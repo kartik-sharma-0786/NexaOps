@@ -90,7 +90,4 @@ We believe "invisible work" matters most.
 
 MIT
 
----
-
-_Built as a demonstration of production-ready architecture patterns._
-_Built as a demonstration of production-ready architecture patterns._
+------
