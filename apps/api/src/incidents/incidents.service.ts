@@ -1,10 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { db, incidents } from '@nexaops/database';
-import { desc, eq } from 'drizzle-orm';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { db, incidentEvents, incidents } from '@nexaops/database';
+import { and, desc, eq } from 'drizzle-orm';
+import { EventsGateway } from '../events/events.gateway';
 import { CreateIncidentDto } from './dto/create-incident.dto';
+import { UpdateIncidentStatusDto } from './dto/update-incident-status.dto';
 
 @Injectable()
 export class IncidentsService {
+  constructor(private readonly eventsGateway: EventsGateway) {}
+
   async create(dto: CreateIncidentDto, userId: string, tenantId: string) {
     const [incident] = await db
       .insert(incidents)
@@ -18,6 +22,18 @@ export class IncidentsService {
       })
       .returning();
 
+    // Fetch creator details to emit complete object
+    const incidentWithCreator = await db.query.incidents.findFirst({
+      where: eq(incidents.id, incident.id),
+      with: {
+        creator: true,
+      },
+    });
+
+    this.eventsGateway.server
+      .to(`tenant:${tenantId}`)
+      .emit('incidentCreated', incidentWithCreator);
+
     return incident;
   }
 
@@ -29,5 +45,86 @@ export class IncidentsService {
         creator: true,
       },
     });
+  }
+
+  async findOne(id: string, tenantId: string) {
+    const incident = await db.query.incidents.findFirst({
+      where: and(eq(incidents.id, id), eq(incidents.tenantId, tenantId)),
+      with: {
+        creator: true,
+        events: {
+          orderBy: [desc(incidentEvents.createdAt)],
+          with: {
+            actor: true,
+          },
+        },
+      },
+    });
+
+    if (!incident) {
+      throw new NotFoundException('Incident not found');
+    }
+
+    return incident;
+  }
+
+  async updateStatus(
+    id: string,
+    dto: UpdateIncidentStatusDto,
+    userId: string,
+    tenantId: string,
+  ) {
+    // Verify existence and ownership
+    const incident = await this.findOne(id, tenantId);
+
+    if (incident.status === dto.status) return incident;
+
+    await db.transaction(async (tx) => {
+      // Update status
+      await tx
+        .update(incidents)
+        .set({ status: dto.status })
+        .where(eq(incidents.id, id));
+
+      // Add timeline event
+      await tx.insert(incidentEvents).values({
+        incidentId: id,
+        tenantId: tenantId,
+        actorId: userId,
+        actionType: 'STATUS_CHANGE',
+        message: `Changed status from ${incident.status} to ${dto.status}`,
+        payload: { oldStatus: incident.status, newStatus: dto.status },
+      });
+    });
+
+    const updated = await this.findOne(id, tenantId);
+    this.eventsGateway.server
+      .to(`tenant:${tenantId}`)
+      .emit('incidentUpdated', updated);
+    return updated;
+  }
+
+  async addComment(
+    id: string,
+    message: string,
+    userId: string,
+    tenantId: string,
+  ) {
+    // Verify existence
+    await this.findOne(id, tenantId);
+
+    await db.insert(incidentEvents).values({
+      incidentId: id,
+      tenantId: tenantId,
+      actorId: userId,
+      actionType: 'COMMENT',
+      message: message,
+    });
+
+    const updated = await this.findOne(id, tenantId);
+    this.eventsGateway.server
+      .to(`tenant:${tenantId}`)
+      .emit('incidentUpdated', updated);
+    return updated;
   }
 }

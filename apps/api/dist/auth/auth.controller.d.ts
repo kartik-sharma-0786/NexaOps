@@ -4,7 +4,7 @@ export declare class AuthController {
     private readonly authService;
     constructor(authService: AuthService);
     register(registerDto: RegisterDto): Promise<{
-        access_token: any;
+        access_token: string;
         user: {
             id: string;
             email: string;
@@ -13,7 +13,7 @@ export declare class AuthController {
         };
     }>;
     login(loginDto: LoginDto): Promise<{
-        access_token: any;
+        access_token: string;
         user: {
             id: string;
             email: string;

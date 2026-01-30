@@ -18,9 +18,25 @@ export default function CreateIncidentPage() {
     formState: { errors },
   } = useForm<IncidentFormData>();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  if (status === "loading") {
+    return <p className="text-center p-8">Loading...</p>;
+  }
+
+  if (!["ADMIN", "RESPONDER"].includes(session?.user?.role || "")) {
+    return (
+      <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-lg shadow text-center">
+        <h1 className="text-xl font-bold text-red-600 mb-4">Access Denied</h1>
+        <p className="text-gray-600 dark:text-gray-300">
+          You do not have permission to create incidents. Please contact your
+          administrator.
+        </p>
+      </div>
+    );
+  }
 
   const onSubmit = async (data: IncidentFormData) => {
     if (!session?.user?.jwt) return;

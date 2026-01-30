@@ -59,16 +59,23 @@ function main() {
                     return [4 /*yield*/, index_1.db
                             .insert(schema_1.users)
                             .values({
-                            tenantId: tenant.id,
                             name: "Alice Admin",
                             email: "alice@acme.com",
                             passwordHash: "$argon2id$v=19$m=65536,t=3,p=4$SECRET_HASH_PLACEHOLDER",
-                            role: "ADMIN",
                         })
                             .returning()];
                 case 2:
                     admin = (_a.sent())[0];
-                    console.log("\u2705 Created User: ".concat(admin.email, " (").concat(admin.role, ")"));
+                    // 3. Link User to Tenant
+                    return [4 /*yield*/, index_1.db.insert(schema_1.tenantMembers).values({
+                            tenantId: tenant.id,
+                            userId: admin.id,
+                            role: "ADMIN",
+                        })];
+                case 3:
+                    // 3. Link User to Tenant
+                    _a.sent();
+                    console.log("\u2705 Created User: ".concat(admin.email, " (ADMIN)"));
                     console.log("🌱 Seeding complete.");
                     process.exit(0);
                     return [2 /*return*/];

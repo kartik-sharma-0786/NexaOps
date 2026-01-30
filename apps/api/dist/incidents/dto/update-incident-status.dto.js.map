@@ -1,0 +1,1 @@
+{"version":3,"file":"update-incident-status.dto.js","sourceRoot":"","sources":["../../../src/incidents/dto/update-incident-status.dto.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,qDAAqD;AAErD,MAAa,uBAAuB;IAGlC,MAAM,CAAuC;CAC9C;AAJD,0DAIC;AADC;IAFC,IAAA,wBAAM,EAAC,CAAC,MAAM,EAAE,cAAc,EAAE,UAAU,CAAC,CAAC;IAC5C,IAAA,4BAAU,GAAE;;uDACgC"}

@@ -1,14 +1,22 @@
 import { relations } from "drizzle-orm";
 import {
+    jsonb,
     pgEnum,
     pgTable,
+    primaryKey,
     text,
     timestamp,
-    uuid
+    uuid,
 } from "drizzle-orm/pg-core";
 
 // Enums
-export const roleEnum = pgEnum("role", ["ADMIN", "RESPONDER", "VIEWER"]);
+export const roleEnum = pgEnum("role", [
+  "OWNER",
+  "ADMIN",
+  "RESPONDER",
+  "OBSERVER",
+  "VIEWER",
+]);
 export const incidentStatusEnum = pgEnum("incident_status", [
   "OPEN",
   "ACKNOWLEDGED",
@@ -33,22 +41,45 @@ export const tenants = pgTable("tenants", {
 // 2. Users
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
-  tenantId: uuid("tenant_id")
-    .references(() => tenants.id)
-    .notNull(),
-  email: text("email").notNull(), // Unique per tenant usually, but let's keep simple unique globally for start
+  email: text("email").notNull().unique(),
   name: text("name").notNull(),
-  passwordHash: text("password_hash").notNull(), // Will use Argon2
-  role: roleEnum("role").default("VIEWER").notNull(),
+  passwordHash: text("password_hash").notNull(), // Argon2
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// Relations for Users
-export const usersRelations = relations(users, ({ one, many }) => ({
+// 3. Tenant Members (Link between Users and Tenants)
+export const tenantMembers = pgTable(
+  "tenant_members",
+  {
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id)
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id)
+      .notNull(),
+    role: roleEnum("role").default("VIEWER").notNull(),
+    joinedAt: timestamp("joined_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.tenantId, t.userId] }),
+  }),
+);
+
+// Relations for Tenant Members
+export const tenantMembersRelations = relations(tenantMembers, ({ one }) => ({
   tenant: one(tenants, {
-    fields: [users.tenantId],
+    fields: [tenantMembers.tenantId],
     references: [tenants.id],
   }),
+  user: one(users, {
+    fields: [tenantMembers.userId],
+    references: [users.id],
+  }),
+}));
+
+// Relations for Users
+export const usersRelations = relations(users, ({ many }) => ({
+  memberships: many(tenantMembers),
   reportedIncidents: many(incidents),
 }));
 
@@ -86,8 +117,13 @@ export const incidentEvents = pgTable("incident_events", {
   incidentId: uuid("incident_id")
     .references(() => incidents.id)
     .notNull(),
-  actorId: uuid("actor_id").references(() => users.id), // Who did it
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id)
+    .notNull(), // Denormalized for RLS efficiency
+  actorId: uuid("actor_id").references(() => users.id),
+  actionType: text("action_type").notNull(), // e.g. "STATUS_CHANGE", "COMMENT"
   message: text("message").notNull(),
+  payload: jsonb("payload"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

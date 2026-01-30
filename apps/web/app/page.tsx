@@ -1,82 +1,173 @@
-import { Button } from "@nexaops/ui";
+import { getServerSession } from "next-auth";
 import Link from "next/link";
+import { authOptions } from "../lib/auth";
 
-export default function Home() {
+export default async function Home() {
+  const session = await getServerSession(authOptions);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gray-50">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl lg:static lg:w-auto lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4">
-          NexaOps &nbsp;
-          <code className="font-mono font-bold">Incidents Platform</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <Link
-            href="/auth/login"
-            className="pointer-events-auto p-2 text-blue-600 font-bold"
-          >
-            Login
-          </Link>
+    <div className="flex flex-col min-h-screen bg-white dark:bg-gray-900">
+      {/* Navigation */}
+      <header className="fixed w-full top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">N</span>
+              </div>
+              <span className="font-bold text-xl text-gray-900 dark:text-white">
+                NexaOps
+              </span>
+            </div>
+
+            <nav className="hidden md:flex gap-8">
+              <Link
+                href="#features"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition"
+              >
+                Features
+              </Link>
+              <Link
+                href="#pricing"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition"
+              >
+                Pricing
+              </Link>
+              <Link
+                href="/docs"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition"
+              >
+                Docs
+              </Link>
+            </nav>
+
+            <div className="flex items-center gap-4">
+              {session ? (
+                <Link
+                  href="/dashboard"
+                  className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition shadow-lg shadow-indigo-200 dark:shadow-none"
+                >
+                  Go to Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/auth/login"
+                    className="text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                  >
+                    Log in
+                  </Link>
+                  <Link
+                    href="/auth/register"
+                    className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
+                  >
+                    Get Started
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+      </header>
 
-      <div className="relative flex place-items-center flex-col gap-6 py-16">
-        <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl text-center">
-          Enterprise Incident Response
-        </h1>
-        <p className="text-lg leading-8 text-gray-600 text-center max-w-2xl">
-          Manage incidents, coordinate teams, and maintain reliability with the
-          modern stack.
-        </p>
-
-        <div className="flex gap-4">
-          <Link href="/auth/register">
-            <Button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
-              Get Started
-            </Button>
-          </Link>
-          <Button className="px-6 py-3 bg-white text-gray-900 border border-gray-200 rounded-lg hover:bg-gray-50 font-medium">
-            Documentation
-          </Button>
-        </div>
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left text-gray-800">
-        <div className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100">
-          <h2 className="mb-3 text-2xl font-semibold">
-            Real-time{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
+      <main className="flex-grow pt-24 pb-12">
+        {/* Hero Section */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-20 lg:py-32">
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-indigo-50 border border-indigo-100 mb-8 dark:bg-indigo-900/20 dark:border-indigo-800">
+            <span className="w-2 h-2 rounded-full bg-indigo-600 mr-2 animate-pulse"></span>
+            <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300">
+              v1.0 is now live
             </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Live incident updates via WebSockets.
+          </div>
+
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 dark:text-white mb-8">
+            Incident response for <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">
+              engineering teams
+            </span>
+          </h1>
+
+          <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 mb-12 max-w-3xl mx-auto leading-relaxed">
+            Orchestrate incidents, automate follow-ups, and keep stakeholders
+            informed in real-time. The complete platform for reliability.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            {session ? (
+              <Link
+                href="/dashboard"
+                className="w-full sm:w-auto px-8 py-4 bg-indigo-600 text-white text-lg font-semibold rounded-xl hover:bg-indigo-700 transition shadow-xl shadow-indigo-200 dark:shadow-none"
+              >
+                Go to Dashboard
+              </Link>
+            ) : (
+              <Link
+                href="/auth/register"
+                className="w-full sm:w-auto px-8 py-4 bg-indigo-600 text-white text-lg font-semibold rounded-xl hover:bg-indigo-700 transition shadow-xl shadow-indigo-200 dark:shadow-none"
+              >
+                Start for Free
+              </Link>
+            )}
+            <button className="w-full sm:w-auto px-8 py-4 bg-white text-gray-700 border border-gray-200 text-lg font-semibold rounded-xl hover:bg-gray-50 transition dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-750">
+              View Documentation
+            </button>
+          </div>
+        </div>
+
+        {/* Features Grid */}
+        <div
+          id="features"
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20"
+        >
+          <div className="grid md:grid-cols-3 gap-8">
+            <FeatureCard
+              title="Real-time Updates"
+              description="Live collaboration with WebSockets. See status changes and comments instantly without refreshing."
+              icon="⚡"
+            />
+            <FeatureCard
+              title="Role-Based Access"
+              description="Granular permissions for Admins, Responders, and Viewers. Secure your incident data."
+              icon="🛡️"
+            />
+            <FeatureCard
+              title="Post-Mortems"
+              description="Generate detailed reports and learn from every incident to improve future reliability."
+              icon="📊"
+            />
+          </div>
+        </div>
+      </main>
+
+      <footer className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <p className="text-center text-gray-500 text-sm">
+            © {new Date().getFullYear()} NexaOps. All rights reserved.
           </p>
         </div>
+      </footer>
+    </div>
+  );
+}
 
-        <div className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100">
-          <h2 className="mb-3 text-2xl font-semibold">
-            Multi-tenant{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Secure data isolation for every team.
-          </p>
-        </div>
-
-        <div className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100">
-          <h2 className="mb-3 text-2xl font-semibold">
-            Reliable{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            99.99% uptime architecture.
-          </p>
-        </div>
-      </div>
-    </main>
+function FeatureCard({
+  title,
+  description,
+  icon,
+}: {
+  title: string;
+  description: string;
+  icon: string;
+}) {
+  return (
+    <div className="p-8 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 hover:border-indigo-100 transition duration-300">
+      <div className="text-4xl mb-4">{icon}</div>
+      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+        {title}
+      </h3>
+      <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+        {description}
+      </p>
+    </div>
   );
 }

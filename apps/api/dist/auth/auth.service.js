@@ -41,16 +41,16 @@ var __importStar = (this && this.__importStar) || (function () {
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
+const jwt_1 = require("@nestjs/jwt");
 const database_1 = require("@nexaops/database");
-const drizzle_orm_1 = require("drizzle-orm");
 const argon2 = __importStar(require("argon2"));
+const drizzle_orm_1 = require("drizzle-orm");
 let AuthService = class AuthService {
     jwtService;
-    constructor(jwtService, ce) {
+    constructor(jwtService) {
         this.jwtService = jwtService;
     }
     async register(dto) {
@@ -62,56 +62,68 @@ let AuthService = class AuthService {
             throw new common_1.ConflictException('User with this email already exists');
         }
         const slug = dto.tenantName.toLowerCase().replace(/\s+/g, '-');
-        const existing, Tenant = await database_1.db
+        const existingTenant = await database_1.db
             .select()
             .from(database_1.tenants)
             .where((0, drizzle_orm_1.eq)(database_1.tenants.slug, slug));
         if (existingTenant.length > 0) {
             throw new common_1.ConflictException('Tenant with this name already exists');
         }
-        const [newTenant] = await database_1.db
-            .insert(database_1.tenants)
-            .values({
-            name: dto.tenantName,
-            slug: slug,
-        })
-            .returning();
-        const hashedPassword = await argon2.hash(dto.password);
-        const [newUser] = await database_1.db
-            .insert(database_1.users);
-        values({
-            email: dto.email,
-            name: dto.name,
-            passwordHash: hashedPassword,
-            tenantId: newTenant.id,
-            role: 'ADMIN',
-        })
-            ,
-                    .returning();
-        return this.generateToken(newUser.id, newUser.email, newUser.role, newTenant.id);
+        const result = await database_1.db.transaction(async (tx) => {
+            const [newTenant] = await tx
+                .insert(database_1.tenants)
+                .values({
+                name: dto.tenantName,
+                slug: slug,
+            })
+                .returning();
+            const hashedPassword = await argon2.hash(dto.password);
+            const [newUser] = await tx
+                .insert(database_1.users)
+                .values({
+                email: dto.email,
+                name: dto.name,
+                passwordHash: hashedPassword,
+            })
+                .returning();
+            await tx.insert(database_1.tenantMembers).values({
+                tenantId: newTenant.id,
+                userId: newUser.id,
+                role: 'OWNER',
+            });
+            return { newTenant, newUser };
+        });
+        return this.generateToken(result.newUser.id, result.newUser.email, 'OWNER', result.newTenant.id);
     }
     async login(dto) {
         const user = await database_1.db.query.users.findFirst({
             where: (0, drizzle_orm_1.eq)(database_1.users.email, dto.email),
+            with: {
+                memberships: true,
+            },
         });
-        if (, (!user)) {
+        if (!user) {
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
         const isPasswordValid = await argon2.verify(user.passwordHash, dto.password);
         if (!isPasswordValid) {
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
-        return this.generateToken(user.id, user.email, user.role, user.tenantId);
+        const membership = user.memberships[0];
+        if (!membership) {
+            throw new common_1.UnauthorizedException('No tenant found for this user');
+        }
+        return this.generateToken(user.id, user.email, membership.role, membership.tenantId);
     }
-    generateToken(userId, email, role, tenantId) {
+    async generateToken(userId, email, role, tenantId) {
         const payload = { sub: userId, email, role, tenantId };
         return {
-            access_token: this.jwtService.sign(payload),
+            access_token: await this.jwtService.signAsync(payload),
             user: {
                 id: userId,
-                email: email,
-                role: role,
-                tenantId: tenantId,
+                email,
+                role,
+                tenantId,
             },
         };
     }
@@ -119,6 +131,6 @@ let AuthService = class AuthService {
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof JwtServi !== "undefined" && JwtServi) === "function" ? _a : Object, Object])
+    __metadata("design:paramtypes", [jwt_1.JwtService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

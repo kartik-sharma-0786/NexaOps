@@ -1,10 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.incidentEventsRelations = exports.incidentEvents = exports.incidentsRelations = exports.incidents = exports.usersRelations = exports.users = exports.tenants = exports.incidentSeverityEnum = exports.incidentStatusEnum = exports.roleEnum = void 0;
+exports.incidentEventsRelations = exports.incidentEvents = exports.incidentsRelations = exports.incidents = exports.usersRelations = exports.tenantMembersRelations = exports.tenantMembers = exports.users = exports.tenants = exports.incidentSeverityEnum = exports.incidentStatusEnum = exports.roleEnum = void 0;
 var drizzle_orm_1 = require("drizzle-orm");
 var pg_core_1 = require("drizzle-orm/pg-core");
 // Enums
-exports.roleEnum = (0, pg_core_1.pgEnum)("role", ["ADMIN", "RESPONDER", "VIEWER"]);
+exports.roleEnum = (0, pg_core_1.pgEnum)("role", [
+    "OWNER",
+    "ADMIN",
+    "RESPONDER",
+    "OBSERVER",
+    "VIEWER",
+]);
 exports.incidentStatusEnum = (0, pg_core_1.pgEnum)("incident_status", [
     "OPEN",
     "ACKNOWLEDGED",
@@ -27,23 +33,43 @@ exports.tenants = (0, pg_core_1.pgTable)("tenants", {
 // 2. Users
 exports.users = (0, pg_core_1.pgTable)("users", {
     id: (0, pg_core_1.uuid)("id").defaultRandom().primaryKey(),
+    email: (0, pg_core_1.text)("email").notNull().unique(),
+    name: (0, pg_core_1.text)("name").notNull(),
+    passwordHash: (0, pg_core_1.text)("password_hash").notNull(), // Argon2
+    createdAt: (0, pg_core_1.timestamp)("created_at").defaultNow().notNull(),
+});
+// 3. Tenant Members (Link between Users and Tenants)
+exports.tenantMembers = (0, pg_core_1.pgTable)("tenant_members", {
     tenantId: (0, pg_core_1.uuid)("tenant_id")
         .references(function () { return exports.tenants.id; })
         .notNull(),
-    email: (0, pg_core_1.text)("email").notNull(), // Unique per tenant usually, but let's keep simple unique globally for start
-    name: (0, pg_core_1.text)("name").notNull(),
-    passwordHash: (0, pg_core_1.text)("password_hash").notNull(), // Will use Argon2
+    userId: (0, pg_core_1.uuid)("user_id")
+        .references(function () { return exports.users.id; })
+        .notNull(),
     role: (0, exports.roleEnum)("role").default("VIEWER").notNull(),
-    createdAt: (0, pg_core_1.timestamp)("created_at").defaultNow().notNull(),
+    joinedAt: (0, pg_core_1.timestamp)("joined_at").defaultNow().notNull(),
+}, function (t) { return ({
+    pk: (0, pg_core_1.primaryKey)({ columns: [t.tenantId, t.userId] }),
+}); });
+// Relations for Tenant Members
+exports.tenantMembersRelations = (0, drizzle_orm_1.relations)(exports.tenantMembers, function (_a) {
+    var one = _a.one;
+    return ({
+        tenant: one(exports.tenants, {
+            fields: [exports.tenantMembers.tenantId],
+            references: [exports.tenants.id],
+        }),
+        user: one(exports.users, {
+            fields: [exports.tenantMembers.userId],
+            references: [exports.users.id],
+        }),
+    });
 });
 // Relations for Users
 exports.usersRelations = (0, drizzle_orm_1.relations)(exports.users, function (_a) {
-    var one = _a.one, many = _a.many;
+    var many = _a.many;
     return ({
-        tenant: one(exports.tenants, {
-            fields: [exports.users.tenantId],
-            references: [exports.tenants.id],
-        }),
+        memberships: many(exports.tenantMembers),
         reportedIncidents: many(exports.incidents),
     });
 });
@@ -82,8 +108,13 @@ exports.incidentEvents = (0, pg_core_1.pgTable)("incident_events", {
     incidentId: (0, pg_core_1.uuid)("incident_id")
         .references(function () { return exports.incidents.id; })
         .notNull(),
-    actorId: (0, pg_core_1.uuid)("actor_id").references(function () { return exports.users.id; }), // Who did it
+    tenantId: (0, pg_core_1.uuid)("tenant_id")
+        .references(function () { return exports.tenants.id; })
+        .notNull(), // Denormalized for RLS efficiency
+    actorId: (0, pg_core_1.uuid)("actor_id").references(function () { return exports.users.id; }),
+    actionType: (0, pg_core_1.text)("action_type").notNull(), // e.g. "STATUS_CHANGE", "COMMENT"
     message: (0, pg_core_1.text)("message").notNull(),
+    payload: (0, pg_core_1.jsonb)("payload"),
     createdAt: (0, pg_core_1.timestamp)("created_at").defaultNow().notNull(),
 });
 exports.incidentEventsRelations = (0, drizzle_orm_1.relations)(exports.incidentEvents, function (_a) {

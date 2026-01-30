@@ -1,4 +1,4 @@
-export declare const roleEnum: import("drizzle-orm/pg-core").PgEnum<["ADMIN", "RESPONDER", "VIEWER"]>;
+export declare const roleEnum: import("drizzle-orm/pg-core").PgEnum<["OWNER", "ADMIN", "RESPONDER", "OBSERVER", "VIEWER"]>;
 export declare const incidentStatusEnum: import("drizzle-orm/pg-core").PgEnum<["OPEN", "ACKNOWLEDGED", "RESOLVED"]>;
 export declare const incidentSeverityEnum: import("drizzle-orm/pg-core").PgEnum<["CRITICAL", "HIGH", "MEDIUM", "LOW"]>;
 export declare const tenants: import("drizzle-orm/pg-core").PgTableWithColumns<{
@@ -84,18 +84,6 @@ export declare const users: import("drizzle-orm/pg-core").PgTableWithColumns<{
             enumValues: undefined;
             baseColumn: never;
         }, {}, {}>;
-        tenantId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "tenant_id";
-            tableName: "users";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-        }, {}, {}>;
         email: import("drizzle-orm/pg-core").PgColumn<{
             name: "email";
             tableName: "users";
@@ -132,18 +120,6 @@ export declare const users: import("drizzle-orm/pg-core").PgTableWithColumns<{
             enumValues: [string, ...string[]];
             baseColumn: never;
         }, {}, {}>;
-        role: import("drizzle-orm/pg-core").PgColumn<{
-            name: "role";
-            tableName: "users";
-            dataType: "string";
-            columnType: "PgEnumColumn";
-            data: "ADMIN" | "RESPONDER" | "VIEWER";
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            enumValues: ["ADMIN", "RESPONDER", "VIEWER"];
-            baseColumn: never;
-        }, {}, {}>;
         createdAt: import("drizzle-orm/pg-core").PgColumn<{
             name: "created_at";
             tableName: "users";
@@ -159,8 +135,67 @@ export declare const users: import("drizzle-orm/pg-core").PgTableWithColumns<{
     };
     dialect: "pg";
 }>;
-export declare const usersRelations: import("drizzle-orm").Relations<"users", {
+export declare const tenantMembers: import("drizzle-orm/pg-core").PgTableWithColumns<{
+    name: "tenant_members";
+    schema: undefined;
+    columns: {
+        tenantId: import("drizzle-orm/pg-core").PgColumn<{
+            name: "tenant_id";
+            tableName: "tenant_members";
+            dataType: "string";
+            columnType: "PgUUID";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        userId: import("drizzle-orm/pg-core").PgColumn<{
+            name: "user_id";
+            tableName: "tenant_members";
+            dataType: "string";
+            columnType: "PgUUID";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        role: import("drizzle-orm/pg-core").PgColumn<{
+            name: "role";
+            tableName: "tenant_members";
+            dataType: "string";
+            columnType: "PgEnumColumn";
+            data: "OWNER" | "ADMIN" | "RESPONDER" | "OBSERVER" | "VIEWER";
+            driverParam: string;
+            notNull: true;
+            hasDefault: true;
+            enumValues: ["OWNER", "ADMIN", "RESPONDER", "OBSERVER", "VIEWER"];
+            baseColumn: never;
+        }, {}, {}>;
+        joinedAt: import("drizzle-orm/pg-core").PgColumn<{
+            name: "joined_at";
+            tableName: "tenant_members";
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
+            driverParam: string;
+            notNull: true;
+            hasDefault: true;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+    };
+    dialect: "pg";
+}>;
+export declare const tenantMembersRelations: import("drizzle-orm").Relations<"tenant_members", {
     tenant: import("drizzle-orm").One<"tenants", true>;
+    user: import("drizzle-orm").One<"users", true>;
+}>;
+export declare const usersRelations: import("drizzle-orm").Relations<"users", {
+    memberships: import("drizzle-orm").Many<"tenant_members">;
     reportedIncidents: import("drizzle-orm").Many<"incidents">;
 }>;
 export declare const incidents: import("drizzle-orm/pg-core").PgTableWithColumns<{
@@ -311,6 +346,18 @@ export declare const incidentEvents: import("drizzle-orm/pg-core").PgTableWithCo
             enumValues: undefined;
             baseColumn: never;
         }, {}, {}>;
+        tenantId: import("drizzle-orm/pg-core").PgColumn<{
+            name: "tenant_id";
+            tableName: "incident_events";
+            dataType: "string";
+            columnType: "PgUUID";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
         actorId: import("drizzle-orm/pg-core").PgColumn<{
             name: "actor_id";
             tableName: "incident_events";
@@ -323,6 +370,18 @@ export declare const incidentEvents: import("drizzle-orm/pg-core").PgTableWithCo
             enumValues: undefined;
             baseColumn: never;
         }, {}, {}>;
+        actionType: import("drizzle-orm/pg-core").PgColumn<{
+            name: "action_type";
+            tableName: "incident_events";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
         message: import("drizzle-orm/pg-core").PgColumn<{
             name: "message";
             tableName: "incident_events";
@@ -333,6 +392,18 @@ export declare const incidentEvents: import("drizzle-orm/pg-core").PgTableWithCo
             notNull: true;
             hasDefault: false;
             enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        payload: import("drizzle-orm/pg-core").PgColumn<{
+            name: "payload";
+            tableName: "incident_events";
+            dataType: "json";
+            columnType: "PgJsonb";
+            data: unknown;
+            driverParam: unknown;
+            notNull: false;
+            hasDefault: false;
+            enumValues: undefined;
             baseColumn: never;
         }, {}, {}>;
         createdAt: import("drizzle-orm/pg-core").PgColumn<{

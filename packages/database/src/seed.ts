@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { db } from "./index";
-import { tenants, users } from "./schema";
+import { tenantMembers, tenants, users } from "./schema";
 
 async function main() {
   console.log("🌱 Seeding database...");
@@ -21,16 +21,20 @@ async function main() {
   const [admin] = await db
     .insert(users)
     .values({
-      tenantId: tenant.id,
       name: "Alice Admin",
       email: "alice@acme.com",
       passwordHash: "$argon2id$v=19$m=65536,t=3,p=4$SECRET_HASH_PLACEHOLDER",
-      role: "ADMIN",
     })
     .returning();
 
-  console.log(`✅ Created User: ${admin.email} (${admin.role})`);
+  // 3. Link User to Tenant
+  await db.insert(tenantMembers).values({
+    tenantId: tenant.id,
+    userId: admin.id,
+    role: "ADMIN",
+  });
 
+  console.log(`✅ Created User: ${admin.email} (ADMIN)`);
   console.log("🌱 Seeding complete.");
   process.exit(0);
 }

@@ -37,7 +37,7 @@ export default function LoginPage() {
           Or{" "}
           <Link
             href="/auth/register"
-            className="font-medium text-blue-600 hover:text-blue-500"
+            className="font-medium text-indigo-600 hover:text-indigo-500"
           >
             create a new company account
           </Link>
@@ -65,7 +65,7 @@ export default function LoginPage() {
                   id="email"
                   type="email"
                   required
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
                   {...register("email", { required: true })}
                 />
               </div>
@@ -83,7 +83,7 @@ export default function LoginPage() {
                   id="password"
                   type="password"
                   required
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
                   {...register("password", { required: true })}
                 />
               </div>
@@ -92,7 +92,7 @@ export default function LoginPage() {
             <div>
               <Button
                 type="submit"
-                className="flex w-full justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition"
               >
                 Sign in
               </Button>
