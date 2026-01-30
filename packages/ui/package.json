@@ -1,0 +1,22 @@
+{
+  "name": "@nexaops/ui",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "react": "^19.0.0",
+    "tsup": "^8.0.2",
+    "@nexaops/typescript-config": "workspace:*",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  }
+}
