@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import { useLanguage } from "../../contexts/language-context";
 
 type Incident = {
   id: string;
@@ -21,6 +22,7 @@ export default function IncidentList({
   initialIncidents: Incident[];
 }) {
   const { data: session } = useSession();
+  const { t } = useLanguage();
   const [incidents, setIncidents] = useState<Incident[]>(initialIncidents);
 
   // Helper to safely access extended session properties
@@ -59,7 +61,7 @@ export default function IncidentList({
       <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
         {incidents.length === 0 ? (
           <li className="px-4 py-4 sm:px-6 text-center text-gray-500">
-            No incidents found.
+            {t.dashboard.noIncidents}
           </li>
         ) : (
           incidents.map((incident) => (
@@ -86,17 +88,23 @@ export default function IncidentList({
                                 : "bg-blue-100 text-blue-800"
                         }`}
                       >
-                        {incident.severity}
+                        {t.dashboard.severity[
+                          incident.severity as keyof typeof t.dashboard.severity
+                        ] || incident.severity}
                       </p>
                     </div>
                   </div>
                   <div className="mt-2 sm:flex sm:justify-between">
                     <div className="sm:flex">
                       <p className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                        Status: {incident.status}
+                        {t.dashboard.statusLabel}{" "}
+                        {t.dashboard.status[
+                          incident.status as keyof typeof t.dashboard.status
+                        ] || incident.status}
                       </p>
                       <p className="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400 sm:mt-0 sm:ml-6">
-                        Created by {incident.creator?.email || "Unknown"}
+                        {t.dashboard.createdBy}{" "}
+                        {incident.creator?.email || t.dashboard.unknown}
                       </p>
                     </div>
                   </div>

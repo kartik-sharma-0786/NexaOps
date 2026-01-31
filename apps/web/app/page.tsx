@@ -13,16 +13,20 @@ import {
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { ChatWidget } from "../components/landing/chat-widget";
+import { LanguageSelector } from "../components/language-selector";
+import { ThemeToggle } from "../components/theme-toggle";
+import { useLanguage } from "../contexts/language-context";
 
 export default function Home() {
   const { data: session, status } = useSession();
+  const { t } = useLanguage();
   const isAuthed = status === "authenticated";
   const userEmail = (session?.user as { email?: string } | undefined)?.email;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors">
       {/* Navigation */}
-      <nav className="border-b border-gray-100 sticky top-0 bg-white/80 backdrop-blur-md z-40">
+      <nav className="border-b border-gray-100 dark:border-gray-800 sticky top-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-40 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-8">
@@ -30,67 +34,71 @@ export default function Home() {
                 <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">
                   N
                 </div>
-                <span className="text-xl font-bold text-gray-900">NexaOps</span>
+                <span className="text-xl font-bold text-gray-900 dark:text-white">
+                  {t.brandName}
+                </span>
               </Link>
-              <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
+              <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600 dark:text-gray-300">
                 <Link
                   href="/features"
-                  className="hover:text-indigo-600 transition-colors"
+                  className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                 >
-                  Features
+                  {t.nav.features}
                 </Link>
                 <Link
                   href="/resources"
-                  className="hover:text-indigo-600 transition-colors"
+                  className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                 >
-                  Resources
+                  {t.nav.resources}
+                </Link>
+                <Link
+                  href="/pricing"
+                  className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                >
+                  {t.nav.pricing}
                 </Link>
                 <Link
                   href="#"
-                  className="hover:text-indigo-600 transition-colors"
+                  className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                 >
-                  Pricing
-                </Link>
-                <Link
-                  href="#"
-                  className="hover:text-indigo-600 transition-colors"
-                >
-                  Docs
+                  {t.nav.docs}
                 </Link>
               </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <LanguageSelector />
+              <ThemeToggle />
               {isAuthed ? (
                 <>
-                  <span className="hidden sm:inline text-sm text-gray-600">
+                  <span className="hidden sm:inline text-sm text-gray-600 dark:text-gray-300">
                     {userEmail || "Signed in"}
                   </span>
                   <Link
                     href="/dashboard"
                     className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition"
                   >
-                    Go to Dashboard
+                    {t.nav.dashboard}
                   </Link>
                   <button
                     onClick={() => signOut({ callbackUrl: "/" })}
-                    className="text-sm font-medium text-gray-600 hover:text-indigo-600"
+                    className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
-                    Sign Out
+                    {t.nav.signOut}
                   </button>
                 </>
               ) : (
                 <>
                   <Link
                     href="/api/auth/signin"
-                    className="text-sm font-medium text-gray-600 hover:text-indigo-600"
+                    className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
-                    Sign In
+                    {t.nav.signIn}
                   </Link>
                   <Link
                     href="/dashboard"
                     className="hidden sm:inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition"
                   >
-                    Get Started
+                    {t.nav.getStarted}
                   </Link>
                 </>
               )}
@@ -104,52 +112,50 @@ export default function Home() {
         <section className="relative pt-20 pb-32 overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="max-w-3xl">
-              <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 tracking-tight leading-tight mb-6">
-                Incident management for{" "}
-                <span className="text-indigo-600">
-                  modern engineering teams
+              <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 dark:text-white tracking-tight leading-tight mb-6">
+                {t.hero.titleStart}{" "}
+                <span className="text-indigo-600 dark:text-indigo-400">
+                  {t.hero.titleEnd}
                 </span>
               </h1>
-              <p className="text-xl text-gray-500 mb-8 max-w-2xl leading-relaxed">
-                Automate incident response, manage on-call schedules, and
-                conduct blameless post-mortems. NexaOps helps you build more
-                reliable software, faster.
+              <p className="text-xl text-gray-500 dark:text-gray-400 mb-8 max-w-2xl leading-relaxed">
+                {t.hero.subtitle}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mb-12">
                 <Link
                   href="/dashboard"
                   className="inline-flex items-center justify-center px-8 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-all shadow-lg hover:shadow-xl"
                 >
-                  Start handling incidents free
+                  {t.hero.ctaPrimary}
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
                 <Link
                   href="#"
-                  className="inline-flex items-center justify-center px-8 py-3 bg-white text-gray-700 border border-gray-200 font-medium rounded-lg hover:bg-gray-50 transition-all"
+                  className="inline-flex items-center justify-center px-8 py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
                 >
-                  <Play className="mr-2 w-4 h-4 text-gray-900" />
-                  Watch Demo
+                  <Play className="mr-2 w-4 h-4 text-gray-900 dark:text-white" />
+                  {t.hero.ctaSecondary}
                 </Link>
               </div>
-              <div className="flex items-center gap-4 text-sm text-gray-500">
+              <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                 <div className="flex -space-x-2">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 border-2 border-white"></div>
-                  <div className="w-8 h-8 rounded-full bg-green-100 border-2 border-white"></div>
-                  <div className="w-8 h-8 rounded-full bg-purple-100 border-2 border-white"></div>
+                  <div className="w-8 h-8 rounded-full bg-blue-100 border-2 border-white dark:border-gray-800"></div>
+                  <div className="w-8 h-8 rounded-full bg-green-100 border-2 border-white dark:border-gray-800"></div>
+                  <div className="w-8 h-8 rounded-full bg-purple-100 border-2 border-white dark:border-gray-800"></div>
                 </div>
-                <p>Trusted by engineering teams everywhere</p>
+                <p>{t.hero.trustedBy}</p>
               </div>
             </div>
           </div>
 
           {/* Decorative background blob */}
-          <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/4 w-[800px] h-[800px] bg-indigo-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+          <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/4 w-[800px] h-[800px] bg-indigo-50 dark:bg-indigo-900/20 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
         </section>
 
         {/* Clients Section */}
-        <section className="py-10 border-y border-gray-100 bg-gray-50/50">
+        <section className="py-10 border-y border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <p className="text-center text-sm font-semibold text-gray-400 uppercase tracking-wider mb-8">
+            <p className="text-center text-sm font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-8">
               Powering reliability at
             </p>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-8 items-center opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
@@ -171,13 +177,13 @@ export default function Home() {
         </section>
 
         {/* Why NexaOps / Features */}
-        <section className="py-24 bg-white">
+        <section className="py-24 bg-white dark:bg-gray-900">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto mb-16">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
                 Why NexaOps?
               </h2>
-              <p className="text-lg text-gray-500">
+              <p className="text-lg text-gray-500 dark:text-gray-400">
                 Everything you need to resolve incidents faster and learn from
                 them effectively.
               </p>
@@ -218,15 +224,15 @@ export default function Home() {
               ].map((feature, idx) => (
                 <div
                   key={idx}
-                  className="p-8 rounded-2xl border border-gray-100 bg-white hover:border-indigo-100 hover:shadow-lg transition-all"
+                  className="p-8 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 hover:border-indigo-100 dark:hover:border-indigo-900 hover:shadow-lg transition-all"
                 >
-                  <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center mb-6">
+                  <div className="w-12 h-12 bg-gray-50 dark:bg-gray-700 rounded-xl flex items-center justify-center mb-6">
                     {feature.icon}
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
                     {feature.title}
                   </h3>
-                  <p className="text-gray-500 leading-relaxed">
+                  <p className="text-gray-500 dark:text-gray-400 leading-relaxed">
                     {feature.desc}
                   </p>
                 </div>
@@ -236,20 +242,20 @@ export default function Home() {
         </section>
 
         {/* Resources Section */}
-        <section className="py-24 bg-gray-50">
+        <section className="py-24 bg-gray-50 dark:bg-gray-800/20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-end mb-12">
               <div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
                   Resources
                 </h2>
-                <p className="text-lg text-gray-500">
+                <p className="text-lg text-gray-500 dark:text-gray-400">
                   Learn best practices from industry experts.
                 </p>
               </div>
               <Link
-                href="#"
-                className="hidden md:flex items-center text-indigo-600 font-medium hover:text-indigo-700"
+                href="/resources"
+                className="hidden md:flex items-center text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-700 dark:hover:text-indigo-300"
               >
                 View all resources <ArrowRight className="ml-2 w-4 h-4" />
               </Link>
@@ -282,17 +288,17 @@ export default function Home() {
                   >
                     <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
                   </div>
-                  <div className="p-6 bg-white border border-t-0 border-gray-200 rounded-b-2xl shadow-sm group-hover:shadow-md transition-all">
-                    <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-2 block">
+                  <div className="p-6 bg-white dark:bg-gray-800 border border-t-0 border-gray-200 dark:border-gray-700 rounded-b-2xl shadow-sm group-hover:shadow-md transition-all">
+                    <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-2 block">
                       {resource.category}
                     </span>
-                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-indigo-600 transition-colors">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                       {resource.title}
                     </h3>
-                    <p className="text-gray-500 text-sm mb-4">
+                    <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
                       {resource.desc}
                     </p>
-                    <span className="text-sm font-medium text-gray-900 flex items-center">
+                    <span className="text-sm font-medium text-gray-900 dark:text-white flex items-center">
                       Read more <ArrowRight className="ml-2 w-4 h-4" />
                     </span>
                   </div>
@@ -334,113 +340,168 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-50 border-t border-gray-200 pt-16 pb-8">
+      <footer className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 pt-16 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
             <div>
-              <h4 className="font-bold text-gray-900 mb-4">Product</h4>
-              <ul className="space-y-2 text-sm text-gray-600">
+              <h4 className="font-bold text-gray-900 dark:text-white mb-4">
+                Product
+              </h4>
+              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                 <li>
-                  <Link href="#" className="hover:text-indigo-600">
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 dark:hover:text-indigo-400"
+                  >
                     Incidents
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-indigo-600">
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 dark:hover:text-indigo-400"
+                  >
                     On-Call
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-indigo-600">
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 dark:hover:text-indigo-400"
+                  >
                     Post-mortems
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-indigo-600">
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 dark:hover:text-indigo-400"
+                  >
                     Status Pages
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
-              <h4 className="font-bold text-gray-900 mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-gray-600">
+              <h4 className="font-bold text-gray-900 dark:text-white mb-4">
+                Company
+              </h4>
+              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                 <li>
-                  <Link href="#" className="hover:text-indigo-600">
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 dark:hover:text-indigo-400"
+                  >
                     About Us
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-indigo-600">
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 dark:hover:text-indigo-400"
+                  >
                     Careers
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-indigo-600">
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 dark:hover:text-indigo-400"
+                  >
                     Customers
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-indigo-600">
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 dark:hover:text-indigo-400"
+                  >
                     Contact
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
-              <h4 className="font-bold text-gray-900 mb-4">Resources</h4>
-              <ul className="space-y-2 text-sm text-gray-600">
+              <h4 className="font-bold text-gray-900 dark:text-white mb-4">
+                Resources
+              </h4>
+              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                 <li>
-                  <Link href="#" className="hover:text-indigo-600">
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 dark:hover:text-indigo-400"
+                  >
                     Blog
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-indigo-600">
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 dark:hover:text-indigo-400"
+                  >
                     Documentation
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-indigo-600">
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 dark:hover:text-indigo-400"
+                  >
                     Community
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-indigo-600">
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 dark:hover:text-indigo-400"
+                  >
                     Partners
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
-              <h4 className="font-bold text-gray-900 mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm text-gray-600">
+              <h4 className="font-bold text-gray-900 dark:text-white mb-4">
+                Legal
+              </h4>
+              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                 <li>
-                  <Link href="#" className="hover:text-indigo-600">
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 dark:hover:text-indigo-400"
+                  >
                     Privacy Policy
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-indigo-600">
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 dark:hover:text-indigo-400"
+                  >
                     Terms of Service
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-indigo-600">
+                  <Link
+                    href="#"
+                    className="hover:text-indigo-600 dark:hover:text-indigo-400"
+                  >
                     Security
                   </Link>
                 </li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="border-t border-gray-200 dark:border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 bg-indigo-600 rounded flex items-center justify-center text-white text-xs font-bold">
                 N
               </div>
-              <span className="text-gray-900 font-bold">NexaOps</span>
+              <span className="text-gray-900 dark:text-white font-bold">
+                NexaOps
+              </span>
             </div>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               © {new Date().getFullYear()} NexaOps Inc. All rights reserved.
             </p>
           </div>

@@ -1,7 +1,9 @@
 import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { LanguageSelector } from "../../components/language-selector";
 import { LogoutButton } from "../../components/logout-button";
+import { ThemeToggle } from "../../components/theme-toggle";
 import { authOptions } from "../../lib/auth";
 
 export default async function DashboardLayout({
@@ -28,6 +30,10 @@ export default async function DashboardLayout({
           </p>
           <div className="mt-2 text-xs font-mono bg-gray-100 dark:bg-gray-700 p-1 rounded px-2 inline-block">
             {session.user.role}
+          </div>
+          <div className="mt-4 flex gap-2">
+            <LanguageSelector />
+            <ThemeToggle />
           </div>
         </div>
         <nav className="mt-6 flex-1">

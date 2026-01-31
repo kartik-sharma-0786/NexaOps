@@ -8,137 +8,114 @@ import {
     Workflow,
 } from "lucide-react";
 import Link from "next/link";
+import { LanguageSelector } from "../../components/language-selector";
+import { ThemeToggle } from "../../components/theme-toggle";
+import { useLanguage } from "../../contexts/language-context";
 
 const highlights = [
   {
+    key: "alerting",
     icon: <BellRing className="w-6 h-6 text-amber-500" />,
-    title: "Smart alerting",
-    copy: "Route incidents by service ownership, severity, and on-call schedules with throttling to avoid alert storms.",
   },
   {
+    key: "runbooks",
     icon: <Workflow className="w-6 h-6 text-indigo-500" />,
-    title: "Automated runbooks",
-    copy: "Trigger repeatable workflows that open war rooms, post to Slack, and attach diagnostics in seconds.",
   },
   {
+    key: "rbac",
     icon: <ShieldCheck className="w-6 h-6 text-emerald-500" />,
-    title: "Role-based control",
-    copy: "Granular roles for admins, responders, and viewers keep sensitive actions protected.",
   },
   {
+    key: "insights",
     icon: <Clock3 className="w-6 h-6 text-blue-500" />,
-    title: "MTTR insights",
-    copy: "Out-of-the-box dashboards for MTTA, MTTR, and incident burndown to spot trends early.",
   },
-];
+] as const;
 
-const deepDives = [
-  {
-    title: "Incident timeline",
-    points: [
-      "Auto-capture events from chat, alerts, and status updates",
-      "One-click export for post-mortems",
-      "Searchable context for handoffs",
-    ],
-  },
-  {
-    title: "On-call & paging",
-    points: [
-      "Rotations with follow-the-sun coverage",
-      "Escalation policies with fallback channels",
-      "Quiet hours and overrides for special cases",
-    ],
-  },
-  {
-    title: "Collaboration",
-    points: [
-      "Slack-first experience with synced status",
-      "Zoom/Meet bridges created automatically",
-      "Announcements for execs and customers",
-    ],
-  },
-  {
-    title: "Reliability guardrails",
-    points: [
-      "SLOs with error budget alerts",
-      "Service catalog with ownership",
-      "Release checks against active incidents",
-    ],
-  },
-];
+const deepDiveKeys = [
+  "incidentTimeline",
+  "onCall",
+  "collaboration",
+  "guardrails",
+] as const;
+
+const teamKeys = ["sre", "platform", "security"] as const;
 
 export default function FeaturesPage() {
+  const { t } = useLanguage();
+
   return (
-    <div className="min-h-screen bg-white">
-      <header className="border-b border-gray-100 bg-white/80 backdrop-blur-sm sticky top-0 z-30">
+    <div className="min-h-screen bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 transition-colors">
+      <header className="border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-30 transition-colors">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">
               N
             </div>
-            <span className="text-lg font-semibold text-gray-900">NexaOps</span>
+            <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              {t.brandName}
+            </span>
           </Link>
           <div className="flex items-center gap-3 text-sm">
+            <LanguageSelector />
+            <ThemeToggle />
             <Link
               href="/dashboard"
               className="hidden sm:inline-flex items-center px-4 py-2 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition"
             >
-              Open dashboard
+              {t.features.openDashboard}
             </Link>
             <Link
               href="/auth/login"
-              className="text-gray-700 hover:text-indigo-600 font-medium"
+              className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium"
             >
-              Login
+              {t.features.login}
             </Link>
           </div>
         </div>
       </header>
 
       <main>
-        <section className="py-16 bg-gradient-to-br from-indigo-50 via-white to-slate-50">
+        <section className="py-16 bg-gradient-to-br from-indigo-50 via-white to-slate-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 transition-colors">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-xs font-semibold mb-4">
-                <Sparkles className="w-4 h-4" /> Built for incident teams
+              <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 text-xs font-semibold mb-4 transition-colors">
+                <Sparkles className="w-4 h-4" /> {t.features.badge}
               </p>
-              <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 leading-tight mb-6">
-                Everything you need to respond, learn, and prevent repeats.
+              <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white leading-tight mb-6">
+                {t.features.heroTitle}
               </h1>
-              <p className="text-lg text-gray-600 mb-8">
-                NexaOps unifies alerting, collaboration, and post-incident
-                analysis so your team ships fast without sacrificing
-                reliability.
+              <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 transition-colors">
+                {t.features.heroSubtitle}
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link
                   href="/dashboard"
-                  className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition"
+                  className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition shadow-lg hover:shadow-xl"
                 >
-                  Try the dashboard
+                  {t.features.tryDashboard}
                 </Link>
                 <Link
                   href="/resources"
-                  className="inline-flex items-center px-6 py-3 border border-indigo-200 text-indigo-700 rounded-lg font-semibold hover:border-indigo-400 transition"
+                  className="inline-flex items-center px-6 py-3 border border-indigo-200 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 rounded-lg font-semibold hover:border-indigo-400 dark:hover:border-indigo-500 transition"
                 >
-                  Explore resources
+                  {t.features.exploreResources}
                 </Link>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               {highlights.map((item) => (
                 <div
-                  key={item.title}
-                  className="p-5 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition"
+                  key={item.key}
+                  className="p-5 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-all"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-700 flex items-center justify-center mb-4 transition-colors">
                     {item.icon}
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {item.title}
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    {t.features.highlights[item.key].title}
                   </h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    {item.copy}
+                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed transition-colors">
+                    {t.features.highlights[item.key].copy}
                   </p>
                 </div>
               ))}
@@ -146,34 +123,32 @@ export default function FeaturesPage() {
           </div>
         </section>
 
-        <section className="py-16 bg-white border-t border-gray-100">
+        <section className="py-16 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 transition-colors">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
-              <h2 className="text-3xl font-bold text-gray-900">
-                How teams use NexaOps
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+                {t.features.howTeamsUseTitle}
               </h2>
-              <p className="text-gray-600 max-w-2xl">
-                From the first page to the post-mortem, NexaOps stitches
-                together your incident lifecycle with opinionated defaults and
-                flexible automation.
+              <p className="text-gray-600 dark:text-gray-400 max-w-2xl transition-colors">
+                {t.features.howTeamsUseSubtitle}
               </p>
             </div>
             <div className="grid md:grid-cols-2 gap-6">
-              {deepDives.map((block) => (
+              {deepDiveKeys.map((key) => (
                 <div
-                  key={block.title}
-                  className="p-6 rounded-2xl border border-gray-100 bg-gradient-to-br from-slate-50 to-white shadow-sm hover:shadow-md transition"
+                  key={key}
+                  className="p-6 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gradient-to-br from-slate-50 to-white dark:from-gray-800 dark:to-gray-900 shadow-sm hover:shadow-md transition-all"
                 >
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-semibold">
-                      {block.title.split(" ")[0]}
+                    <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-semibold transition-colors">
+                      {t.features.deepDives[key].title.split(" ")[0]}
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-900">
-                      {block.title}
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                      {t.features.deepDives[key].title}
                     </h3>
                   </div>
-                  <ul className="space-y-2 text-gray-700 text-sm">
-                    {block.points.map((point) => (
+                  <ul className="space-y-2 text-gray-700 dark:text-gray-300 text-sm transition-colors">
+                    {t.features.deepDives[key].points.map((point) => (
                       <li key={point} className="flex items-start gap-2">
                         <span className="mt-[6px] h-2 w-2 rounded-full bg-indigo-500" />
                         <span>{point}</span>
@@ -186,23 +161,21 @@ export default function FeaturesPage() {
           </div>
         </section>
 
-        <section className="py-16 bg-slate-900 text-white">
+        <section className="py-16 bg-slate-900 dark:bg-slate-950 text-white transition-colors">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-3 gap-8">
-            {["SREs", "Platform", "Security"].map((team) => (
+            {teamKeys.map((key) => (
               <div
-                key={team}
+                key={key}
                 className="p-6 rounded-2xl bg-white/5 border border-white/10"
               >
                 <p className="text-sm uppercase tracking-wide text-slate-300 mb-2">
-                  Built for {team}
+                  {t.features.teams[key].label}
                 </p>
                 <h3 className="text-xl font-semibold mb-3">
-                  Resilient {team} teams
+                  {t.features.teams[key].title}
                 </h3>
                 <p className="text-slate-200 text-sm leading-relaxed">
-                  Pair on-call, automation, and learning loops so{" "}
-                  {team.toLowerCase()} can keep customers happy and engineers
-                  unblocked.
+                  {t.features.teams[key].desc}
                 </p>
               </div>
             ))}
@@ -210,9 +183,9 @@ export default function FeaturesPage() {
           <div className="mt-12 text-center">
             <Link
               href="/dashboard"
-              className="inline-flex items-center px-8 py-3 bg-white text-slate-900 font-semibold rounded-lg hover:bg-slate-100 transition"
+              className="inline-flex items-center px-8 py-3 bg-white text-slate-900 font-semibold rounded-lg hover:bg-slate-100 transition shadow-lg hover:shadow-xl hover:scale-105 transform duration-200"
             >
-              See it in action
+              {t.features.seeItInAction}
             </Link>
           </div>
         </section>
