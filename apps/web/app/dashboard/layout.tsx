@@ -1,8 +1,8 @@
 import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { LogoutButton } from "../../../components/logout-button";
-import { authOptions } from "../../../lib/auth";
+import { LogoutButton } from "../../components/logout-button";
+import { authOptions } from "../../lib/auth";
 
 export default async function DashboardLayout({
   children,

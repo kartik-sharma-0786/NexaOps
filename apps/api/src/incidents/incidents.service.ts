@@ -1,5 +1,7 @@
+import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { db, incidentEvents, incidents } from '@nexaops/database';
+import { Queue } from 'bullmq';
 import { and, desc, eq } from 'drizzle-orm';
 import { EventsGateway } from '../events/events.gateway';
 import { CreateIncidentDto } from './dto/create-incident.dto';
@@ -7,7 +9,10 @@ import { UpdateIncidentStatusDto } from './dto/update-incident-status.dto';
 
 @Injectable()
 export class IncidentsService {
-  constructor(private readonly eventsGateway: EventsGateway) {}
+  constructor(
+    private readonly eventsGateway: EventsGateway,
+    @InjectQueue('notifications') private notificationsQueue: Queue,
+  ) {}
 
   async create(dto: CreateIncidentDto, userId: string, tenantId: string) {
     const [incident] = await db
@@ -33,6 +38,15 @@ export class IncidentsService {
     this.eventsGateway.server
       .to(`tenant:${tenantId}`)
       .emit('incidentCreated', incidentWithCreator);
+
+    // Add Email Job
+    if (incidentWithCreator?.creator?.email) {
+      await this.notificationsQueue.add('send-email', {
+        to: incidentWithCreator.creator.email,
+        subject: `[${incident.severity}] New Incident: ${incident.title}`,
+        text: `A new incident has been reported.\n\nTitle: ${incident.title}\nDescription: ${incident.description}\nSeverity: ${incident.severity}`,
+      });
+    }
 
     return incident;
   }
@@ -79,7 +93,7 @@ export class IncidentsService {
 
     if (incident.status === dto.status) return incident;
 
-    await db.transaction(async (tx) => {
+    await db.transaction(async (tx: typeof db) => {
       // Update status
       await tx
         .update(incidents)
@@ -101,6 +115,14 @@ export class IncidentsService {
     this.eventsGateway.server
       .to(`tenant:${tenantId}`)
       .emit('incidentUpdated', updated);
+
+    // Add Email Job
+    await this.notificationsQueue.add('send-email', {
+      to: 'team@nexaops.com', // In real world, fetch subscribers
+      subject: `Incident Updated: ${incident.title}`,
+      text: `Status changed from ${incident.status} to ${dto.status}`,
+    });
+
     return updated;
   }
 

@@ -1,9 +1,11 @@
+import { Queue } from 'bullmq';
 import { EventsGateway } from '../events/events.gateway';
 import { CreateIncidentDto } from './dto/create-incident.dto';
 import { UpdateIncidentStatusDto } from './dto/update-incident-status.dto';
 export declare class IncidentsService {
     private readonly eventsGateway;
-    constructor(eventsGateway: EventsGateway);
+    private notificationsQueue;
+    constructor(eventsGateway: EventsGateway, notificationsQueue: Queue);
     create(dto: CreateIncidentDto, userId: string, tenantId: string): Promise<{
         id: string;
         createdAt: Date;

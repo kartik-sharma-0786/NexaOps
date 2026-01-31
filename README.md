@@ -18,8 +18,12 @@ Built with a focus on type safety, scalability, and maintainability.
 
 - **Multi-Tenancy**: Strict data isolation between tenants using Row-Level Security (RLS) logic.
 - **RBAC**: Granular permissions for Admins, Responders, and Viewers via Guard middleware.
-- **Real-Time Ops**: Instant status updates across all clients using WebSockets.
-- **Async Processing**: Decoupled email notifications and webhooks using Redis message queues.
+
+## Operations
+
+- **CI/CD**: GitHub Actions for automated testing and linting.
+- **Observability**: Health checks via `/health` endpoint (Terminus) monitoring Database and Memory.
+- **Containerization**: Full Docker support for API, Web, Postgres, and Redis.
 
 ## Project Structure
 
@@ -52,29 +56,23 @@ This project follows a monorepo architecture to separate concerns while sharing 
    cd nexaops
    ```
 
-2. **Start Infrastructure**
-   Spin up PostgreSQL and Redis instances.
+2. **Run Infrastructure & Apps (Docker)**
+
+   Run the entire stack (API, Web, DB, Redis) with a single command:
 
    ```bash
-   docker-compose up -d
+   docker-compose up --build
    ```
 
-3. **Install Dependencies**
+3. **Manual Dev Setup (Optional)**
+
+   If you prefer running apps locally with Node.js:
 
    ```bash
+   docker-compose up -d postgres redis
    pnpm install
-   ```
-
-4. **Database Setup**
-   Run migrations and seed data.
-
-   ```bash
    pnpm db:migrate
    pnpm db:seed
-   ```
-
-5. **Run Development Server**
-   ```bash
    pnpm dev
    ```
 
@@ -90,4 +88,4 @@ We believe "invisible work" matters most.
 
 MIT
 
-------
+---

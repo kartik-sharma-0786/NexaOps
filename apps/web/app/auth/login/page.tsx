@@ -9,10 +9,13 @@ import { useForm } from "react-hook-form";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit } = useForm<{
+    email: string;
+    password: string;
+  }>();
   const [error, setError] = useState("");
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: { email: string; password: string }) => {
     setError("");
     const res = await signIn("credentials", {
       email: data.email,

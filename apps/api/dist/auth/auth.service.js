@@ -109,7 +109,8 @@ let AuthService = class AuthService {
         if (!isPasswordValid) {
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
-        const membership = user.memberships[0];
+        const memberships = user.memberships;
+        const membership = memberships?.[0];
         if (!membership) {
             throw new common_1.UnauthorizedException('No tenant found for this user');
         }

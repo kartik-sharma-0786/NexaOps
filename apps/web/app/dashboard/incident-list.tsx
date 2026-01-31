@@ -23,13 +23,18 @@ export default function IncidentList({
   const { data: session } = useSession();
   const [incidents, setIncidents] = useState<Incident[]>(initialIncidents);
 
+  // Helper to safely access extended session properties
+  const user = session?.user as
+    | { tenantId?: string; email?: string }
+    | undefined;
+
   useEffect(() => {
-    if (!session?.user?.tenantId) return;
+    if (!user?.tenantId) return;
 
     const socket = io("http://localhost:4000");
 
     socket.on("connect", () => {
-      socket.emit("joinTenantRoom", session.user.tenantId);
+      socket.emit("joinTenantRoom", user.tenantId);
     });
 
     socket.on("incidentCreated", (newIncident: Incident) => {
@@ -47,98 +52,60 @@ export default function IncidentList({
     return () => {
       socket.disconnect();
     };
-  }, [session]);
+  }, [session, user?.tenantId]);
 
   return (
-    <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead className="bg-gray-50 dark:bg-gray-700">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-              Title
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-              Severity
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-              Status
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-              Created By
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-          {incidents.length === 0 ? (
-            <tr>
-              <td colSpan={4} className="px-6 py-12 text-center text-gray-500">
-                <div className="flex flex-col items-center justify-center space-y-3">
-                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-8 h-8 text-gray-400"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                      />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                    All good! No open incidents.
-                  </h3>
-                  <p className="max-w-xs text-sm text-gray-500 dark:text-gray-400">
-                    Your systems seem to be running smoothly.
-                  </p>
-                </div>
-              </td>
-            </tr>
-          ) : (
-            incidents.map((incident) => (
-              <tr
-                key={incident.id}
-                className="animate-fade-in-down hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+    <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
+      <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
+        {incidents.length === 0 ? (
+          <li className="px-4 py-4 sm:px-6 text-center text-gray-500">
+            No incidents found.
+          </li>
+        ) : (
+          incidents.map((incident) => (
+            <li key={incident.id}>
+              <Link
+                href={`/dashboard/incidents/${incident.id}`}
+                className="block hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150 ease-in-out"
               >
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <Link
-                    href={`/dashboard/incidents/${incident.id}`}
-                    className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
-                  >
-                    {incident.title}
-                  </Link>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                  <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                    ${
-                      incident.severity === "CRITICAL"
-                        ? "bg-red-100 text-red-800"
-                        : incident.severity === "HIGH"
-                          ? "bg-orange-100 text-orange-800"
-                          : incident.severity === "MEDIUM"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-blue-100 text-blue-800"
-                    }`}
-                  >
-                    {incident.severity}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                  {incident.status}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                  {incident.creator?.email}
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+                <div className="px-4 py-4 sm:px-6">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium text-indigo-600 truncate">
+                      {incident.title}
+                    </p>
+                    <div className="ml-2 flex-shrink-0 flex">
+                      <p
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                        ${
+                          incident.severity === "CRITICAL"
+                            ? "bg-red-100 text-red-800"
+                            : incident.severity === "HIGH"
+                              ? "bg-orange-100 text-orange-800"
+                              : incident.severity === "MEDIUM"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-blue-100 text-blue-800"
+                        }`}
+                      >
+                        {incident.severity}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-2 sm:flex sm:justify-between">
+                    <div className="sm:flex">
+                      <p className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                        Status: {incident.status}
+                      </p>
+                      <p className="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400 sm:mt-0 sm:ml-6">
+                        Created by {incident.creator?.email || "Unknown"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </li>
+          ))
+        )}
+      </ul>
     </div>
   );
 }

@@ -37,7 +37,7 @@ export class AuthService {
     }
 
     // Transaction to ensure atomicity
-    const result = await db.transaction(async (tx) => {
+    const result = await db.transaction(async (tx: typeof db) => {
       const [newTenant] = await tx
         .insert(tenants)
         .values({
@@ -97,7 +97,12 @@ export class AuthService {
     }
 
     // Default to the first tenant found
-    const membership = user.memberships[0];
+    const memberships = (
+      user as {
+        memberships?: Array<{ role: string; tenantId: string }>;
+      }
+    ).memberships;
+    const membership = memberships?.[0];
     if (!membership) {
       throw new UnauthorizedException('No tenant found for this user');
     }

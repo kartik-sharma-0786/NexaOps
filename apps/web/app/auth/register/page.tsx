@@ -8,10 +8,20 @@ import { useForm } from "react-hook-form";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit } = useForm<{
+    tenantName: string;
+    name: string;
+    email: string;
+    password: string;
+  }>();
   const [error, setError] = useState("");
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: {
+    tenantName: string;
+    name: string;
+    email: string;
+    password: string;
+  }) => {
     setError("");
     try {
       const res = await fetch("http://localhost:4000/auth/register", {
@@ -27,8 +37,8 @@ export default function RegisterPage() {
 
       // On success, redirect to login
       router.push("/auth/login");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Registration failed");
     }
   };
 

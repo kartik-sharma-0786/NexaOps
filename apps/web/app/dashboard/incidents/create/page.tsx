@@ -21,12 +21,13 @@ export default function CreateIncidentPage() {
   const { data: session, status } = useSession();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const user = session?.user as { role?: string; jwt?: string } | undefined;
 
   if (status === "loading") {
     return <p className="text-center p-8">Loading...</p>;
   }
 
-  if (!["ADMIN", "RESPONDER"].includes(session?.user?.role || "")) {
+  if (!["ADMIN", "RESPONDER"].includes(user?.role || "")) {
     return (
       <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-lg shadow text-center">
         <h1 className="text-xl font-bold text-red-600 mb-4">Access Denied</h1>
@@ -39,7 +40,7 @@ export default function CreateIncidentPage() {
   }
 
   const onSubmit = async (data: IncidentFormData) => {
-    if (!session?.user?.jwt) return;
+    if (!user?.jwt) return;
     setLoading(true);
     setError("");
 
@@ -48,7 +49,7 @@ export default function CreateIncidentPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session.user.jwt}`,
+          Authorization: `Bearer ${user.jwt}`,
         },
         body: JSON.stringify(data),
       });

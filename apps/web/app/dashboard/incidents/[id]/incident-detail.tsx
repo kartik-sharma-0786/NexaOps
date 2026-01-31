@@ -1,12 +1,39 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
-// Reuse Incident interface but simpler for now
-type Incident = any;
+interface ExtendedUser {
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  tenantId?: string;
+  jwt?: string;
+  role?: string;
+}
+
+interface IncidentEvent {
+  id: string;
+  message: string;
+  createdAt: string;
+  actor?: {
+    email: string;
+  };
+}
+
+interface Incident {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  severity: string;
+  creator?: {
+    email: string;
+  };
+  createdAt: string;
+  events?: IncidentEvent[];
+}
 
 export default function IncidentDetail({
   initialIncident,
@@ -14,18 +41,20 @@ export default function IncidentDetail({
   initialIncident: Incident;
 }) {
   const { data: session } = useSession();
-  const [incident, setIncident] = useState(initialIncident);
+  const [incident, setIncident] = useState<Incident>(initialIncident);
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+
+  // Helper to safely access extended session properties
+  const user = session?.user as ExtendedUser;
 
   useEffect(() => {
-    if (!session?.user?.tenantId) return;
+    if (!user?.tenantId) return;
 
     const socket = io("http://localhost:4000");
 
     socket.on("connect", () => {
-      socket.emit("joinTenantRoom", session.user.tenantId);
+      socket.emit("joinTenantRoom", user.tenantId);
     });
 
     socket.on("incidentUpdated", (updatedIncident: Incident) => {
@@ -37,16 +66,16 @@ export default function IncidentDetail({
     return () => {
       socket.disconnect();
     };
-  }, [session, incident.id]);
+  }, [session, incident.id, user?.tenantId]);
 
   const handleStatusChange = async (newStatus: string) => {
-    if (!session?.user?.jwt) return;
+    if (!user?.jwt) return;
     try {
       await fetch(`http://localhost:4000/incidents/${incident.id}/status`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session.user.jwt}`,
+          Authorization: `Bearer ${user.jwt}`,
         },
         body: JSON.stringify({ status: newStatus }),
       });
@@ -58,7 +87,7 @@ export default function IncidentDetail({
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!session?.user?.jwt || !comment.trim()) return;
+    if (!user?.jwt || !comment.trim()) return;
 
     setLoading(true);
     try {
@@ -66,7 +95,7 @@ export default function IncidentDetail({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session.user.jwt}`,
+          Authorization: `Bearer ${user.jwt}`,
         },
         body: JSON.stringify({ message: comment }),
       });
@@ -92,7 +121,7 @@ export default function IncidentDetail({
             </p>
           </div>
           <div>
-            {["ADMIN", "RESPONDER"].includes(session?.user?.role || "") ? (
+            {["ADMIN", "RESPONDER"].includes(user?.role || "") ? (
               <select
                 aria-label="Status"
                 value={incident.status}
@@ -137,7 +166,7 @@ export default function IncidentDetail({
         </h3>
 
         <div className="space-y-4 mb-6">
-          {incident.events?.map((event: any) => (
+          {incident.events?.map((event) => (
             <div
               key={event.id}
               className="border-l-4 border-gray-200 dark:border-gray-600 pl-4 py-2"
@@ -158,7 +187,7 @@ export default function IncidentDetail({
           )}
         </div>
 
-        {["ADMIN", "RESPONDER"].includes(session?.user?.role || "") && (
+        {["ADMIN", "RESPONDER"].includes(user?.role || "") && (
           <form onSubmit={handleAddComment}>
             <div>
               <label htmlFor="comment" className="sr-only">

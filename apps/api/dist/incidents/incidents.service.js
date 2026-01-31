@@ -8,16 +8,23 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.IncidentsService = void 0;
+const bullmq_1 = require("@nestjs/bullmq");
 const common_1 = require("@nestjs/common");
 const database_1 = require("@nexaops/database");
+const bullmq_2 = require("bullmq");
 const drizzle_orm_1 = require("drizzle-orm");
 const events_gateway_1 = require("../events/events.gateway");
 let IncidentsService = class IncidentsService {
     eventsGateway;
-    constructor(eventsGateway) {
+    notificationsQueue;
+    constructor(eventsGateway, notificationsQueue) {
         this.eventsGateway = eventsGateway;
+        this.notificationsQueue = notificationsQueue;
     }
     async create(dto, userId, tenantId) {
         const [incident] = await database_1.db
@@ -40,6 +47,13 @@ let IncidentsService = class IncidentsService {
         this.eventsGateway.server
             .to(`tenant:${tenantId}`)
             .emit('incidentCreated', incidentWithCreator);
+        if (incidentWithCreator?.creator?.email) {
+            await this.notificationsQueue.add('send-email', {
+                to: incidentWithCreator.creator.email,
+                subject: `[${incident.severity}] New Incident: ${incident.title}`,
+                text: `A new incident has been reported.\n\nTitle: ${incident.title}\nDescription: ${incident.description}\nSeverity: ${incident.severity}`,
+            });
+        }
         return incident;
     }
     async findAll(tenantId) {
@@ -91,6 +105,11 @@ let IncidentsService = class IncidentsService {
         this.eventsGateway.server
             .to(`tenant:${tenantId}`)
             .emit('incidentUpdated', updated);
+        await this.notificationsQueue.add('send-email', {
+            to: 'team@nexaops.com',
+            subject: `Incident Updated: ${incident.title}`,
+            text: `Status changed from ${incident.status} to ${dto.status}`,
+        });
         return updated;
     }
     async addComment(id, message, userId, tenantId) {
@@ -112,6 +131,8 @@ let IncidentsService = class IncidentsService {
 exports.IncidentsService = IncidentsService;
 exports.IncidentsService = IncidentsService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [events_gateway_1.EventsGateway])
+    __param(1, (0, bullmq_1.InjectQueue)('notifications')),
+    __metadata("design:paramtypes", [events_gateway_1.EventsGateway,
+        bullmq_2.Queue])
 ], IncidentsService);
 //# sourceMappingURL=incidents.service.js.map
