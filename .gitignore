@@ -1,1 +1,22 @@
+# Dependencies
 node_modules
+.pnpm-store
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Next.js
+.next
+out
+
+# NestJS
+dist
+
+# Turbo
+.turbo
+
+# OS
+.DS_Store
+Thumbs.db
