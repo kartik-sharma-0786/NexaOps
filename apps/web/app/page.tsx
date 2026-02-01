@@ -10,102 +10,18 @@ import {
     Users,
     Zap,
 } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { ChatWidget } from "../components/landing/chat-widget";
-import { LanguageSelector } from "../components/language-selector";
-import { ThemeToggle } from "../components/theme-toggle";
+import { LandingNavbar } from "../components/landing/navbar";
 import { useLanguage } from "../contexts/language-context";
 
 export default function Home() {
-  const { data: session, status } = useSession();
   const { t } = useLanguage();
-  const isAuthed = status === "authenticated";
-  const userEmail = (session?.user as { email?: string } | undefined)?.email;
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors">
       {/* Navigation */}
-      <nav className="border-b border-gray-100 dark:border-gray-800 sticky top-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-40 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-8">
-              <Link href="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">
-                  N
-                </div>
-                <span className="text-xl font-bold text-gray-900 dark:text-white">
-                  {t.brandName}
-                </span>
-              </Link>
-              <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600 dark:text-gray-300">
-                <Link
-                  href="/features"
-                  className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                >
-                  {t.nav.features}
-                </Link>
-                <Link
-                  href="/resources"
-                  className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                >
-                  {t.nav.resources}
-                </Link>
-                <Link
-                  href="/pricing"
-                  className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                >
-                  {t.nav.pricing}
-                </Link>
-                <Link
-                  href="#"
-                  className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                >
-                  {t.nav.docs}
-                </Link>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 sm:gap-4">
-              <LanguageSelector />
-              <ThemeToggle />
-              {isAuthed ? (
-                <>
-                  <span className="hidden sm:inline text-sm text-gray-600 dark:text-gray-300">
-                    {userEmail || "Signed in"}
-                  </span>
-                  <Link
-                    href="/dashboard"
-                    className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition"
-                  >
-                    {t.nav.dashboard}
-                  </Link>
-                  <button
-                    onClick={() => signOut({ callbackUrl: "/" })}
-                    className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
-                  >
-                    {t.nav.signOut}
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/api/auth/signin"
-                    className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
-                  >
-                    {t.nav.signIn}
-                  </Link>
-                  <Link
-                    href="/dashboard"
-                    className="hidden sm:inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition"
-                  >
-                    {t.nav.getStarted}
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </nav>
+      <LandingNavbar />
 
       <main>
         {/* Hero Section */}

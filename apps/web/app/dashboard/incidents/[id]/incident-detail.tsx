@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import { useLanguage } from "../../../../contexts/language-context";
 
 interface ExtendedUser {
   name?: string | null;
@@ -41,6 +42,7 @@ export default function IncidentDetail({
   initialIncident: Incident;
 }) {
   const { data: session } = useSession();
+  const { t } = useLanguage();
   const [incident, setIncident] = useState<Incident>(initialIncident);
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
@@ -51,7 +53,8 @@ export default function IncidentDetail({
   useEffect(() => {
     if (!user?.tenantId) return;
 
-    const socket = io("http://localhost:4000");
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+    const socket = io(apiUrl);
 
     socket.on("connect", () => {
       socket.emit("joinTenantRoom", user.tenantId);
@@ -71,7 +74,8 @@ export default function IncidentDetail({
   const handleStatusChange = async (newStatus: string) => {
     if (!user?.jwt) return;
     try {
-      await fetch(`http://localhost:4000/incidents/${incident.id}/status`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      await fetch(`${apiUrl}/incidents/${incident.id}/status`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -91,7 +95,8 @@ export default function IncidentDetail({
 
     setLoading(true);
     try {
-      await fetch(`http://localhost:4000/incidents/${incident.id}/comments`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      await fetch(`${apiUrl}/incidents/${incident.id}/comments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -116,7 +121,8 @@ export default function IncidentDetail({
               {incident.title}
             </h1>
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-              Reported by {incident.creator?.email} on{" "}
+              {t.incidentDetail.reportedBy} {incident.creator?.email}{" "}
+              {t.incidentDetail.on}{" "}
               {new Date(incident.createdAt).toLocaleString()}
             </p>
           </div>
@@ -128,13 +134,17 @@ export default function IncidentDetail({
                 onChange={(e) => handleStatusChange(e.target.value)}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600"
               >
-                <option value="OPEN">Open</option>
-                <option value="ACKNOWLEDGED">Acknowledged</option>
-                <option value="RESOLVED">Resolved</option>
+                <option value="OPEN">{t.dashboard.status.OPEN}</option>
+                <option value="ACKNOWLEDGED">
+                  {t.dashboard.status.ACKNOWLEDGED}
+                </option>
+                <option value="RESOLVED">{t.dashboard.status.RESOLVED}</option>
               </select>
             ) : (
               <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-md text-sm font-medium">
-                {incident.status}
+                {t.dashboard.status[
+                  incident.status as keyof typeof t.dashboard.status
+                ] || incident.status}
               </span>
             )}
           </div>
@@ -155,14 +165,16 @@ export default function IncidentDetail({
                     : "bg-blue-100 text-blue-800"
             }`}
           >
-            {incident.severity}
+            {t.dashboard.severity[
+              incident.severity as keyof typeof t.dashboard.severity
+            ] || incident.severity}
           </span>
         </div>
       </div>
 
       <div className="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
         <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
-          Timeline & Comments
+          {t.incidentDetail.timeline}
         </h3>
 
         <div className="space-y-4 mb-6">
@@ -183,7 +195,9 @@ export default function IncidentDetail({
             </div>
           ))}
           {(!incident.events || incident.events.length === 0) && (
-            <p className="text-gray-500 italic">No activity yet.</p>
+            <p className="text-gray-500 italic">
+              {t.incidentDetail.noActivity}
+            </p>
           )}
         </div>
 
@@ -199,7 +213,7 @@ export default function IncidentDetail({
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 className="shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                placeholder="Add a note or update..."
+                placeholder={t.incidentDetail.placeholder}
               />
             </div>
             <div className="mt-3 flex justify-end">
@@ -208,7 +222,7 @@ export default function IncidentDetail({
                 disabled={loading}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
               >
-                {loading ? "Posting..." : "Post Comment"}
+                {loading ? t.incidentDetail.posting : t.incidentDetail.post}
               </button>
             </div>
           </form>

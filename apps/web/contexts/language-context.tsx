@@ -15,10 +15,13 @@ type Translations = {
     dashboard: string;
     getStarted: string;
     signOut: string;
+    contact: string;
   };
   dashboard: {
     overview: string;
     incidents: string;
+    settings: string;
+    tenant: string;
     createIncident: string;
     totalIncidents: string;
     activeNow: string;
@@ -36,6 +39,7 @@ type Translations = {
     };
     status: {
       OPEN: string;
+      ACKNOWLEDGED: string;
       IN_PROGRESS: string;
       RESOLVED: string;
       CLOSED: string;
@@ -105,6 +109,81 @@ type Translations = {
       webinarAutomation: { type: string; title: string; desc: string };
     };
   };
+  incidentForm: {
+    loading: string;
+    accessDenied: string;
+    permissionDenied: string;
+    createTitle: string;
+    errorGeneric: string;
+    title: string;
+    titleRequired: string;
+    description: string;
+    severity: string;
+    cancel: string;
+    create: string;
+    creating: string;
+  };
+  incidentDetail: {
+    reportedBy: string;
+    on: string;
+    timeline: string;
+    noActivity: string;
+    placeholder: string;
+    post: string;
+    posting: string;
+  };
+  auth: {
+    signInTitle: string;
+    signInSubtitle: string;
+    createAccount: string;
+    emailLabel: string;
+    passwordLabel: string;
+    signInButton: string;
+    createAccountTitle: string;
+    companyNameLabel: string;
+    fullNameLabel: string;
+    signInLink: string;
+    createAccountButton: string;
+    creatingAccount: string;
+    errorInvalid: string;
+    errorGeneric: string;
+  };
+  settings: {
+    title: string;
+    profile: string;
+    accountReference: string;
+    preferences: string;
+    theme: string;
+    language: string;
+    role: string;
+    tenantId: string;
+    email: string;
+    fullName: string;
+    tenantName: string;
+  };
+  contact: {
+    heroTitle: string;
+    heroSubtitle: string;
+    form: {
+      nameLabel: string;
+      emailLabel: string;
+      companyLabel: string;
+      messageLabel: string;
+      submitButton: string;
+      submitting: string;
+      successMessage: string;
+    };
+    sales: {
+      title: string;
+      description: string;
+      email: string;
+    };
+    support: {
+      title: string;
+      description: string;
+      email: string;
+    };
+  };
 };
 
 const translations: Record<Language, Translations> = {
@@ -113,6 +192,8 @@ const translations: Record<Language, Translations> = {
     dashboard: {
       overview: "Overview",
       incidents: "Incidents",
+      settings: "Settings",
+      tenant: "Tenant",
       createIncident: "Create Incident",
       totalIncidents: "Total incidents",
       activeNow: "Active now",
@@ -130,6 +211,7 @@ const translations: Record<Language, Translations> = {
       },
       status: {
         OPEN: "Open",
+        ACKNOWLEDGED: "Acknowledged",
         IN_PROGRESS: "In Progress",
         RESOLVED: "Resolved",
         CLOSED: "Closed",
@@ -144,6 +226,7 @@ const translations: Record<Language, Translations> = {
       dashboard: "Go to Dashboard",
       getStarted: "Get Started",
       signOut: "Sign Out",
+      contact: "Contact",
     },
     hero: {
       badge: "New: NexaOps AI Assistant",
@@ -290,12 +373,93 @@ const translations: Record<Language, Translations> = {
         },
       },
     },
+    incidentForm: {
+      loading: "Loading...",
+      accessDenied: "Access Denied",
+      permissionDenied:
+        "You do not have permission to create incidents. Please contact your administrator.",
+      createTitle: "Create New Incident",
+      errorGeneric: "Something went wrong. Please try again.",
+      title: "Title",
+      titleRequired: "Title is required",
+      description: "Description",
+      severity: "Severity",
+      cancel: "Cancel",
+      create: "Create Incident",
+      creating: "Creating...",
+    },
+    incidentDetail: {
+      reportedBy: "Reported by",
+      on: "on",
+      timeline: "Timeline & Comments",
+      noActivity: "No activity yet.",
+      placeholder: "Add a note or update...",
+      post: "Post Comment",
+      posting: "Posting...",
+    },
+    auth: {
+      signInTitle: "Sign in to your account",
+      signInSubtitle: "Or",
+      createAccount: "create a new company account",
+      emailLabel: "Email address",
+      passwordLabel: "Password",
+      signInButton: "Sign in",
+      createAccountTitle: "Create your account",
+      companyNameLabel: "Company Name",
+      fullNameLabel: "Full Name",
+      signInLink: "sign in to existing account",
+      createAccountButton: "Create account",
+      creatingAccount: "Creating...",
+      errorInvalid: "Invalid email or password",
+      errorGeneric: "Registration failed",
+    },
+    settings: {
+      title: "Settings",
+      profile: "Profile",
+      accountReference: "Account Reference",
+      preferences: "Preferences",
+      theme: "Theme",
+      language: "Language",
+      role: "Role",
+      tenantId: "Tenant ID",
+      email: "Email",
+      fullName: "Full Name",
+      tenantName: "Tenant Name",
+    },
+    contact: {
+      heroTitle: "Contact our team",
+      heroSubtitle:
+        "Got questions? We're here to help. Chat to our friendly team 24/7 and get things solved within 2 hours.",
+      form: {
+        nameLabel: "Name",
+        emailLabel: "Work email",
+        companyLabel: "Company website",
+        messageLabel: "Message",
+        submitButton: "Send message",
+        submitting: "Sending...",
+        successMessage: "Message sent! We'll be in touch shortly.",
+      },
+      sales: {
+        title: "Talk to Sales",
+        description:
+          "Interested in our Enterprise plan? Let's talk about how we can help your team.",
+        email: "sales@nexaops.com",
+      },
+      support: {
+        title: "Help & Support",
+        description:
+          "Already a customer? Get help with your account or technical questions.",
+        email: "support@nexaops.com",
+      },
+    },
   },
   ja: {
     brandName: "NexaOps",
     dashboard: {
       overview: "概要",
       incidents: "インシデント",
+      settings: "設定",
+      tenant: "テナント",
       createIncident: "インシデント作成",
       totalIncidents: "総インシデント数",
       activeNow: "現在アクティブ",
@@ -313,6 +477,7 @@ const translations: Record<Language, Translations> = {
       },
       status: {
         OPEN: "オープン",
+        ACKNOWLEDGED: "確認済み",
         IN_PROGRESS: "進行中",
         RESOLVED: "解決済み",
         CLOSED: "クローズ",
@@ -327,6 +492,7 @@ const translations: Record<Language, Translations> = {
       dashboard: "ダッシュボードへ",
       getStarted: "始める",
       signOut: "ログアウト",
+      contact: "お問い合わせ",
     },
     hero: {
       badge: "新機能：NexaOps AIアシスタント",
@@ -473,12 +639,93 @@ const translations: Record<Language, Translations> = {
         },
       },
     },
+    incidentForm: {
+      loading: "読み込み中...",
+      accessDenied: "アクセス拒否",
+      permissionDenied:
+        "インシデントを作成する権限がありません。管理者に連絡してください。",
+      createTitle: "新しいインシデントを作成",
+      errorGeneric: "エラーが発生しました。もう一度お試しください。",
+      title: "タイトル",
+      titleRequired: "タイトルは必須です",
+      description: "説明",
+      severity: "重大度",
+      cancel: "キャンセル",
+      create: "インシデント作成",
+      creating: "作成中...",
+    },
+    incidentDetail: {
+      reportedBy: "報告者:",
+      on: "日時:",
+      timeline: "タイムラインとコメント",
+      noActivity: "アクティビティはまだありません。",
+      placeholder: "メモや更新を追加...",
+      post: "コメントを投稿",
+      posting: "投稿中...",
+    },
+    auth: {
+      signInTitle: "アカウントにサインイン",
+      signInSubtitle: "または",
+      createAccount: "新しい会社アカウントを作成",
+      emailLabel: "メールアドレス",
+      passwordLabel: "パスワード",
+      signInButton: "サインイン",
+      createAccountTitle: "アカウントを作成",
+      companyNameLabel: "会社名",
+      fullNameLabel: "氏名",
+      signInLink: "既存のアカウントにサインイン",
+      createAccountButton: "アカウント作成",
+      creatingAccount: "作成中...",
+      errorInvalid: "メールアドレスまたはパスワードが無効です",
+      errorGeneric: "登録に失敗しました",
+    },
+    settings: {
+      title: "設定",
+      profile: "プロフィール",
+      accountReference: "アカウント参照",
+      preferences: "設定",
+      theme: "テーマ",
+      language: "言語",
+      role: "役割",
+      tenantId: "テナントID",
+      email: "メールアドレス",
+      fullName: "氏名",
+      tenantName: "テナント名",
+    },
+    contact: {
+      heroTitle: "チームにお問い合わせ",
+      heroSubtitle:
+        "ご質問がありますか？私たちがサポートします。24時間365日対応のフレンドリーなチームにチャットして、2時間以内に解決しましょう。",
+      form: {
+        nameLabel: "名前",
+        emailLabel: "職場メールアドレス",
+        companyLabel: "会社ウェブサイト",
+        messageLabel: "メッセージ",
+        submitButton: "送信する",
+        submitting: "送信中...",
+        successMessage: "送信されました！まもなくご連絡いたします。",
+      },
+      sales: {
+        title: "営業へのお問い合わせ",
+        description:
+          "エンタープライズプランにご興味がありますか？チームをどのように支援できるかお話ししましょう。",
+        email: "sales@nexaops.com",
+      },
+      support: {
+        title: "ヘルプとサポート",
+        description:
+          "すでに顧客ですか？アカウントや技術的な質問についてサポートを受けましょう。",
+        email: "support@nexaops.com",
+      },
+    },
   },
   hi: {
     brandName: "नेक्साऑप्स",
     dashboard: {
       overview: "अवलोकन",
       incidents: "घटनाओं",
+      settings: "सेटिंग्स",
+      tenant: "टेनेंट",
       createIncident: "घटना बनाएँ",
       totalIncidents: "कुल घटनाएं",
       activeNow: "अभी सक्रिय",
@@ -496,6 +743,7 @@ const translations: Record<Language, Translations> = {
       },
       status: {
         OPEN: "खुला",
+        ACKNOWLEDGED: "स्वीकृत",
         IN_PROGRESS: "प्रगति में",
         RESOLVED: "सुलझा हुआ",
         CLOSED: "बंद",
@@ -510,6 +758,7 @@ const translations: Record<Language, Translations> = {
       dashboard: "डैशबोर्ड पर जाएं",
       getStarted: "शुरू करें",
       signOut: "साइन आउट",
+      contact: "संपर्क",
     },
     hero: {
       badge: "नई: नेक्साऑप्स एआई सहायक",
@@ -654,6 +903,85 @@ const translations: Record<Language, Translations> = {
           title: "घटना प्रतिक्रिया में स्वचालन",
           desc: "रनबुक स्वचालन को समझना और कैसे शुरू करें।",
         },
+      },
+    },
+    incidentForm: {
+      loading: "लोड हो रहा है...",
+      accessDenied: "प्रवेश अस्वीकृत",
+      permissionDenied:
+        "आपके पास घटनाएँ बनाने की अनुमति नहीं है। कृपया अपने व्यवस्थापक से संपर्क करें।",
+      createTitle: "नई घटना बनाएँ",
+      errorGeneric: "कुछ गलत हो गया। कृपया पुन: प्रयास करें।",
+      title: "शीर्षक",
+      titleRequired: "शीर्षक आवश्यक है",
+      description: "विवरण",
+      severity: "गंभीरता",
+      cancel: "रद्द करें",
+      create: "घटना बनाएँ",
+      creating: "बना रहा है...",
+    },
+    incidentDetail: {
+      reportedBy: "रिपोर्टकर्ता:",
+      on: "दिनांक:",
+      timeline: "समयरेखा और टिप्पणियाँ",
+      noActivity: "अभी तक कोई गतिविधि नहीं।",
+      placeholder: "नोट या अपडेट जोड़ें...",
+      post: "टिप्पणी पोस्ट करें",
+      posting: "पोस्ट किया जा रहा है...",
+    },
+    auth: {
+      signInTitle: "अपने खाते में साइन इन करें",
+      signInSubtitle: "या",
+      createAccount: "एक नया कंपनी खाता बनाएँ",
+      emailLabel: "ईमेल पता",
+      passwordLabel: "पासवर्ड",
+      signInButton: "साइन इन करें",
+      createAccountTitle: "अपना खाता बनाएँ",
+      companyNameLabel: "कंपनी का नाम",
+      fullNameLabel: "पूरा नाम",
+      signInLink: "मौजूदा खाते में साइन इन करें",
+      createAccountButton: "खाता बनाएँ",
+      creatingAccount: "बना रहा है...",
+      errorInvalid: "अमान्य ईमेल या पासवर्ड",
+      errorGeneric: "पंजीकरण विफल रहा",
+    },
+    settings: {
+      title: "सेटिंग्स",
+      profile: "प्रोफ़ाइल",
+      accountReference: "खाता संदर्भ",
+      preferences: "पसंद",
+      theme: "थीम",
+      language: "भाषा",
+      role: "भूमिका",
+      tenantId: "टेनेंट आईडी",
+      email: "ईमेल",
+      fullName: "पूरा नाम",
+      tenantName: "टेनेंट नाम",
+    },
+    contact: {
+      heroTitle: "हमारी टीम से संपर्क करें",
+      heroSubtitle:
+        "कोई सवाल है? हम मदद करने के लिए यहाँ हैं। हमारी टीम से 24/7 चैट करें और 2 घंटे के भीतर समाधान पाएं।",
+      form: {
+        nameLabel: "नाम",
+        emailLabel: "कार्य ईमेल",
+        companyLabel: "कंपनी वेबसाइट",
+        messageLabel: "संदेश",
+        submitButton: "संदेश भेजें",
+        submitting: "भेज रहा है...",
+        successMessage: "संदेश भेजा गया! हम जल्द ही संपर्क करेंगे।",
+      },
+      sales: {
+        title: "बिक्री से बात करें",
+        description:
+          "हमारे एंटरप्राइज़ प्लान में रुचि है? आइए बात करें कि हम आपकी टीम की मदद कैसे कर सकते हैं।",
+        email: "sales@nexaops.com",
+      },
+      support: {
+        title: "मदद और सहायता",
+        description:
+          "पहले से ही ग्राहक हैं? अपने खाते या तकनीकी प्रश्नों के साथ सहायता प्राप्त करें।",
+        email: "support@nexaops.com",
       },
     },
   },

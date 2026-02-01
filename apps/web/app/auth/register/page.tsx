@@ -5,9 +5,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { LanguageSelector } from "../../../components/language-selector";
+import { Logo } from "../../../components/logo";
+import { ThemeToggle } from "../../../components/theme-toggle";
+import { useLanguage } from "../../../contexts/language-context";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const { register, handleSubmit } = useForm<{
     tenantName: string;
     name: string;
@@ -15,6 +20,7 @@ export default function RegisterPage() {
     password: string;
   }>();
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const onSubmit = async (data: {
     tenantName: string;
@@ -23,8 +29,10 @@ export default function RegisterPage() {
     password: string;
   }) => {
     setError("");
+    setLoading(true);
     try {
-      const res = await fetch("http://localhost:4000/auth/register", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const res = await fetch(`${apiUrl}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -32,38 +40,48 @@ export default function RegisterPage() {
 
       if (!res.ok) {
         const json = await res.json();
-        throw new Error(json.message || "Registration failed");
+        throw new Error(json.message || t.auth.errorGeneric);
       }
 
       // On success, redirect to login
       router.push("/auth/login");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed");
+      setError(err instanceof Error ? err.message : t.auth.errorGeneric);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-          Create your account
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 sm:px-6 lg:px-8 transition-colors">
+      <div className="absolute top-4 right-4 flex gap-2">
+        <LanguageSelector />
+        <ThemeToggle />
+      </div>
+
+      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
+        <Link href="/" className="inline-block">
+          <Logo className="mx-auto w-12 h-12" />
+        </Link>
+        <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+          {t.auth.createAccountTitle}
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Or{" "}
+        <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+          {t.auth.signInSubtitle}{" "}
           <Link
             href="/auth/login"
-            className="font-medium text-blue-600 hover:text-blue-500"
+            className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
           >
-            sign in to existing account
+            {t.auth.signInLink}
           </Link>
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100 dark:border-gray-700">
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             {error && (
-              <div className="bg-red-50 p-4 rounded-md text-red-600 text-sm">
+              <div className="bg-red-50 dark:bg-red-900/30 p-4 rounded-md text-red-600 dark:text-red-400 text-sm">
                 {error}
               </div>
             )}
@@ -71,16 +89,16 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="tenantName"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Company Name
+                {t.auth.companyNameLabel}
               </label>
               <div className="mt-1">
                 <input
                   id="tenantName"
                   type="text"
                   required
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   {...register("tenantName", { required: true })}
                 />
               </div>
@@ -89,16 +107,16 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="name"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Full Name
+                {t.auth.fullNameLabel}
               </label>
               <div className="mt-1">
                 <input
                   id="name"
                   type="text"
                   required
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   {...register("name", { required: true })}
                 />
               </div>
@@ -107,16 +125,16 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Email address
+                {t.auth.emailLabel}
               </label>
               <div className="mt-1">
                 <input
                   id="email"
                   type="email"
                   required
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   {...register("email", { required: true })}
                 />
               </div>
@@ -125,16 +143,16 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Password
+                {t.auth.passwordLabel}
               </label>
               <div className="mt-1">
                 <input
                   id="password"
                   type="password"
                   required
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   {...register("password", { required: true, minLength: 6 })}
                 />
               </div>
@@ -143,9 +161,10 @@ export default function RegisterPage() {
             <div>
               <Button
                 type="submit"
-                className="flex w-full justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                disabled={loading}
+                className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition dark:focus:ring-offset-gray-900 disabled:opacity-50"
               >
-                Sign up
+                {loading ? t.auth.creatingAccount : t.auth.createAccountButton}
               </Button>
             </div>
           </form>

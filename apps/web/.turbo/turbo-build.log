@@ -2,6 +2,10 @@
 > web@0.1.0 build C:\Users\Kartik\OneDrive\Desktop\NexaOps\apps\web
 > next build
 
+⚠ `eslint` configuration in next.config.ts is no longer supported. See more info here: https://nextjs.org/docs/app/api-reference/cli/next#next-lint-options
+⚠ Invalid next.config.ts options detected: 
+⚠     Unrecognized key(s) in object: 'eslint'
+⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
 ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
  We detected multiple lockfiles and selected the directory of C:\Users\Kartik\package-lock.json as the root directory.
  To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
@@ -9,28 +13,23 @@
  Detected additional lockfiles: 
    * C:\Users\Kartik\OneDrive\Desktop\NexaOps\pnpm-lock.yaml
 
-Attention: Next.js now collects completely anonymous telemetry regarding usage.
-This information is used to shape Next.js' roadmap and prioritize features.
-You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
-https://nextjs.org/telemetry
-
 ▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
 
   Creating an optimized production build ...
-✓ Compiled successfully in 2.4s
+✓ Compiled successfully in 7.4s
   Running TypeScript ...
-  Collecting page data using 7 workers ...
-  Generating static pages using 7 workers (0/4) ...
-  Generating static pages using 7 workers (1/4) 
-  Generating static pages using 7 workers (2/4) 
-  Generating static pages using 7 workers (3/4) 
-✓ Generating static pages using 7 workers (4/4) in 562.5ms
-  Finalizing page optimization ...
+Failed to compile.
 
-Route (app)
-┌ ○ /
-└ ○ /_not-found
+./next.config.ts:5:3
+Type error: Object literal may only specify known properties, and 'eslint' does not exist in type 'NextConfig'.
 
-
-○  (Static)  prerendered as static content
-
+[0m [90m 3 |[39m [36mconst[39m nextConfig[33m:[39m [33mNextConfig[39m [33m=[39m {
+ [90m 4 |[39m   output[33m:[39m [32m"standalone"[39m[33m,[39m
+[31m[1m>[22m[39m[90m 5 |[39m   eslint[33m:[39m {
+ [90m   |[39m   [31m[1m^[22m[39m
+ [90m 6 |[39m     ignoreDuringBuilds[33m:[39m [36mtrue[39m[33m,[39m
+ [90m 7 |[39m   }[33m,[39m
+ [90m 8 |[39m }[33m;[39m[0m
+Next.js build worker exited with code: 1 and signal: null
+ ELIFECYCLE  Command failed with exit code 1.

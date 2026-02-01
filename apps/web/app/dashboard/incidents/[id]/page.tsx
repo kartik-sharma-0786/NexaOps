@@ -8,7 +8,8 @@ async function getIncident(id: string) {
   if (!session?.user?.jwt) return null;
 
   try {
-    const res = await fetch(`http://localhost:4000/incidents/${id}`, {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+    const res = await fetch(`${apiUrl}/incidents/${id}`, {
       headers: {
         Authorization: `Bearer ${session.user.jwt}`,
       },

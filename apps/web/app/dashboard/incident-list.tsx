@@ -33,7 +33,8 @@ export default function IncidentList({
   useEffect(() => {
     if (!user?.tenantId) return;
 
-    const socket = io("http://localhost:4000");
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+    const socket = io(apiUrl);
 
     socket.on("connect", () => {
       socket.emit("joinTenantRoom", user.tenantId);

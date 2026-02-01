@@ -3,6 +3,7 @@
 import { Check, Heart } from "lucide-react";
 import Link from "next/link";
 import { LanguageSelector } from "../../components/language-selector";
+import { Logo } from "../../components/logo";
 import { ThemeToggle } from "../../components/theme-toggle";
 import { useLanguage } from "../../contexts/language-context";
 
@@ -14,9 +15,7 @@ export default function PricingPage() {
       <header className="border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-30 transition-colors">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">
-              N
-            </div>
+            <Logo className="w-8 h-8" />
             <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {t.brandName}
             </span>

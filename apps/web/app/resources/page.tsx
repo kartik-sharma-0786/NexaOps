@@ -3,6 +3,7 @@
 import { ArrowRight, Book, FileText, Search, Video } from "lucide-react";
 import Link from "next/link";
 import { LanguageSelector } from "../../components/language-selector";
+import { Logo } from "../../components/logo";
 import { ThemeToggle } from "../../components/theme-toggle";
 import { useLanguage } from "../../contexts/language-context";
 
@@ -57,9 +58,7 @@ export default function ResourcesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">
-                N
-              </div>
+              <Logo className="w-8 h-8" />
               <span className="text-xl font-bold text-gray-900 dark:text-white">
                 {t.brandName}
               </span>
