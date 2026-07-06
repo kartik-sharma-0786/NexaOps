@@ -29,6 +29,8 @@ Built with a focus on type safety, scalability, and maintainability.
 
 If you deploy the API or the full app on Vercel, you must point `DATABASE_URL` at a managed Postgres instance such as Neon, Supabase, or Vercel Postgres. The Docker Compose hostname `postgres` only works inside the local or VPS container stack and will return a database error on Vercel.
 
+If you deploy only the web app on Vercel, set `NEXT_PUBLIC_API_URL` to your deployed API URL and keep `NEXTAUTH_URL` and `NEXTAUTH_SECRET` configured in the Vercel project environment variables.
+
 ## Project Structure
 
 This project follows a monorepo architecture to separate concerns while sharing logic.
