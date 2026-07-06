@@ -1,11 +1,24 @@
 import "dotenv/config";
+import * as argon2 from "argon2";
+import { eq } from "drizzle-orm";
 import { db } from "./index";
 import { tenantMembers, tenants, users } from "./schema";
+
+const SEED_PASSWORD = "secret";
 
 async function main() {
   console.log("🌱 Seeding database...");
 
-  // 1. Create a Tenant
+  const existing = await db.query.users.findFirst({
+    where: eq(users.email, "alice@acme.com"),
+  });
+  if (existing) {
+    console.log("⏭️  Seed data already exists (alice@acme.com). Skipping.");
+    process.exit(0);
+  }
+
+  const passwordHash = await argon2.hash(SEED_PASSWORD);
+
   const [tenant] = await db
     .insert(tenants)
     .values({
@@ -16,18 +29,15 @@ async function main() {
 
   console.log(`✅ Created Tenant: ${tenant.name} (${tenant.id})`);
 
-  // 2. Create an Admin User
-  // Note: In real app, password should be hashed. Using "secret" for dev.
   const [admin] = await db
     .insert(users)
     .values({
       name: "Alice Admin",
       email: "alice@acme.com",
-      passwordHash: "$argon2id$v=19$m=65536,t=3,p=4$SECRET_HASH_PLACEHOLDER",
+      passwordHash,
     })
     .returning();
 
-  // 3. Link User to Tenant
   await db.insert(tenantMembers).values({
     tenantId: tenant.id,
     userId: admin.id,
@@ -35,6 +45,7 @@ async function main() {
   });
 
   console.log(`✅ Created User: ${admin.email} (ADMIN)`);
+  console.log(`🔑 Login with password: ${SEED_PASSWORD}`);
   console.log("🌱 Seeding complete.");
   process.exit(0);
 }

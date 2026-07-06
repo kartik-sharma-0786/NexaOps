@@ -17,6 +17,9 @@ dist
 # Turbo
 .turbo
 
+# Local embedded Postgres (no-Docker dev)
+.pgdata
+
 # OS
 .DS_Store
 Thumbs.db

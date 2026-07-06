@@ -8,15 +8,28 @@ describe('AppController', () => {
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [AppController],
-      providers: [AppService],
+      providers: [
+        {
+          provide: AppService,
+          useValue: {
+            getHello: jest.fn().mockResolvedValue({
+              message: 'Hello World! Database is connected.',
+              tenants: [],
+            }),
+          },
+        },
+      ],
     }).compile();
 
     appController = app.get<AppController>(AppController);
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+    it('should return hello message with tenants', async () => {
+      await expect(appController.getHello()).resolves.toEqual({
+        message: 'Hello World! Database is connected.',
+        tenants: [],
+      });
     });
   });
 });

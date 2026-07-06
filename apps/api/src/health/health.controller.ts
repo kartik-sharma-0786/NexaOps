@@ -1,8 +1,8 @@
 import { Controller, Get } from '@nestjs/common';
 import {
-    HealthCheck,
-    HealthCheckService,
-    MemoryHealthIndicator,
+  HealthCheck,
+  HealthCheckService,
+  MemoryHealthIndicator,
 } from '@nestjs/terminus';
 import { DrizzleHealthIndicator } from './drizzle.health';
 

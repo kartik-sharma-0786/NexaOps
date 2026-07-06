@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { useLanguage } from "../../../../contexts/language-context";
+import { canManageIncidents } from "../../../../lib/roles";
 
 interface ExtendedUser {
   name?: string | null;
@@ -127,7 +128,7 @@ export default function IncidentDetail({
             </p>
           </div>
           <div>
-            {["ADMIN", "RESPONDER"].includes(user?.role || "") ? (
+            {canManageIncidents(user?.role) ? (
               <select
                 aria-label="Status"
                 value={incident.status}
@@ -201,7 +202,7 @@ export default function IncidentDetail({
           )}
         </div>
 
-        {["ADMIN", "RESPONDER"].includes(user?.role || "") && (
+        {canManageIncidents(user?.role) && (
           <form onSubmit={handleAddComment}>
             <div>
               <label htmlFor="comment" className="sr-only">

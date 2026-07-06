@@ -19,6 +19,7 @@
   "devDependencies": {
     "@nexaops/typescript-config": "workspace:*",
     "@types/node": "^20.11.24",
+    "argon2": "^0.44.0",
     "drizzle-kit": "^0.20.14",
     "tsx": "^4.7.1",
     "typescript": "^5.9.3"

@@ -40,6 +40,7 @@ services:
       DATABASE_URL: postgres://nexaops:password@postgres:5432/nexaops_db
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      NOTIFICATIONS_QUEUE_ENABLED: "true"
       JWT_SECRET: super-secret-key-for-dev
     depends_on:
       postgres:

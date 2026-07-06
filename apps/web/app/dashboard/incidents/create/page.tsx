@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLanguage } from "../../../../contexts/language-context";
+import { canManageIncidents } from "../../../../lib/roles";
 
 type IncidentFormData = {
   title: string;
@@ -29,7 +30,7 @@ export default function CreateIncidentPage() {
     return <p className="text-center p-8">{t.incidentForm.loading}</p>;
   }
 
-  if (!["ADMIN", "RESPONDER"].includes(user?.role || "")) {
+  if (!canManageIncidents(user?.role)) {
     return (
       <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-lg shadow text-center">
         <h1 className="text-xl font-bold text-red-600 mb-4">

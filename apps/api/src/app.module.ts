@@ -9,18 +9,24 @@ import { HealthModule } from './health/health.module';
 import { IncidentsModule } from './incidents/incidents.module';
 import { NotificationsModule } from './notifications/notifications.module';
 
+const queueEnabled = process.env.NOTIFICATIONS_QUEUE_ENABLED !== 'false';
+
 @Module({
   imports: [
     HealthModule,
     ConfigModule.forRoot({ isGlobal: true }),
-    BullModule.forRoot({
-      connection: {
-        host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT || '6379'),
-        password: process.env.REDIS_PASSWORD || undefined,
-        tls: process.env.REDIS_TLS === 'true' ? {} : undefined,
-      },
-    }),
+    ...(queueEnabled
+      ? [
+          BullModule.forRoot({
+            connection: {
+              host: process.env.REDIS_HOST || 'localhost',
+              port: parseInt(process.env.REDIS_PORT || '6379'),
+              password: process.env.REDIS_PASSWORD || undefined,
+              tls: process.env.REDIS_TLS === 'true' ? {} : undefined,
+            },
+          }),
+        ]
+      : []),
     AuthModule,
     IncidentsModule,
     EventsModule,

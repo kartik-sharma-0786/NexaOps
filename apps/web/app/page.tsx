@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { ChatWidget } from "../components/landing/chat-widget";
+import { FeatureStatusBadge } from "../components/landing/feature-status-badge";
 import { LandingNavbar } from "../components/landing/navbar";
 import { useLanguage } from "../contexts/language-context";
 
@@ -46,7 +47,7 @@ export default function Home() {
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
                 <Link
-                  href="#"
+                  href="/features"
                   className="inline-flex items-center justify-center px-8 py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
                 >
                   <Play className="mr-2 w-4 h-4 text-gray-900 dark:text-white" />
@@ -75,7 +76,6 @@ export default function Home() {
               Powering reliability at
             </p>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-8 items-center opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-              {/* Placeholders for logos */}
               {["Acme Corp", "GlobalTech", "Nebula", "Vertex", "Horizon"].map(
                 (name) => (
                   <div
@@ -109,41 +109,50 @@ export default function Home() {
               {[
                 {
                   icon: <Zap className="w-6 h-6 text-yellow-500" />,
-                  title: "Instant Response",
-                  desc: "Automate paging, war room creation, and stakeholder updates instantly when an alert fires.",
-                },
-                {
-                  icon: <Shield className="w-6 h-6 text-green-500" />,
-                  title: "Reliability Guardrails",
-                  desc: "Define service level objectives (SLOs) and error budgets to balance feature velocity with stability.",
+                  title: "Incident Management",
+                  desc: "Create, track, and resolve incidents with severity levels, status updates, and a live timeline.",
+                  status: "live" as const,
                 },
                 {
                   icon: <BarChart className="w-6 h-6 text-purple-500" />,
-                  title: "Actionable Insights",
-                  desc: "Turn incident data into learning with automated timelines and blameless post-mortem templates.",
+                  title: "Timeline & Comments",
+                  desc: "Capture status changes and team comments in a searchable incident timeline with real-time updates.",
+                  status: "live" as const,
+                },
+                {
+                  icon: <Shield className="w-6 h-6 text-green-500" />,
+                  title: "Role-Based Access",
+                  desc: "Multi-tenant isolation with OWNER, ADMIN, RESPONDER, and VIEWER roles guarding who can act on incidents.",
+                  status: "live" as const,
                 },
                 {
                   icon: <Users className="w-6 h-6 text-blue-500" />,
                   title: "On-Call Scheduling",
                   desc: "Fair and flexible on-call rotations that prevent burnout and ensure coverage.",
+                  status: "coming_soon" as const,
                 },
                 {
                   icon: <Globe className="w-6 h-6 text-indigo-500" />,
                   title: "Universal Integrations",
                   desc: "Connect with Slack, Jira, Zoom, PagerDuty, and 100+ observability tools.",
+                  status: "coming_soon" as const,
                 },
                 {
                   icon: <BookOpen className="w-6 h-6 text-pink-500" />,
-                  title: "Runbooks",
-                  desc: "Interactive runbooks that guide responders through best practices during stress.",
+                  title: "Runbooks & Post-mortems",
+                  desc: "Interactive runbooks and blameless post-mortem templates to turn incidents into learning.",
+                  status: "coming_soon" as const,
                 },
               ].map((feature, idx) => (
                 <div
                   key={idx}
                   className="p-8 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 hover:border-indigo-100 dark:hover:border-indigo-900 hover:shadow-lg transition-all"
                 >
-                  <div className="w-12 h-12 bg-gray-50 dark:bg-gray-700 rounded-xl flex items-center justify-center mb-6">
-                    {feature.icon}
+                  <div className="flex items-start justify-between gap-3 mb-6">
+                    <div className="w-12 h-12 bg-gray-50 dark:bg-gray-700 rounded-xl flex items-center justify-center">
+                      {feature.icon}
+                    </div>
+                    <FeatureStatusBadge status={feature.status} />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
                     {feature.title}
@@ -226,9 +235,7 @@ export default function Home() {
 
         {/* CTA Section */}
         <section className="py-24 bg-indigo-900 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-10">
-            {/* Pattern placeholder */}
-          </div>
+          <div className="absolute inset-0 opacity-10" />
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
               Ready to improve your reliability?
@@ -245,7 +252,7 @@ export default function Home() {
                 Get Started for Free
               </Link>
               <Link
-                href="#"
+                href="/contact"
                 className="px-8 py-4 bg-transparent border border-indigo-400 text-white font-medium rounded-lg hover:bg-indigo-800 transition"
               >
                 Contact Sales
@@ -266,7 +273,7 @@ export default function Home() {
               <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                 <li>
                   <Link
-                    href="#"
+                    href="/dashboard"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
                     Incidents
@@ -274,7 +281,7 @@ export default function Home() {
                 </li>
                 <li>
                   <Link
-                    href="#"
+                    href="/features"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
                     On-Call
@@ -282,19 +289,14 @@ export default function Home() {
                 </li>
                 <li>
                   <Link
-                    href="#"
+                    href="/resources"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
                     Post-mortems
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    href="#"
-                    className="hover:text-indigo-600 dark:hover:text-indigo-400"
-                  >
-                    Status Pages
-                  </Link>
+                  <span className="text-gray-500 dark:text-gray-500">Status Pages</span>
                 </li>
               </ul>
             </div>
@@ -305,7 +307,7 @@ export default function Home() {
               <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                 <li>
                   <Link
-                    href="#"
+                    href="/contact"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
                     About Us
@@ -313,7 +315,7 @@ export default function Home() {
                 </li>
                 <li>
                   <Link
-                    href="#"
+                    href="/contact"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
                     Careers
@@ -321,7 +323,7 @@ export default function Home() {
                 </li>
                 <li>
                   <Link
-                    href="#"
+                    href="/resources"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
                     Customers
@@ -329,7 +331,7 @@ export default function Home() {
                 </li>
                 <li>
                   <Link
-                    href="#"
+                    href="/contact"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
                     Contact
@@ -344,7 +346,7 @@ export default function Home() {
               <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                 <li>
                   <Link
-                    href="#"
+                    href="/resources"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
                     Blog
@@ -352,7 +354,7 @@ export default function Home() {
                 </li>
                 <li>
                   <Link
-                    href="#"
+                    href="/features"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
                     Documentation
@@ -360,7 +362,7 @@ export default function Home() {
                 </li>
                 <li>
                   <Link
-                    href="#"
+                    href="/contact"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
                     Community
@@ -368,7 +370,7 @@ export default function Home() {
                 </li>
                 <li>
                   <Link
-                    href="#"
+                    href="/pricing"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
                     Partners
@@ -382,28 +384,13 @@ export default function Home() {
               </h4>
               <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                 <li>
-                  <Link
-                    href="#"
-                    className="hover:text-indigo-600 dark:hover:text-indigo-400"
-                  >
-                    Privacy Policy
-                  </Link>
+                  <span className="text-gray-500 dark:text-gray-500">Privacy Policy</span>
                 </li>
                 <li>
-                  <Link
-                    href="#"
-                    className="hover:text-indigo-600 dark:hover:text-indigo-400"
-                  >
-                    Terms of Service
-                  </Link>
+                  <span className="text-gray-500 dark:text-gray-500">Terms of Service</span>
                 </li>
                 <li>
-                  <Link
-                    href="#"
-                    className="hover:text-indigo-600 dark:hover:text-indigo-400"
-                  >
-                    Security
-                  </Link>
+                  <span className="text-gray-500 dark:text-gray-500">Security</span>
                 </li>
               </ul>
             </div>

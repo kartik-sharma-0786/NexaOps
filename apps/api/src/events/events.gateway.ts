@@ -1,18 +1,19 @@
 import { Logger } from '@nestjs/common';
 import {
-    ConnectedSocket,
-    MessageBody,
-    OnGatewayConnection,
-    OnGatewayDisconnect,
-    SubscribeMessage,
-    WebSocketGateway,
-    WebSocketServer,
+  ConnectedSocket,
+  MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
   cors: {
-    origin: '*', // In production, restrict this to the frontend URL
+    origin: process.env.NEXTAUTH_URL ?? 'http://localhost:3000',
+    credentials: true,
   },
 })
 export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -30,12 +31,12 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('joinTenantRoom')
-  handleJoinTenantRoom(
+  async handleJoinTenantRoom(
     @ConnectedSocket() client: Socket,
     @MessageBody() tenantId: string,
   ) {
     if (tenantId) {
-      client.join(`tenant:${tenantId}`);
+      await client.join(`tenant:${tenantId}`);
       this.logger.log(`Client ${client.id} joined room tenant:${tenantId}`);
       return { event: 'joinedRoom', data: `tenant:${tenantId}` };
     }

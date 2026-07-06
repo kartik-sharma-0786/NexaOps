@@ -1,9 +1,12 @@
-import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { db, incidentEvents, incidents } from '@nexaops/database';
-import { Queue } from 'bullmq';
 import { and, desc, eq } from 'drizzle-orm';
+import {
+  publicUserColumns,
+  stripPasswordHashFromIncident,
+} from '../common/public-user';
 import { EventsGateway } from '../events/events.gateway';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateIncidentDto } from './dto/create-incident.dto';
 import { UpdateIncidentStatusDto } from './dto/update-incident-status.dto';
 
@@ -11,7 +14,7 @@ import { UpdateIncidentStatusDto } from './dto/update-incident-status.dto';
 export class IncidentsService {
   constructor(
     private readonly eventsGateway: EventsGateway,
-    @InjectQueue('notifications') private notificationsQueue: Queue,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async create(dto: CreateIncidentDto, userId: string, tenantId: string) {
@@ -31,17 +34,21 @@ export class IncidentsService {
     const incidentWithCreator = await db.query.incidents.findFirst({
       where: eq(incidents.id, incident.id),
       with: {
-        creator: true,
+        creator: publicUserColumns,
       },
     });
 
+    const safePayload = incidentWithCreator
+      ? stripPasswordHashFromIncident(incidentWithCreator)
+      : incidentWithCreator;
+
     this.eventsGateway.server
       .to(`tenant:${tenantId}`)
-      .emit('incidentCreated', incidentWithCreator);
+      .emit('incidentCreated', safePayload);
 
     // Add Email Job
     if (incidentWithCreator?.creator?.email) {
-      await this.notificationsQueue.add('send-email', {
+      await this.notificationsService.enqueueEmail({
         to: incidentWithCreator.creator.email,
         subject: `[${incident.severity}] New Incident: ${incident.title}`,
         text: `A new incident has been reported.\n\nTitle: ${incident.title}\nDescription: ${incident.description}\nSeverity: ${incident.severity}`,
@@ -52,24 +59,25 @@ export class IncidentsService {
   }
 
   async findAll(tenantId: string) {
-    return db.query.incidents.findMany({
+    const rows = await db.query.incidents.findMany({
       where: eq(incidents.tenantId, tenantId),
       orderBy: [desc(incidents.createdAt)],
       with: {
-        creator: true,
+        creator: publicUserColumns,
       },
     });
+    return rows.map(stripPasswordHashFromIncident);
   }
 
   async findOne(id: string, tenantId: string) {
     const incident = await db.query.incidents.findFirst({
       where: and(eq(incidents.id, id), eq(incidents.tenantId, tenantId)),
       with: {
-        creator: true,
+        creator: publicUserColumns,
         events: {
           orderBy: [desc(incidentEvents.createdAt)],
           with: {
-            actor: true,
+            actor: publicUserColumns,
           },
         },
       },
@@ -79,7 +87,7 @@ export class IncidentsService {
       throw new NotFoundException('Incident not found');
     }
 
-    return incident;
+    return stripPasswordHashFromIncident(incident);
   }
 
   async updateStatus(
@@ -116,9 +124,8 @@ export class IncidentsService {
       .to(`tenant:${tenantId}`)
       .emit('incidentUpdated', updated);
 
-    // Add Email Job
-    await this.notificationsQueue.add('send-email', {
-      to: 'team@nexaops.com', // In real world, fetch subscribers
+    await this.notificationsService.enqueueEmail({
+      to: 'team@nexaops.com',
       subject: `Incident Updated: ${incident.title}`,
       text: `Status changed from ${incident.status} to ${dto.status}`,
     });

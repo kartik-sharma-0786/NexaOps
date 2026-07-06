@@ -4,6 +4,7 @@ import Link from "next/link";
 import { LanguageSelector } from "../../components/language-selector";
 import { ThemeToggle } from "../../components/theme-toggle";
 import { useLanguage } from "../../contexts/language-context";
+import { canManageIncidents } from "../../lib/roles";
 import IncidentList from "./incident-list";
 
 interface Incident {
@@ -80,7 +81,7 @@ export default function DashboardClient({
           <div className="flex items-center gap-3">
             <LanguageSelector />
             <ThemeToggle />
-            {["ADMIN", "RESPONDER"].includes(userRole || "") && (
+            {canManageIncidents(userRole) && (
               <Link
                 href="/dashboard/incidents/create"
                 className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"

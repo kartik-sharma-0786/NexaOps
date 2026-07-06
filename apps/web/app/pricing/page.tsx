@@ -101,16 +101,20 @@ export default function PricingPage() {
           </p>
 
           <div className="p-8 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-inner inline-block">
-            <div className="w-64 h-64 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center mb-4 mx-auto">
-              <span className="text-gray-400 dark:text-gray-500 text-sm">
-                QR Code Placeholder
-              </span>
-              {/* Replace this div with your actual QR code image */}
-              {/* <img src="/your-qr-code.png" alt="Payment QR Code" className="w-full h-full object-contain" /> */}
+            <div className="w-64 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/40 p-6 text-center mx-auto">
+              <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                Need invoice or custom pricing?
+              </p>
+              <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">
+                Talk to sales for enterprise billing, procurement, and custom rollout support.
+              </p>
+              <Link
+                href="/contact"
+                className="mt-6 inline-flex items-center justify-center rounded-lg bg-indigo-600 px-5 py-3 text-sm font-medium text-white hover:bg-indigo-700 transition"
+              >
+                Contact sales
+              </Link>
             </div>
-            <p className="text-sm font-mono text-gray-500 dark:text-gray-400">
-              Scan to pay via UPI/Payment App
-            </p>
           </div>
         </div>
       </main>

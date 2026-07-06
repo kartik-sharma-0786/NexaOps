@@ -8,6 +8,7 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const frontendOrigin = process.env.NEXTAUTH_URL ?? 'http://localhost:3000';
 
   // Swagger Setup
   const config = new DocumentBuilder()
@@ -21,8 +22,11 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  app.enableCors();
+  app.enableCors({ origin: frontendOrigin, credentials: true });
   app.useGlobalPipes(new ValidationPipe());
   await app.listen(process.env.PORT ?? 4000);
 }
-bootstrap();
+bootstrap().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});

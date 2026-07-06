@@ -1,14 +1,15 @@
 import {
-    Body,
-    Controller,
-    Get,
-    Param,
-    Patch,
-    Post,
-    Request,
-    UseGuards,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { INCIDENT_WRITE_ROLES } from '../auth/roles.constants';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { AddCommentDto } from './dto/add-comment.dto';
@@ -22,7 +23,7 @@ export class IncidentsController {
   constructor(private readonly incidentsService: IncidentsService) {}
 
   @Post()
-  @Roles('ADMIN', 'RESPONDER')
+  @Roles(...INCIDENT_WRITE_ROLES)
   create(@Request() req: any, @Body() createIncidentDto: CreateIncidentDto) {
     const user = req.user;
     return this.incidentsService.create(
@@ -45,7 +46,7 @@ export class IncidentsController {
   }
 
   @Patch(':id/status')
-  @Roles('ADMIN', 'RESPONDER')
+  @Roles(...INCIDENT_WRITE_ROLES)
   updateStatus(
     @Request() req: any,
     @Param('id') id: string,

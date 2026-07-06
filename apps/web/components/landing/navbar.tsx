@@ -44,7 +44,7 @@ export function LandingNavbar() {
                 {t.nav.pricing}
               </Link>
               <Link
-                href="#"
+                href="/resources"
                 className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
               >
                 {t.nav.docs}

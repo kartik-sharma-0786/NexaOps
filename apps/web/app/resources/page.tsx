@@ -53,7 +53,6 @@ export default function ResourcesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-      {/* Navigation (Simplified for sub-page) */}
       <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -118,18 +117,18 @@ export default function ResourcesPage() {
                     <span className="ml-2">{t.resources.items[key].type}</span>
                   </span>
                 </div>
-                <Link href="#" className="block mt-2 group">
+                <div className="block mt-2 group">
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                     {t.resources.items[key].title}
                   </h3>
                   <p className="mt-3 text-base text-gray-500 dark:text-gray-400">
                     {t.resources.items[key].desc}
                   </p>
-                </Link>
+                </div>
               </div>
               <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700">
                 <Link
-                  href="#"
+                  href="/contact"
                   className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 flex items-center transition-colors"
                 >
                   {t.resources.readMore} <ArrowRight className="ml-1 w-4 h-4" />

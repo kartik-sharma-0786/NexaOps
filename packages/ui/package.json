@@ -14,7 +14,9 @@
     "tsup": "^8.0.2",
     "@nexaops/typescript-config": "workspace:*",
     "@types/react": "^19.0.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "eslint": "^9",
+    "typescript-eslint": "^8.20.0"
   },
   "peerDependencies": {
     "react": ">=18"

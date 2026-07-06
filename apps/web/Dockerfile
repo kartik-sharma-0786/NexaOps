@@ -3,24 +3,17 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
-# 1. Install Dependencies
-FROM base AS dependencies
-WORKDIR /app
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY apps/web/package.json ./apps/web/package.json
-COPY packages/ui/package.json ./packages/ui/package.json
-RUN pnpm install --frozen-lockfile
-
-# 2. Build
+# 1. Build
 FROM base AS build
 WORKDIR /app
 COPY . .
-COPY --from=dependencies /app/node_modules ./node_modules
-COPY --from=dependencies /app/apps/web/node_modules ./apps/web/node_modules
+# Install turbo globally to ensure compatibility with Alpine Linux and avoid lockfile platform issues
+RUN npm install -g turbo
+RUN pnpm install --frozen-lockfile
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN pnpm -C /app --filter web build
+RUN turbo build --filter=web
 
-# 3. Production Image
+# 2. Production Image
 FROM base AS deploy
 WORKDIR /app
 ENV NODE_ENV=production
