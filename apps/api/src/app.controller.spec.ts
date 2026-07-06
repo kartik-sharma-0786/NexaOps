@@ -15,6 +15,7 @@ describe('AppController', () => {
             getHello: jest.fn().mockResolvedValue({
               message: 'Hello World! Database is connected.',
               tenants: [],
+              databaseStatus: 'connected',
             }),
           },
         },
@@ -29,6 +30,7 @@ describe('AppController', () => {
       await expect(appController.getHello()).resolves.toEqual({
         message: 'Hello World! Database is connected.',
         tenants: [],
+        databaseStatus: 'connected',
       });
     });
   });

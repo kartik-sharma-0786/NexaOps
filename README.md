@@ -25,6 +25,10 @@ Built with a focus on type safety, scalability, and maintainability.
 - **Observability**: Health checks via `/health` endpoint (Terminus) monitoring Database and Memory.
 - **Containerization**: Full Docker support for API, Web, Postgres, and Redis.
 
+### Vercel Deployment Note
+
+If you deploy the API or the full app on Vercel, you must point `DATABASE_URL` at a managed Postgres instance such as Neon, Supabase, or Vercel Postgres. The Docker Compose hostname `postgres` only works inside the local or VPS container stack and will return a database error on Vercel.
+
 ## Project Structure
 
 This project follows a monorepo architecture to separate concerns while sharing logic.
