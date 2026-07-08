@@ -80,7 +80,8 @@ export const tenantMembersRelations = relations(tenantMembers, ({ one }) => ({
 // Relations for Users
 export const usersRelations = relations(users, ({ many }) => ({
   memberships: many(tenantMembers),
-  reportedIncidents: many(incidents),
+  reportedIncidents: many(incidents, { relationName: "incidentCreator" }),
+  assignedIncidents: many(incidents, { relationName: "incidentAssignee" }),
 }));
 
 // Team invitations (single-use, hashed at rest)
@@ -132,6 +133,7 @@ export const incidents = pgTable("incidents", {
   status: incidentStatusEnum("status").default("OPEN").notNull(),
   severity: incidentSeverityEnum("severity").default("LOW").notNull(),
   creatorId: uuid("creator_id").references(() => users.id),
+  assigneeId: uuid("assignee_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -145,6 +147,12 @@ export const incidentsRelations = relations(incidents, ({ one, many }) => ({
   creator: one(users, {
     fields: [incidents.creatorId],
     references: [users.id],
+    relationName: "incidentCreator",
+  }),
+  assignee: one(users, {
+    fields: [incidents.assigneeId],
+    references: [users.id],
+    relationName: "incidentAssignee",
   }),
   events: many(incidentEvents),
 }));

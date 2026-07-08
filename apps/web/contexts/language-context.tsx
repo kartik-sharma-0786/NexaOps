@@ -106,6 +106,10 @@ type Translations = {
     statusLabel: string;
     createdBy: string;
     unknown: string;
+    assignedTo: string;
+    unassigned: string;
+    filterAll: string;
+    filterMine: string;
     severity: {
       CRITICAL: string;
       HIGH: string;
@@ -330,6 +334,10 @@ const translations: Record<Language, Translations> = {
       statusLabel: "Status:",
       createdBy: "Created by",
       unknown: "Unknown",
+      assignedTo: "Assigned to",
+      unassigned: "Unassigned",
+      filterAll: "All",
+      filterMine: "Assigned to me",
       severity: {
         CRITICAL: "Critical",
         HIGH: "High",
@@ -752,6 +760,10 @@ const translations: Record<Language, Translations> = {
       statusLabel: "ステータス:",
       createdBy: "作成者",
       unknown: "不明",
+      assignedTo: "担当者:",
+      unassigned: "未割り当て",
+      filterAll: "すべて",
+      filterMine: "自分の担当",
       severity: {
         CRITICAL: "重大",
         HIGH: "高",
@@ -1175,6 +1187,10 @@ const translations: Record<Language, Translations> = {
       statusLabel: "स्थिति:",
       createdBy: "द्वारा निर्मित",
       unknown: "अज्ञात",
+      assignedTo: "को सौंपा गया:",
+      unassigned: "असाइन नहीं किया गया",
+      filterAll: "सभी",
+      filterMine: "मुझे सौंपे गए",
       severity: {
         CRITICAL: "महत्वपूर्ण",
         HIGH: "उच्च",

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   db,
   incidentEvents,
@@ -24,6 +28,10 @@ export class IncidentsService {
   ) {}
 
   async create(dto: CreateIncidentDto, userId: string, tenantId: string) {
+    if (dto.assigneeId) {
+      await this.assertTenantMember(tenantId, dto.assigneeId);
+    }
+
     const [incident] = await db
       .insert(incidents)
       .values({
@@ -33,6 +41,7 @@ export class IncidentsService {
         status: 'OPEN',
         tenantId: tenantId,
         creatorId: userId,
+        assigneeId: dto.assigneeId,
       })
       .returning();
 
@@ -41,6 +50,7 @@ export class IncidentsService {
       where: eq(incidents.id, incident.id),
       with: {
         creator: publicUserColumns,
+        assignee: publicUserColumns,
       },
     });
 
@@ -64,12 +74,18 @@ export class IncidentsService {
     return incident;
   }
 
-  async findAll(tenantId: string) {
+  async findAll(tenantId: string, assigneeId?: string) {
     const rows = await db.query.incidents.findMany({
-      where: eq(incidents.tenantId, tenantId),
+      where: assigneeId
+        ? and(
+            eq(incidents.tenantId, tenantId),
+            eq(incidents.assigneeId, assigneeId),
+          )
+        : eq(incidents.tenantId, tenantId),
       orderBy: [desc(incidents.createdAt)],
       with: {
         creator: publicUserColumns,
+        assignee: publicUserColumns,
       },
     });
     return rows.map(stripPasswordHashFromIncident);
@@ -80,6 +96,7 @@ export class IncidentsService {
       where: and(eq(incidents.id, id), eq(incidents.tenantId, tenantId)),
       with: {
         creator: publicUserColumns,
+        assignee: publicUserColumns,
         events: {
           orderBy: [desc(incidentEvents.createdAt)],
           with: {
@@ -143,6 +160,73 @@ export class IncidentsService {
     );
 
     return updated;
+  }
+
+  async assign(
+    id: string,
+    assigneeId: string | null,
+    userId: string,
+    tenantId: string,
+  ) {
+    const incident = await this.findOne(id, tenantId);
+
+    let assigneeEmail: string | undefined;
+    let assigneeName: string | undefined;
+    if (assigneeId) {
+      const member = await this.assertTenantMember(tenantId, assigneeId);
+      assigneeEmail = member.email;
+      assigneeName = member.name;
+    }
+
+    await db.transaction(async (tx: typeof db) => {
+      await tx
+        .update(incidents)
+        .set({ assigneeId })
+        .where(eq(incidents.id, id));
+
+      await tx.insert(incidentEvents).values({
+        incidentId: id,
+        tenantId: tenantId,
+        actorId: userId,
+        actionType: 'ASSIGNMENT',
+        message: assigneeId
+          ? `Assigned to ${assigneeName ?? assigneeEmail}`
+          : 'Unassigned',
+        payload: { assigneeId },
+      });
+    });
+
+    const updated = await this.findOne(id, tenantId);
+    this.eventsGateway.server
+      .to(`tenant:${tenantId}`)
+      .emit('incidentUpdated', updated);
+
+    if (assigneeEmail) {
+      await this.notificationsService.enqueueEmail({
+        to: assigneeEmail,
+        subject: `[${incident.severity}] Incident assigned to you: ${incident.title}`,
+        text: `You have been assigned to the incident "${incident.title}".\n\nStatus: ${incident.status}\nSeverity: ${incident.severity}`,
+      });
+    }
+
+    return updated;
+  }
+
+  private async assertTenantMember(tenantId: string, userId: string) {
+    const [member] = await db
+      .select({ email: users.email, name: users.name })
+      .from(tenantMembers)
+      .innerJoin(users, eq(tenantMembers.userId, users.id))
+      .where(
+        and(
+          eq(tenantMembers.tenantId, tenantId),
+          eq(tenantMembers.userId, userId),
+        ),
+      );
+    if (!member) {
+      throw new BadRequestException('Assignee must be a member of your tenant');
+    }
+    return member;
   }
 
   private async getNotifiableMemberEmails(tenantId: string) {

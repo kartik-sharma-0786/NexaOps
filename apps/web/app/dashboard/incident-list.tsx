@@ -14,6 +14,11 @@ type Incident = {
   creator?: {
     email: string;
   };
+  assignee?: {
+    id: string;
+    email: string;
+    name?: string;
+  } | null;
 };
 
 export default function IncidentList({
@@ -24,11 +29,17 @@ export default function IncidentList({
   const { data: session } = useSession();
   const { t } = useLanguage();
   const [incidents, setIncidents] = useState<Incident[]>(initialIncidents);
+  const [filter, setFilter] = useState<"all" | "mine">("all");
 
   // Helper to safely access extended session properties
   const user = session?.user as
-    | { tenantId?: string; email?: string; jwt?: string }
+    | { id?: string; tenantId?: string; email?: string; jwt?: string }
     | undefined;
+
+  const visibleIncidents =
+    filter === "mine"
+      ? incidents.filter((inc) => inc.assignee?.id === user?.id)
+      : incidents;
 
   useEffect(() => {
     if (!user?.jwt) return;
@@ -56,13 +67,29 @@ export default function IncidentList({
 
   return (
     <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
+      <div className="px-4 pt-4 sm:px-6 flex gap-2">
+        {(["all", "mine"] as const).map((key) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setFilter(key)}
+            className={`px-3 py-1.5 rounded-full text-sm font-medium transition ${
+              filter === key
+                ? "bg-indigo-600 text-white"
+                : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+            }`}
+          >
+            {key === "all" ? t.dashboard.filterAll : t.dashboard.filterMine}
+          </button>
+        ))}
+      </div>
       <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
-        {incidents.length === 0 ? (
+        {visibleIncidents.length === 0 ? (
           <li className="px-4 py-4 sm:px-6 text-center text-gray-500">
             {t.dashboard.noIncidents}
           </li>
         ) : (
-          incidents.map((incident) => (
+          visibleIncidents.map((incident) => (
             <li key={incident.id}>
               <Link
                 href={`/dashboard/incidents/${incident.id}`}
@@ -103,6 +130,12 @@ export default function IncidentList({
                       <p className="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400 sm:mt-0 sm:ml-6">
                         {t.dashboard.createdBy}{" "}
                         {incident.creator?.email || t.dashboard.unknown}
+                      </p>
+                      <p className="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400 sm:mt-0 sm:ml-6">
+                        {t.dashboard.assignedTo}{" "}
+                        {incident.assignee
+                          ? incident.assignee.name || incident.assignee.email
+                          : t.dashboard.unassigned}
                       </p>
                     </div>
                   </div>

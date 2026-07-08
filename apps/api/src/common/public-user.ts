@@ -24,11 +24,15 @@ export function stripPasswordHashFromIncident<T>(incident: T): T {
 
   const value = incident as {
     creator?: { passwordHash?: string } | null;
+    assignee?: { passwordHash?: string } | null;
     events?: Array<{ actor?: { passwordHash?: string } | null }>;
   };
 
   if (value.creator) {
     value.creator = stripPasswordHash(value.creator) as typeof value.creator;
+  }
+  if (value.assignee) {
+    value.assignee = stripPasswordHash(value.assignee) as typeof value.assignee;
   }
   if (value.events) {
     value.events = value.events.map((event) => ({

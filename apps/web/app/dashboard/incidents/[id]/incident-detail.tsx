@@ -33,9 +33,20 @@ interface Incident {
   creator?: {
     email: string;
   };
+  assignee?: {
+    id: string;
+    email: string;
+    name?: string;
+  } | null;
   createdAt: string;
   events?: IncidentEvent[];
 }
+
+type Member = {
+  userId: string;
+  name: string;
+  email: string;
+};
 
 export default function IncidentDetail({
   initialIncident,
@@ -47,9 +58,40 @@ export default function IncidentDetail({
   const [incident, setIncident] = useState<Incident>(initialIncident);
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
+  const [members, setMembers] = useState<Member[]>([]);
 
   // Helper to safely access extended session properties
   const user = session?.user as ExtendedUser;
+
+  useEffect(() => {
+    if (!user?.jwt || !canManageIncidents(user?.role)) return;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+    fetch(`${apiUrl}/members`, {
+      headers: { Authorization: `Bearer ${user.jwt}` },
+    })
+      .then(async (res) => {
+        if (res.ok) setMembers(await res.json());
+      })
+      .catch(() => {});
+  }, [user?.jwt, user?.role]);
+
+  const handleAssign = async (assigneeId: string) => {
+    if (!user?.jwt) return;
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      await fetch(`${apiUrl}/incidents/${incident.id}/assign`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.jwt}`,
+        },
+        body: JSON.stringify({ assigneeId: assigneeId || null }),
+      });
+      // State updates via socket
+    } catch (error) {
+      console.error("Failed to assign incident", error);
+    }
+  };
 
   useEffect(() => {
     if (!user?.jwt) return;
@@ -150,7 +192,7 @@ export default function IncidentDetail({
         <p className="mt-4 text-gray-700 dark:text-gray-200">
           {incident.description}
         </p>
-        <div className="mt-4">
+        <div className="mt-4 flex flex-wrap items-center gap-4">
           <span
             className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
             ${
@@ -167,6 +209,31 @@ export default function IncidentDetail({
               incident.severity as keyof typeof t.dashboard.severity
             ] || incident.severity}
           </span>
+
+          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+            <span>{t.dashboard.assignedTo}</span>
+            {canManageIncidents(user?.role) ? (
+              <select
+                aria-label={t.dashboard.assignedTo}
+                value={incident.assignee?.id ?? ""}
+                onChange={(e) => handleAssign(e.target.value)}
+                className="rounded-md border-gray-300 text-sm p-1 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              >
+                <option value="">{t.dashboard.unassigned}</option>
+                {members.map((m) => (
+                  <option key={m.userId} value={m.userId}>
+                    {m.name || m.email}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <span className="font-medium">
+                {incident.assignee
+                  ? incident.assignee.name || incident.assignee.email
+                  : t.dashboard.unassigned}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
