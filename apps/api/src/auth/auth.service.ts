@@ -1,12 +1,13 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { db, tenantMembers, tenants, users } from '@nexaops/database';
 import * as argon2 from 'argon2';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 
 @Injectable()
@@ -113,6 +114,38 @@ export class AuthService {
       membership.role,
       membership.tenantId,
     );
+  }
+
+  async listMemberships(userId: string) {
+    const rows = await db
+      .select({
+        tenantId: tenantMembers.tenantId,
+        role: tenantMembers.role,
+        tenantName: tenants.name,
+        tenantSlug: tenants.slug,
+      })
+      .from(tenantMembers)
+      .innerJoin(tenants, eq(tenantMembers.tenantId, tenants.id))
+      .where(eq(tenantMembers.userId, userId));
+    return rows;
+  }
+
+  async switchTenant(userId: string, email: string, tenantId: string) {
+    const [membership] = await db
+      .select()
+      .from(tenantMembers)
+      .where(
+        and(
+          eq(tenantMembers.userId, userId),
+          eq(tenantMembers.tenantId, tenantId),
+        ),
+      );
+
+    if (!membership) {
+      throw new ForbiddenException('You are not a member of this tenant');
+    }
+
+    return this.generateToken(userId, email, membership.role, tenantId);
   }
 
   private async generateToken(

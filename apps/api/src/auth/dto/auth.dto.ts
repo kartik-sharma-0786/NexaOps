@@ -1,4 +1,10 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  IsUUID,
+  MinLength,
+} from 'class-validator';
 
 export class RegisterDto {
   @IsString()
@@ -24,4 +30,9 @@ export class LoginDto {
 
   @IsNotEmpty()
   password: string;
+}
+
+export class SwitchTenantDto {
+  @IsUUID()
+  tenantId: string;
 }

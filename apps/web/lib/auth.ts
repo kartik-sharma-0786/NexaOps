@@ -82,6 +82,11 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
+  session: {
+    // Keep the NextAuth session lifetime aligned with the API JWT (1 day)
+    // so the UI never holds an expired API token.
+    maxAge: 24 * 60 * 60,
+  },
   pages: {
     signIn: "/auth/login",
   },

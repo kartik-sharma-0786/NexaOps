@@ -52,14 +52,11 @@ export default function IncidentDetail({
   const user = session?.user as ExtendedUser;
 
   useEffect(() => {
-    if (!user?.tenantId) return;
+    if (!user?.jwt) return;
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-    const socket = io(apiUrl);
-
-    socket.on("connect", () => {
-      socket.emit("joinTenantRoom", user.tenantId);
-    });
+    // The server verifies this JWT on connect and joins the tenant room itself.
+    const socket = io(apiUrl, { auth: { token: user.jwt } });
 
     socket.on("incidentUpdated", (updatedIncident: Incident) => {
       if (updatedIncident.id === incident.id) {
@@ -70,7 +67,7 @@ export default function IncidentDetail({
     return () => {
       socket.disconnect();
     };
-  }, [session, incident.id, user?.tenantId]);
+  }, [session, incident.id, user?.jwt]);
 
   const handleStatusChange = async (newStatus: string) => {
     if (!user?.jwt) return;

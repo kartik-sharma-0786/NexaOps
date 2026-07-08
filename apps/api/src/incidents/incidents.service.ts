@@ -1,6 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { db, incidentEvents, incidents } from '@nexaops/database';
-import { and, desc, eq } from 'drizzle-orm';
+import {
+  db,
+  incidentEvents,
+  incidents,
+  tenantMembers,
+  users,
+} from '@nexaops/database';
+import { and, desc, eq, inArray } from 'drizzle-orm';
 import {
   publicUserColumns,
   stripPasswordHashFromIncident,
@@ -124,13 +130,33 @@ export class IncidentsService {
       .to(`tenant:${tenantId}`)
       .emit('incidentUpdated', updated);
 
-    await this.notificationsService.enqueueEmail({
-      to: 'team@nexaops.com',
-      subject: `Incident Updated: ${incident.title}`,
-      text: `Status changed from ${incident.status} to ${dto.status}`,
-    });
+    // Notify the tenant's responders rather than a hardcoded address.
+    const recipients = await this.getNotifiableMemberEmails(tenantId);
+    await Promise.all(
+      recipients.map((to) =>
+        this.notificationsService.enqueueEmail({
+          to,
+          subject: `Incident Updated: ${incident.title}`,
+          text: `Status changed from ${incident.status} to ${dto.status}`,
+        }),
+      ),
+    );
 
     return updated;
+  }
+
+  private async getNotifiableMemberEmails(tenantId: string) {
+    const rows = await db
+      .select({ email: users.email })
+      .from(tenantMembers)
+      .innerJoin(users, eq(tenantMembers.userId, users.id))
+      .where(
+        and(
+          eq(tenantMembers.tenantId, tenantId),
+          inArray(tenantMembers.role, ['OWNER', 'ADMIN', 'RESPONDER']),
+        ),
+      );
+    return rows.map((row) => row.email);
   }
 
   async addComment(

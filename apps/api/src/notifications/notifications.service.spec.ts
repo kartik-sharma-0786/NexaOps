@@ -27,10 +27,14 @@ describe('NotificationsService', () => {
       text: 'Hello',
     });
 
-    expect(queue.add).toHaveBeenCalledWith('send-email', {
-      to: 'user@example.com',
-      subject: 'Test',
-      text: 'Hello',
-    });
+    expect(queue.add).toHaveBeenCalledWith(
+      'send-email',
+      {
+        to: 'user@example.com',
+        subject: 'Test',
+        text: 'Hello',
+      },
+      expect.objectContaining({ attempts: 3 }),
+    );
   });
 });

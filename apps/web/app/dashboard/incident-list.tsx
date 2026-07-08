@@ -27,18 +27,15 @@ export default function IncidentList({
 
   // Helper to safely access extended session properties
   const user = session?.user as
-    | { tenantId?: string; email?: string }
+    | { tenantId?: string; email?: string; jwt?: string }
     | undefined;
 
   useEffect(() => {
-    if (!user?.tenantId) return;
+    if (!user?.jwt) return;
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-    const socket = io(apiUrl);
-
-    socket.on("connect", () => {
-      socket.emit("joinTenantRoom", user.tenantId);
-    });
+    // The server verifies this JWT on connect and joins the tenant room itself.
+    const socket = io(apiUrl, { auth: { token: user.jwt } });
 
     socket.on("incidentCreated", (newIncident: Incident) => {
       setIncidents((prev) => [newIncident, ...prev]);
@@ -55,7 +52,7 @@ export default function IncidentList({
     return () => {
       socket.disconnect();
     };
-  }, [session, user?.tenantId]);
+  }, [session, user?.jwt]);
 
   return (
     <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">

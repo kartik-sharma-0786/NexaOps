@@ -207,6 +207,7 @@ async function pushSchema(env) {
 
 async function main() {
   const env = { ...process.env, ...(await ensureRedis()) };
+  const postgresAlreadyRunning = await isPortOpen(5432);
 
   console.log("Starting embedded PostgreSQL (no Docker)...");
   const pg = new EmbeddedPostgres({
@@ -216,16 +217,22 @@ async function main() {
     port: 5432,
     persistent: true,
   });
+  let ownsPostgres = false;
 
-  if (!existsSync(pgDir)) {
-    await pg.initialise();
+  if (postgresAlreadyRunning) {
+    console.log("Reusing existing PostgreSQL on localhost:5432.");
+  } else {
+    if (!existsSync(pgDir)) {
+      await pg.initialise();
+      await pg.start();
+      await pg.createDatabase("nexaops_db");
+      await pg.stop();
+    }
+
     await pg.start();
-    await pg.createDatabase("nexaops_db");
-    await pg.stop();
+    ownsPostgres = true;
+    console.log("PostgreSQL ready on localhost:5432");
   }
-
-  await pg.start();
-  console.log("PostgreSQL ready on localhost:5432");
 
   console.log("Pushing database schema...");
   await pushSchema(env);
@@ -245,14 +252,18 @@ async function main() {
 
   const shutdown = async () => {
     dev.kill("SIGINT");
-    await pg.stop();
+    if (ownsPostgres) {
+      await pg.stop();
+    }
     process.exit(0);
   };
 
   process.on("SIGINT", shutdown);
   process.on("SIGTERM", shutdown);
   dev.on("exit", async (code) => {
-    await pg.stop();
+    if (ownsPostgres) {
+      await pg.stop();
+    }
     process.exit(code ?? 0);
   });
 }
