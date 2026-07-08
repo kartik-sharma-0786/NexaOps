@@ -50,6 +50,12 @@ export function DashboardSidebar({
           {t.dashboard.incidents}
         </Link>
         <Link
+          href="/dashboard/team"
+          className="block px-6 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+        >
+          {t.team.title}
+        </Link>
+        <Link
           href="/dashboard/settings"
           className="block px-6 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
         >

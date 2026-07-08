@@ -15,7 +15,8 @@ describe('AppController', () => {
             getHello: jest.fn().mockResolvedValue({
               service: 'NexaOps API',
               databaseStatus: 'connected',
-              message: 'NexaOps API is running. See /api/docs for documentation.',
+              message:
+                'NexaOps API is running. See /api/docs for documentation.',
             }),
           },
         },

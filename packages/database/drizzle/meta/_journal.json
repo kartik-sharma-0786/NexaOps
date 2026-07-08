@@ -15,6 +15,13 @@
       "when": 1783519632753,
       "tag": "0001_broken_rhodey",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1783532441598,
+      "tag": "0002_kind_madelyne_pryor",
+      "breakpoints": true
     }
   ]
 }

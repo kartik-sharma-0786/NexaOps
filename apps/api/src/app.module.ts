@@ -11,6 +11,7 @@ import { EventsModule } from './events/events.module';
 import { HealthModule } from './health/health.module';
 import { IncidentsModule } from './incidents/incidents.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { TeamModule } from './team/team.module';
 
 const queueEnabled = process.env.NOTIFICATIONS_QUEUE_ENABLED !== 'false';
 const isProduction = process.env.NODE_ENV === 'production';
@@ -46,6 +47,7 @@ const isProduction = process.env.NODE_ENV === 'production';
     IncidentsModule,
     EventsModule,
     NotificationsModule,
+    TeamModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

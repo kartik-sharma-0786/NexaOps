@@ -242,6 +242,39 @@ type Translations = {
     passwordMismatch: string;
     backToLogin: string;
   };
+  team: {
+    title: string;
+    members: string;
+    invitations: string;
+    inviteMember: string;
+    sendInvite: string;
+    sending: string;
+    inviteSent: string;
+    member: string;
+    role: string;
+    joined: string;
+    actions: string;
+    you: string;
+    remove: string;
+    confirmRemove: string;
+    noInvitations: string;
+    expires: string;
+    revoke: string;
+    errorGeneric: string;
+    roles: {
+      OWNER: string;
+      ADMIN: string;
+      RESPONDER: string;
+      OBSERVER: string;
+      VIEWER: string;
+    };
+    invitedToJoin: string;
+    asRole: string;
+    joinTeam: string;
+    joining: string;
+    inviteInvalid: string;
+    acceptTitle: string;
+  };
   settings: {
     title: string;
     profile: string;
@@ -629,6 +662,39 @@ const translations: Record<Language, Translations> = {
       resetInvalid: "This reset link is invalid or has expired.",
       passwordMismatch: "Passwords do not match",
       backToLogin: "Back to sign in",
+    },
+    team: {
+      title: "Team",
+      members: "Members",
+      invitations: "Pending Invitations",
+      inviteMember: "Invite Member",
+      sendInvite: "Send Invite",
+      sending: "Sending...",
+      inviteSent: "Invitation sent!",
+      member: "Member",
+      role: "Role",
+      joined: "Joined",
+      actions: "Actions",
+      you: "You",
+      remove: "Remove",
+      confirmRemove: "Remove this member from the team?",
+      noInvitations: "No pending invitations.",
+      expires: "Expires",
+      revoke: "Revoke",
+      errorGeneric: "Something went wrong. Please try again.",
+      roles: {
+        OWNER: "Owner",
+        ADMIN: "Admin",
+        RESPONDER: "Responder",
+        OBSERVER: "Observer",
+        VIEWER: "Viewer",
+      },
+      invitedToJoin: "You've been invited to join",
+      asRole: "as",
+      joinTeam: "Join Team",
+      joining: "Joining...",
+      inviteInvalid: "This invitation is invalid or has expired.",
+      acceptTitle: "Accept Invitation",
     },
     settings: {
       title: "Settings",
@@ -1020,6 +1086,39 @@ const translations: Record<Language, Translations> = {
       passwordMismatch: "パスワードが一致しません",
       backToLogin: "サインインに戻る",
     },
+    team: {
+      title: "チーム",
+      members: "メンバー",
+      invitations: "保留中の招待",
+      inviteMember: "メンバーを招待",
+      sendInvite: "招待を送信",
+      sending: "送信中...",
+      inviteSent: "招待を送信しました！",
+      member: "メンバー",
+      role: "役割",
+      joined: "参加日",
+      actions: "操作",
+      you: "あなた",
+      remove: "削除",
+      confirmRemove: "このメンバーをチームから削除しますか？",
+      noInvitations: "保留中の招待はありません。",
+      expires: "有効期限",
+      revoke: "取り消す",
+      errorGeneric: "エラーが発生しました。もう一度お試しください。",
+      roles: {
+        OWNER: "オーナー",
+        ADMIN: "管理者",
+        RESPONDER: "対応者",
+        OBSERVER: "オブザーバー",
+        VIEWER: "閲覧者",
+      },
+      invitedToJoin: "次のチームに招待されています：",
+      asRole: "役割：",
+      joinTeam: "チームに参加",
+      joining: "参加中...",
+      inviteInvalid: "この招待は無効か期限切れです。",
+      acceptTitle: "招待を承認",
+    },
     settings: {
       title: "設定",
       profile: "プロフィール",
@@ -1409,6 +1508,39 @@ const translations: Record<Language, Translations> = {
       resetInvalid: "यह रीसेट लिंक अमान्य है या समाप्त हो गया है।",
       passwordMismatch: "पासवर्ड मेल नहीं खाते",
       backToLogin: "साइन इन पर वापस जाएं",
+    },
+    team: {
+      title: "टीम",
+      members: "सदस्य",
+      invitations: "लंबित निमंत्रण",
+      inviteMember: "सदस्य आमंत्रित करें",
+      sendInvite: "निमंत्रण भेजें",
+      sending: "भेज रहा है...",
+      inviteSent: "निमंत्रण भेजा गया!",
+      member: "सदस्य",
+      role: "भूमिका",
+      joined: "शामिल हुए",
+      actions: "क्रियाएँ",
+      you: "आप",
+      remove: "हटाएं",
+      confirmRemove: "इस सदस्य को टीम से हटाएं?",
+      noInvitations: "कोई लंबित निमंत्रण नहीं।",
+      expires: "समाप्ति",
+      revoke: "रद्द करें",
+      errorGeneric: "कुछ गलत हो गया। कृपया पुन: प्रयास करें।",
+      roles: {
+        OWNER: "स्वामी",
+        ADMIN: "व्यवस्थापक",
+        RESPONDER: "उत्तरदाता",
+        OBSERVER: "पर्यवेक्षक",
+        VIEWER: "दर्शक",
+      },
+      invitedToJoin: "आपको शामिल होने के लिए आमंत्रित किया गया है:",
+      asRole: "भूमिका:",
+      joinTeam: "टीम में शामिल हों",
+      joining: "शामिल हो रहे हैं...",
+      inviteInvalid: "यह निमंत्रण अमान्य है या समाप्त हो गया है।",
+      acceptTitle: "निमंत्रण स्वीकार करें",
     },
     settings: {
       title: "सेटिंग्स",

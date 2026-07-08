@@ -83,6 +83,32 @@ export const usersRelations = relations(users, ({ many }) => ({
   reportedIncidents: many(incidents),
 }));
 
+// Team invitations (single-use, hashed at rest)
+export const invitations = pgTable("invitations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id)
+    .notNull(),
+  email: text("email").notNull(),
+  role: roleEnum("role").default("RESPONDER").notNull(),
+  tokenHash: text("token_hash").notNull().unique(),
+  invitedById: uuid("invited_by_id").references(() => users.id),
+  expiresAt: timestamp("expires_at").notNull(),
+  acceptedAt: timestamp("accepted_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const invitationsRelations = relations(invitations, ({ one }) => ({
+  tenant: one(tenants, {
+    fields: [invitations.tenantId],
+    references: [tenants.id],
+  }),
+  invitedBy: one(users, {
+    fields: [invitations.invitedById],
+    references: [users.id],
+  }),
+}));
+
 // Password reset tokens (single-use, hashed at rest)
 export const passwordResetTokens = pgTable("password_reset_tokens", {
   id: uuid("id").defaultRandom().primaryKey(),
