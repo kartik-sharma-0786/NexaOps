@@ -32,7 +32,7 @@ export default function DashboardClient({
     (acc, inc) => {
       acc.total += 1;
       acc[inc.severity] = (acc[inc.severity] || 0) + 1;
-      if (inc.status === "OPEN" || inc.status === "IN_PROGRESS") {
+      if (inc.status === "OPEN" || inc.status === "ACKNOWLEDGED") {
         acc.active += 1;
       }
       return acc;

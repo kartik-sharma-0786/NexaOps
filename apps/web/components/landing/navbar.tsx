@@ -63,7 +63,7 @@ export function LandingNavbar() {
             {isAuthed ? (
               <>
                 <span className="hidden sm:inline text-sm text-gray-600 dark:text-gray-300">
-                  {userEmail || "Signed in"}
+                  {userEmail || t.nav.signedIn}
                 </span>
                 <Link
                   href="/dashboard"

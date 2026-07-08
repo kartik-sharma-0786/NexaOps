@@ -1,5 +1,7 @@
 "use client";
 
+import { useLanguage } from "../../contexts/language-context";
+
 type FeatureStatus = "live" | "coming_soon";
 
 const styles: Record<FeatureStatus, string> = {
@@ -8,12 +10,13 @@ const styles: Record<FeatureStatus, string> = {
     "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
 };
 
-const labels: Record<FeatureStatus, string> = {
-  live: "Live",
-  coming_soon: "Coming Soon",
-};
-
 export function FeatureStatusBadge({ status }: { status: FeatureStatus }) {
+  const { t } = useLanguage();
+  const labels: Record<FeatureStatus, string> = {
+    live: t.featureBadge.live,
+    coming_soon: t.featureBadge.comingSoon,
+  };
+
   return (
     <span
       className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wide ${styles[status]}`}

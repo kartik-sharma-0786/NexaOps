@@ -43,7 +43,7 @@ export default function IncidentDetail({
   initialIncident: Incident;
 }) {
   const { data: session } = useSession();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const [incident, setIncident] = useState<Incident>(initialIncident);
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
@@ -121,13 +121,13 @@ export default function IncidentDetail({
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
               {t.incidentDetail.reportedBy} {incident.creator?.email}{" "}
               {t.incidentDetail.on}{" "}
-              {new Date(incident.createdAt).toLocaleString()}
+              {new Date(incident.createdAt).toLocaleString(locale)}
             </p>
           </div>
           <div>
             {canManageIncidents(user?.role) ? (
               <select
-                aria-label="Status"
+                aria-label={t.dashboard.statusLabel}
                 value={incident.status}
                 onChange={(e) => handleStatusChange(e.target.value)}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600"
@@ -185,7 +185,7 @@ export default function IncidentDetail({
                 <span className="font-semibold text-gray-900 dark:text-white">
                   {event.actor?.email}
                 </span>{" "}
-                - {new Date(event.createdAt).toLocaleString()}
+                - {new Date(event.createdAt).toLocaleString(locale)}
               </p>
               <p className="text-gray-800 dark:text-gray-100 mt-1">
                 {event.message}
@@ -203,7 +203,7 @@ export default function IncidentDetail({
           <form onSubmit={handleAddComment}>
             <div>
               <label htmlFor="comment" className="sr-only">
-                Add comment
+                {t.incidentDetail.placeholder}
               </label>
               <textarea
                 id="comment"

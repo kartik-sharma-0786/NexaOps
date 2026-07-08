@@ -1,8 +1,22 @@
 "use client";
 
-import { createContext, ReactNode, useContext, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 type Language = "en" | "ja" | "hi";
+
+const LANGUAGE_STORAGE_KEY = "nexaops.language";
+
+const locales: Record<Language, string> = {
+  en: "en-US",
+  ja: "ja-JP",
+  hi: "hi-IN",
+};
 
 type Translations = {
   brandName: string;
@@ -16,6 +30,67 @@ type Translations = {
     getStarted: string;
     signOut: string;
     contact: string;
+    signedIn: string;
+  };
+  featureBadge: {
+    live: string;
+    comingSoon: string;
+  };
+  landing: {
+    poweringReliability: string;
+    whyTitle: string;
+    whySubtitle: string;
+    cards: {
+      incidentManagement: { title: string; desc: string };
+      timeline: { title: string; desc: string };
+      rbac: { title: string; desc: string };
+      onCall: { title: string; desc: string };
+      integrations: { title: string; desc: string };
+      runbooks: { title: string; desc: string };
+    };
+    resourcesTitle: string;
+    resourcesSubtitle: string;
+    viewAllResources: string;
+    readMore: string;
+    resourceCards: {
+      guide: { category: string; title: string; desc: string };
+      webinar: { category: string; title: string; desc: string };
+      caseStudy: { category: string; title: string; desc: string };
+    };
+    ctaTitle: string;
+    ctaSubtitle: string;
+    ctaPrimary: string;
+    ctaSecondary: string;
+  };
+  footer: {
+    product: string;
+    company: string;
+    resources: string;
+    legal: string;
+    incidents: string;
+    onCall: string;
+    postMortems: string;
+    statusPages: string;
+    aboutUs: string;
+    careers: string;
+    customers: string;
+    contact: string;
+    blog: string;
+    documentation: string;
+    community: string;
+    partners: string;
+    privacy: string;
+    terms: string;
+    security: string;
+    rights: string;
+  };
+  chat: {
+    title: string;
+    greeting: string;
+    fallback: string;
+    pricingReply: string;
+    featuresReply: string;
+    placeholder: string;
   };
   dashboard: {
     overview: string;
@@ -93,6 +168,9 @@ type Translations = {
     supportTitle: string;
     supportText: string;
     getStarted: string;
+    invoiceTitle: string;
+    invoiceText: string;
+    contactSales: string;
   };
   resources: {
     heroTitle: string;
@@ -227,6 +305,101 @@ const translations: Record<Language, Translations> = {
       getStarted: "Get Started",
       signOut: "Sign Out",
       contact: "Contact",
+      signedIn: "Signed in",
+    },
+    featureBadge: {
+      live: "Live",
+      comingSoon: "Coming Soon",
+    },
+    landing: {
+      poweringReliability: "Powering reliability at",
+      whyTitle: "Why NexaOps?",
+      whySubtitle:
+        "Everything you need to resolve incidents faster and learn from them effectively.",
+      cards: {
+        incidentManagement: {
+          title: "Incident Management",
+          desc: "Create, track, and resolve incidents with severity levels, status updates, and a live timeline.",
+        },
+        timeline: {
+          title: "Timeline & Comments",
+          desc: "Capture status changes and team comments in a searchable incident timeline with real-time updates.",
+        },
+        rbac: {
+          title: "Role-Based Access",
+          desc: "Multi-tenant isolation with OWNER, ADMIN, RESPONDER, and VIEWER roles guarding who can act on incidents.",
+        },
+        onCall: {
+          title: "On-Call Scheduling",
+          desc: "Fair and flexible on-call rotations that prevent burnout and ensure coverage.",
+        },
+        integrations: {
+          title: "Universal Integrations",
+          desc: "Connect with Slack, Jira, Zoom, PagerDuty, and 100+ observability tools.",
+        },
+        runbooks: {
+          title: "Runbooks & Post-mortems",
+          desc: "Interactive runbooks and blameless post-mortem templates to turn incidents into learning.",
+        },
+      },
+      resourcesTitle: "Resources",
+      resourcesSubtitle: "Learn best practices from industry experts.",
+      viewAllResources: "View all resources",
+      readMore: "Read more",
+      resourceCards: {
+        guide: {
+          category: "Guide",
+          title: "The Comprehensive Guide to Incident Management",
+          desc: "From SEV1 to Post-mortem, learn how to handle critical incidents.",
+        },
+        webinar: {
+          category: "Webinar",
+          title: "Building a Culture of Reliability",
+          desc: "Watch our panel discussion with SRE leaders from top tech companies.",
+        },
+        caseStudy: {
+          category: "Case Study",
+          title: "How TechFlow Reduced MTTR by 60%",
+          desc: "See how TechFlow leveraged NexaOps to streamline their response.",
+        },
+      },
+      ctaTitle: "Ready to improve your reliability?",
+      ctaSubtitle:
+        "Join thousands of developers who trust NexaOps to manage their critical incidents.",
+      ctaPrimary: "Get Started for Free",
+      ctaSecondary: "Contact Sales",
+    },
+    footer: {
+      product: "Product",
+      company: "Company",
+      resources: "Resources",
+      legal: "Legal",
+      incidents: "Incidents",
+      onCall: "On-Call",
+      postMortems: "Post-mortems",
+      statusPages: "Status Pages",
+      aboutUs: "About Us",
+      careers: "Careers",
+      customers: "Customers",
+      contact: "Contact",
+      blog: "Blog",
+      documentation: "Documentation",
+      community: "Community",
+      partners: "Partners",
+      privacy: "Privacy Policy",
+      terms: "Terms of Service",
+      security: "Security",
+      rights: "All rights reserved.",
+    },
+    chat: {
+      title: "NexaOps Support",
+      greeting: "Hello! How can I help you with NexaOps today?",
+      fallback: "Thanks for reaching out! Our team will get back to you shortly.",
+      pricingReply:
+        "NexaOps is currently free while in active development. Check our Pricing section for details.",
+      featuresReply:
+        "NexaOps provides Incident Management, On-call scheduling, and automated Post-mortems.",
+      placeholder: "Type a message...",
     },
     hero: {
       badge: "New: NexaOps AI Assistant",
@@ -332,6 +505,10 @@ const translations: Record<Language, Translations> = {
       supportText:
         "If you like what we're building and want to support the infrastructure costs or buy me a coffee, you can donate below.",
       getStarted: "Get Started",
+      invoiceTitle: "Need invoice or custom pricing?",
+      invoiceText:
+        "Talk to sales for enterprise billing, procurement, and custom rollout support.",
+      contactSales: "Contact sales",
     },
     resources: {
       heroTitle: "NexaOps Resources",
@@ -493,6 +670,102 @@ const translations: Record<Language, Translations> = {
       getStarted: "始める",
       signOut: "ログアウト",
       contact: "お問い合わせ",
+      signedIn: "ログイン中",
+    },
+    featureBadge: {
+      live: "提供中",
+      comingSoon: "近日公開",
+    },
+    landing: {
+      poweringReliability: "信頼性を支えている企業",
+      whyTitle: "なぜNexaOps？",
+      whySubtitle:
+        "インシデントをより迅速に解決し、効果的に学ぶために必要なすべて。",
+      cards: {
+        incidentManagement: {
+          title: "インシデント管理",
+          desc: "深刻度レベル、ステータス更新、ライブタイムラインでインシデントを作成、追跡、解決します。",
+        },
+        timeline: {
+          title: "タイムラインとコメント",
+          desc: "ステータス変更とチームのコメントを、リアルタイム更新付きの検索可能なタイムラインに記録します。",
+        },
+        rbac: {
+          title: "ロールベースのアクセス",
+          desc: "OWNER、ADMIN、RESPONDER、VIEWERの役割によるマルチテナント分離で、誰がインシデントに対応できるかを管理します。",
+        },
+        onCall: {
+          title: "オンコールスケジューリング",
+          desc: "燃え尽きを防ぎ、カバレッジを確保する公平で柔軟なオンコールローテーション。",
+        },
+        integrations: {
+          title: "ユニバーサル統合",
+          desc: "Slack、Jira、Zoom、PagerDuty、100以上の可観測性ツールと連携します。",
+        },
+        runbooks: {
+          title: "ランブックとポストモーテム",
+          desc: "インシデントを学びに変える、インタラクティブなランブックと非難のないポストモーテムテンプレート。",
+        },
+      },
+      resourcesTitle: "リソース",
+      resourcesSubtitle: "業界の専門家からベストプラクティスを学びましょう。",
+      viewAllResources: "すべてのリソースを見る",
+      readMore: "続きを読む",
+      resourceCards: {
+        guide: {
+          category: "ガイド",
+          title: "インシデント管理の総合ガイド",
+          desc: "SEV1からポストモーテムまで、重大インシデントの対応方法を学びます。",
+        },
+        webinar: {
+          category: "ウェビナー",
+          title: "信頼性の文化を築く",
+          desc: "大手テック企業のSREリーダーによるパネルディスカッションをご覧ください。",
+        },
+        caseStudy: {
+          category: "事例研究",
+          title: "TechFlowがMTTRを60%削減した方法",
+          desc: "TechFlowがNexaOpsを活用して対応を効率化した方法をご覧ください。",
+        },
+      },
+      ctaTitle: "信頼性を向上させる準備はできましたか？",
+      ctaSubtitle:
+        "重大インシデントの管理をNexaOpsに任せる数千人の開発者に加わりましょう。",
+      ctaPrimary: "無料で始める",
+      ctaSecondary: "営業に問い合わせる",
+    },
+    footer: {
+      product: "製品",
+      company: "会社",
+      resources: "リソース",
+      legal: "法的情報",
+      incidents: "インシデント",
+      onCall: "オンコール",
+      postMortems: "ポストモーテム",
+      statusPages: "ステータスページ",
+      aboutUs: "会社概要",
+      careers: "採用情報",
+      customers: "お客様",
+      contact: "お問い合わせ",
+      blog: "ブログ",
+      documentation: "ドキュメント",
+      community: "コミュニティ",
+      partners: "パートナー",
+      privacy: "プライバシーポリシー",
+      terms: "利用規約",
+      security: "セキュリティ",
+      rights: "無断複写・転載を禁じます。",
+    },
+    chat: {
+      title: "NexaOpsサポート",
+      greeting: "こんにちは！NexaOpsについて何かお手伝いできますか？",
+      fallback:
+        "お問い合わせありがとうございます！担当者がまもなくご連絡いたします。",
+      pricingReply:
+        "NexaOpsは現在開発中のため無料でご利用いただけます。詳細は料金セクションをご覧ください。",
+      featuresReply:
+        "NexaOpsはインシデント管理、オンコールスケジューリング、自動ポストモーテムを提供します。",
+      placeholder: "メッセージを入力...",
     },
     hero: {
       badge: "新機能：NexaOps AIアシスタント",
@@ -598,6 +871,10 @@ const translations: Record<Language, Translations> = {
       supportText:
         "私たちが作っているものが気に入って、インフラストラクチャのコストを支援したい、またはコーヒーを奢りたい場合は、以下から寄付できます。",
       getStarted: "始める",
+      invoiceTitle: "請求書またはカスタム価格が必要ですか？",
+      invoiceText:
+        "エンタープライズの請求、調達、カスタム展開のサポートについては営業にご相談ください。",
+      contactSales: "営業に問い合わせる",
     },
     resources: {
       heroTitle: "NexaOps リソース",
@@ -759,6 +1036,102 @@ const translations: Record<Language, Translations> = {
       getStarted: "शुरू करें",
       signOut: "साइन आउट",
       contact: "संपर्क",
+      signedIn: "साइन इन किया हुआ",
+    },
+    featureBadge: {
+      live: "उपलब्ध",
+      comingSoon: "जल्द आ रहा है",
+    },
+    landing: {
+      poweringReliability: "इनकी विश्वसनीयता को शक्ति प्रदान कर रहा है",
+      whyTitle: "नेक्साऑप्स क्यों?",
+      whySubtitle:
+        "घटनाओं को तेज़ी से हल करने और उनसे प्रभावी ढंग से सीखने के लिए आपको जो कुछ भी चाहिए।",
+      cards: {
+        incidentManagement: {
+          title: "घटना प्रबंधन",
+          desc: "गंभीरता स्तर, स्थिति अपडेट और लाइव टाइमलाइन के साथ घटनाएं बनाएं, ट्रैक करें और हल करें।",
+        },
+        timeline: {
+          title: "टाइमलाइन और टिप्पणियाँ",
+          desc: "रीयल-टाइम अपडेट के साथ खोजने योग्य टाइमलाइन में स्थिति परिवर्तन और टीम टिप्पणियाँ दर्ज करें।",
+        },
+        rbac: {
+          title: "भूमिका-आधारित पहुंच",
+          desc: "OWNER, ADMIN, RESPONDER और VIEWER भूमिकाओं के साथ मल्टी-टेनेंट अलगाव जो नियंत्रित करता है कि कौन घटनाओं पर कार्य कर सकता है।",
+        },
+        onCall: {
+          title: "ऑन-कॉल शेड्यूलिंग",
+          desc: "निष्पक्ष और लचीले ऑन-कॉल रोटेशन जो बर्नआउट को रोकते हैं और कवरेज सुनिश्चित करते हैं।",
+        },
+        integrations: {
+          title: "यूनिवर्सल इंटीग्रेशन",
+          desc: "Slack, Jira, Zoom, PagerDuty और 100+ ऑब्ज़र्वेबिलिटी टूल्स से जुड़ें।",
+        },
+        runbooks: {
+          title: "रनबुक्स और पोस्टमार्टम",
+          desc: "घटनाओं को सीख में बदलने के लिए इंटरैक्टिव रनबुक्स और दोषरहित पोस्टमार्टम टेम्पलेट।",
+        },
+      },
+      resourcesTitle: "संसाधन",
+      resourcesSubtitle: "उद्योग विशेषज्ञों से सर्वोत्तम अभ्यास सीखें।",
+      viewAllResources: "सभी संसाधन देखें",
+      readMore: "और पढ़ें",
+      resourceCards: {
+        guide: {
+          category: "गाइड",
+          title: "घटना प्रबंधन की व्यापक गाइड",
+          desc: "SEV1 से पोस्टमार्टम तक, गंभीर घटनाओं को संभालना सीखें।",
+        },
+        webinar: {
+          category: "वेबिनार",
+          title: "विश्वसनीयता की संस्कृति बनाना",
+          desc: "शीर्ष टेक कंपनियों के SRE लीडर्स के साथ हमारी पैनल चर्चा देखें।",
+        },
+        caseStudy: {
+          category: "केस स्टडी",
+          title: "TechFlow ने MTTR को 60% कैसे कम किया",
+          desc: "देखें कि TechFlow ने अपनी प्रतिक्रिया को सुव्यवस्थित करने के लिए नेक्साऑप्स का उपयोग कैसे किया।",
+        },
+      },
+      ctaTitle: "अपनी विश्वसनीयता सुधारने के लिए तैयार हैं?",
+      ctaSubtitle:
+        "हजारों डेवलपर्स से जुड़ें जो अपनी गंभीर घटनाओं के प्रबंधन के लिए नेक्साऑप्स पर भरोसा करते हैं।",
+      ctaPrimary: "मुफ़्त में शुरू करें",
+      ctaSecondary: "बिक्री से संपर्क करें",
+    },
+    footer: {
+      product: "उत्पाद",
+      company: "कंपनी",
+      resources: "संसाधन",
+      legal: "कानूनी",
+      incidents: "घटनाएं",
+      onCall: "ऑन-कॉल",
+      postMortems: "पोस्टमार्टम",
+      statusPages: "स्टेटस पेज",
+      aboutUs: "हमारे बारे में",
+      careers: "करियर",
+      customers: "ग्राहक",
+      contact: "संपर्क",
+      blog: "ब्लॉग",
+      documentation: "दस्तावेज़ीकरण",
+      community: "समुदाय",
+      partners: "पार्टनर्स",
+      privacy: "गोपनीयता नीति",
+      terms: "सेवा की शर्तें",
+      security: "सुरक्षा",
+      rights: "सर्वाधिकार सुरक्षित।",
+    },
+    chat: {
+      title: "नेक्साऑप्स सहायता",
+      greeting: "नमस्ते! आज मैं नेक्साऑप्स के बारे में आपकी कैसे मदद कर सकता हूं?",
+      fallback:
+        "संपर्क करने के लिए धन्यवाद! हमारी टीम जल्द ही आपसे संपर्क करेगी।",
+      pricingReply:
+        "नेक्साऑप्स सक्रिय विकास के दौरान वर्तमान में मुफ़्त है। विवरण के लिए हमारा मूल्य निर्धारण अनुभाग देखें।",
+      featuresReply:
+        "नेक्साऑप्स घटना प्रबंधन, ऑन-कॉल शेड्यूलिंग और स्वचालित पोस्टमार्टम प्रदान करता है।",
+      placeholder: "संदेश लिखें...",
     },
     hero: {
       badge: "नई: नेक्साऑप्स एआई सहायक",
@@ -864,6 +1237,10 @@ const translations: Record<Language, Translations> = {
       supportText:
         "यदि आप जो हम बना रहे हैं उसे पसंद करते हैं और बुनियादी ढांचे की लागत का समर्थन करना चाहते हैं या मुझे कॉफी खरीदना चाहते हैं, तो आप नीचे दान कर सकते हैं।",
       getStarted: "शुरू करें",
+      invoiceTitle: "चालान या कस्टम मूल्य निर्धारण चाहिए?",
+      invoiceText:
+        "एंटरप्राइज़ बिलिंग, खरीद और कस्टम रोलआउट समर्थन के लिए बिक्री से बात करें।",
+      contactSales: "बिक्री से संपर्क करें",
     },
     resources: {
       heroTitle: "नेक्साऑप्स संसाधन",
@@ -991,18 +1368,46 @@ interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: Translations;
+  locale: string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(
   undefined,
 );
 
+function isLanguage(value: string | null): value is Language {
+  return value === "en" || value === "ja" || value === "hi";
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>("en");
+  const [language, setLanguageState] = useState<Language>("en");
+
+  // Restore the saved choice after hydration (server always renders "en",
+  // so reading localStorage in the initializer would cause a hydration
+  // mismatch).
+  useEffect(() => {
+    const saved = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    if (isLanguage(saved)) {
+      // One-time post-hydration restore; reading localStorage in the
+      // initializer would desync server and client HTML.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLanguageState(saved);
+    }
+  }, []);
+
+  const setLanguage = (lang: Language) => {
+    setLanguageState(lang);
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+  };
 
   return (
     <LanguageContext.Provider
-      value={{ language, setLanguage, t: translations[language] }}
+      value={{
+        language,
+        setLanguage,
+        t: translations[language],
+        locale: locales[language],
+      }}
     >
       {children}
     </LanguageContext.Provider>

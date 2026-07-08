@@ -40,7 +40,7 @@ export default function Home() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mb-12">
                 <Link
-                  href="/dashboard"
+                  href="/auth/register"
                   className="inline-flex items-center justify-center px-8 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-all shadow-lg hover:shadow-xl"
                 >
                   {t.hero.ctaPrimary}
@@ -73,7 +73,7 @@ export default function Home() {
         <section className="py-10 border-y border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <p className="text-center text-sm font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-8">
-              Powering reliability at
+              {t.landing.poweringReliability}
             </p>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-8 items-center opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
               {["Acme Corp", "GlobalTech", "Nebula", "Vertex", "Horizon"].map(
@@ -97,11 +97,10 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto mb-16">
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                Why NexaOps?
+                {t.landing.whyTitle}
               </h2>
               <p className="text-lg text-gray-500 dark:text-gray-400">
-                Everything you need to resolve incidents faster and learn from
-                them effectively.
+                {t.landing.whySubtitle}
               </p>
             </div>
 
@@ -109,38 +108,32 @@ export default function Home() {
               {[
                 {
                   icon: <Zap className="w-6 h-6 text-yellow-500" />,
-                  title: "Incident Management",
-                  desc: "Create, track, and resolve incidents with severity levels, status updates, and a live timeline.",
+                  ...t.landing.cards.incidentManagement,
                   status: "live" as const,
                 },
                 {
                   icon: <BarChart className="w-6 h-6 text-purple-500" />,
-                  title: "Timeline & Comments",
-                  desc: "Capture status changes and team comments in a searchable incident timeline with real-time updates.",
+                  ...t.landing.cards.timeline,
                   status: "live" as const,
                 },
                 {
                   icon: <Shield className="w-6 h-6 text-green-500" />,
-                  title: "Role-Based Access",
-                  desc: "Multi-tenant isolation with OWNER, ADMIN, RESPONDER, and VIEWER roles guarding who can act on incidents.",
+                  ...t.landing.cards.rbac,
                   status: "live" as const,
                 },
                 {
                   icon: <Users className="w-6 h-6 text-blue-500" />,
-                  title: "On-Call Scheduling",
-                  desc: "Fair and flexible on-call rotations that prevent burnout and ensure coverage.",
+                  ...t.landing.cards.onCall,
                   status: "coming_soon" as const,
                 },
                 {
                   icon: <Globe className="w-6 h-6 text-indigo-500" />,
-                  title: "Universal Integrations",
-                  desc: "Connect with Slack, Jira, Zoom, PagerDuty, and 100+ observability tools.",
+                  ...t.landing.cards.integrations,
                   status: "coming_soon" as const,
                 },
                 {
                   icon: <BookOpen className="w-6 h-6 text-pink-500" />,
-                  title: "Runbooks & Post-mortems",
-                  desc: "Interactive runbooks and blameless post-mortem templates to turn incidents into learning.",
+                  ...t.landing.cards.runbooks,
                   status: "coming_soon" as const,
                 },
               ].map((feature, idx) => (
@@ -172,38 +165,27 @@ export default function Home() {
             <div className="flex justify-between items-end mb-12">
               <div>
                 <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                  Resources
+                  {t.landing.resourcesTitle}
                 </h2>
                 <p className="text-lg text-gray-500 dark:text-gray-400">
-                  Learn best practices from industry experts.
+                  {t.landing.resourcesSubtitle}
                 </p>
               </div>
               <Link
                 href="/resources"
                 className="hidden md:flex items-center text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-700 dark:hover:text-indigo-300"
               >
-                View all resources <ArrowRight className="ml-2 w-4 h-4" />
+                {t.landing.viewAllResources}{" "}
+                <ArrowRight className="ml-2 w-4 h-4" />
               </Link>
             </div>
 
             <div className="grid md:grid-cols-3 gap-8">
               {[
+                { ...t.landing.resourceCards.guide, color: "bg-blue-600" },
+                { ...t.landing.resourceCards.webinar, color: "bg-purple-600" },
                 {
-                  category: "Guide",
-                  title: "The Comprehensive Guide to Incident Management",
-                  desc: "From SEV1 to Post-mortem, learn how to handle critical incidents.",
-                  color: "bg-blue-600",
-                },
-                {
-                  category: "Webinar",
-                  title: "Building a Culture of Reliability",
-                  desc: "Watch our panel discussion with SRE leaders from top tech companies.",
-                  color: "bg-purple-600",
-                },
-                {
-                  category: "Case Study",
-                  title: "How TechFlow Reduced MTTR by 60%",
-                  desc: "See how TechFlow leveraged NexaOps to streamline their response.",
+                  ...t.landing.resourceCards.caseStudy,
                   color: "bg-green-600",
                 },
               ].map((resource, idx) => (
@@ -224,7 +206,7 @@ export default function Home() {
                       {resource.desc}
                     </p>
                     <span className="text-sm font-medium text-gray-900 dark:text-white flex items-center">
-                      Read more <ArrowRight className="ml-2 w-4 h-4" />
+                      {t.landing.readMore} <ArrowRight className="ml-2 w-4 h-4" />
                     </span>
                   </div>
                 </div>
@@ -238,24 +220,23 @@ export default function Home() {
           <div className="absolute inset-0 opacity-10" />
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-              Ready to improve your reliability?
+              {t.landing.ctaTitle}
             </h2>
             <p className="text-xl text-indigo-200 mb-10 max-w-2xl mx-auto">
-              Join thousands of developers who trust NexaOps to manage their
-              critical incidents.
+              {t.landing.ctaSubtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/dashboard"
+                href="/auth/register"
                 className="px-8 py-4 bg-white text-indigo-900 font-bold rounded-lg hover:bg-gray-100 transition shadow-lg"
               >
-                Get Started for Free
+                {t.landing.ctaPrimary}
               </Link>
               <Link
                 href="/contact"
                 className="px-8 py-4 bg-transparent border border-indigo-400 text-white font-medium rounded-lg hover:bg-indigo-800 transition"
               >
-                Contact Sales
+                {t.landing.ctaSecondary}
               </Link>
             </div>
           </div>
@@ -268,7 +249,7 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
             <div>
               <h4 className="font-bold text-gray-900 dark:text-white mb-4">
-                Product
+                {t.footer.product}
               </h4>
               <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                 <li>
@@ -276,7 +257,7 @@ export default function Home() {
                     href="/dashboard"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
-                    Incidents
+                    {t.footer.incidents}
                   </Link>
                 </li>
                 <li>
@@ -284,7 +265,7 @@ export default function Home() {
                     href="/features"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
-                    On-Call
+                    {t.footer.onCall}
                   </Link>
                 </li>
                 <li>
@@ -292,17 +273,19 @@ export default function Home() {
                     href="/resources"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
-                    Post-mortems
+                    {t.footer.postMortems}
                   </Link>
                 </li>
                 <li>
-                  <span className="text-gray-500 dark:text-gray-500">Status Pages</span>
+                  <span className="text-gray-500 dark:text-gray-500">
+                    {t.footer.statusPages}
+                  </span>
                 </li>
               </ul>
             </div>
             <div>
               <h4 className="font-bold text-gray-900 dark:text-white mb-4">
-                Company
+                {t.footer.company}
               </h4>
               <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                 <li>
@@ -310,7 +293,7 @@ export default function Home() {
                     href="/contact"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
-                    About Us
+                    {t.footer.aboutUs}
                   </Link>
                 </li>
                 <li>
@@ -318,7 +301,7 @@ export default function Home() {
                     href="/contact"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
-                    Careers
+                    {t.footer.careers}
                   </Link>
                 </li>
                 <li>
@@ -326,7 +309,7 @@ export default function Home() {
                     href="/resources"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
-                    Customers
+                    {t.footer.customers}
                   </Link>
                 </li>
                 <li>
@@ -334,14 +317,14 @@ export default function Home() {
                     href="/contact"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
-                    Contact
+                    {t.footer.contact}
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
               <h4 className="font-bold text-gray-900 dark:text-white mb-4">
-                Resources
+                {t.footer.resources}
               </h4>
               <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                 <li>
@@ -349,15 +332,15 @@ export default function Home() {
                     href="/resources"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
-                    Blog
+                    {t.footer.blog}
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="/features"
+                    href="/resources"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
-                    Documentation
+                    {t.footer.documentation}
                   </Link>
                 </li>
                 <li>
@@ -365,7 +348,7 @@ export default function Home() {
                     href="/contact"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
-                    Community
+                    {t.footer.community}
                   </Link>
                 </li>
                 <li>
@@ -373,24 +356,30 @@ export default function Home() {
                     href="/pricing"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
-                    Partners
+                    {t.footer.partners}
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
               <h4 className="font-bold text-gray-900 dark:text-white mb-4">
-                Legal
+                {t.footer.legal}
               </h4>
               <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                 <li>
-                  <span className="text-gray-500 dark:text-gray-500">Privacy Policy</span>
+                  <span className="text-gray-500 dark:text-gray-500">
+                    {t.footer.privacy}
+                  </span>
                 </li>
                 <li>
-                  <span className="text-gray-500 dark:text-gray-500">Terms of Service</span>
+                  <span className="text-gray-500 dark:text-gray-500">
+                    {t.footer.terms}
+                  </span>
                 </li>
                 <li>
-                  <span className="text-gray-500 dark:text-gray-500">Security</span>
+                  <span className="text-gray-500 dark:text-gray-500">
+                    {t.footer.security}
+                  </span>
                 </li>
               </ul>
             </div>
@@ -401,11 +390,11 @@ export default function Home() {
                 N
               </div>
               <span className="text-gray-900 dark:text-white font-bold">
-                NexaOps
+                {t.brandName}
               </span>
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              © {new Date().getFullYear()} NexaOps Inc. All rights reserved.
+              © {new Date().getFullYear()} NexaOps Inc. {t.footer.rights}
             </p>
           </div>
         </div>

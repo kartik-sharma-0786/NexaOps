@@ -103,16 +103,16 @@ export default function PricingPage() {
           <div className="p-8 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-inner inline-block">
             <div className="w-64 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/40 p-6 text-center mx-auto">
               <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                Need invoice or custom pricing?
+                {t.pricing.invoiceTitle}
               </p>
               <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">
-                Talk to sales for enterprise billing, procurement, and custom rollout support.
+                {t.pricing.invoiceText}
               </p>
               <Link
                 href="/contact"
                 className="mt-6 inline-flex items-center justify-center rounded-lg bg-indigo-600 px-5 py-3 text-sm font-medium text-white hover:bg-indigo-700 transition"
               >
-                Contact sales
+                {t.pricing.contactSales}
               </Link>
             </div>
           </div>
