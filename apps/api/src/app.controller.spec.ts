@@ -13,9 +13,9 @@ describe('AppController', () => {
           provide: AppService,
           useValue: {
             getHello: jest.fn().mockResolvedValue({
-              message: 'Hello World! Database is connected.',
-              tenants: [],
+              service: 'NexaOps API',
               databaseStatus: 'connected',
+              message: 'NexaOps API is running. See /api/docs for documentation.',
             }),
           },
         },
@@ -26,12 +26,10 @@ describe('AppController', () => {
   });
 
   describe('root', () => {
-    it('should return hello message with tenants', async () => {
-      await expect(appController.getHello()).resolves.toEqual({
-        message: 'Hello World! Database is connected.',
-        tenants: [],
-        databaseStatus: 'connected',
-      });
+    it('should return service status without exposing data', async () => {
+      const result = await appController.getHello();
+      expect(result.databaseStatus).toBe('connected');
+      expect(result).not.toHaveProperty('tenants');
     });
   });
 });
