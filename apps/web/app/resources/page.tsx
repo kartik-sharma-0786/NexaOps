@@ -2,9 +2,7 @@
 
 import { ArrowRight, Book, FileText, Search, Video } from "lucide-react";
 import Link from "next/link";
-import { LanguageSelector } from "../../components/language-selector";
-import { Logo } from "../../components/logo";
-import { ThemeToggle } from "../../components/theme-toggle";
+import { LandingNavbar } from "../../components/landing/navbar";
 import { useLanguage } from "../../contexts/language-context";
 
 const resourceKeys = [
@@ -53,28 +51,7 @@ export default function ResourcesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-      <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center gap-2">
-              <Logo className="w-8 h-8" />
-              <span className="text-xl font-bold text-gray-900 dark:text-white">
-                {t.brandName}
-              </span>
-            </Link>
-            <div className="flex items-center gap-4">
-              <LanguageSelector />
-              <ThemeToggle />
-              <Link
-                href="/dashboard"
-                className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300"
-              >
-                {t.resources.goToDashboard}
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <LandingNavbar />
 
       {/* Hero */}
       <div className="bg-indigo-900 dark:bg-indigo-950 py-24 transition-colors">

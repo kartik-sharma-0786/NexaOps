@@ -171,6 +171,7 @@ type Translations = {
     invoiceTitle: string;
     invoiceText: string;
     contactSales: string;
+    planFeatures: string[];
   };
   resources: {
     heroTitle: string;
@@ -509,6 +510,13 @@ const translations: Record<Language, Translations> = {
       invoiceText:
         "Talk to sales for enterprise billing, procurement, and custom rollout support.",
       contactSales: "Contact sales",
+      planFeatures: [
+        "Unlimited Incidents",
+        "Unlimited Team Members",
+        "Slack & Discord Integration",
+        "Post-Mortem Generator",
+        "Basic On-Call Scheduling",
+      ],
     },
     resources: {
       heroTitle: "NexaOps Resources",
@@ -875,6 +883,13 @@ const translations: Record<Language, Translations> = {
       invoiceText:
         "エンタープライズの請求、調達、カスタム展開のサポートについては営業にご相談ください。",
       contactSales: "営業に問い合わせる",
+      planFeatures: [
+        "無制限のインシデント",
+        "無制限のチームメンバー",
+        "SlackとDiscordの統合",
+        "ポストモーテムジェネレーター",
+        "基本的なオンコールスケジューリング",
+      ],
     },
     resources: {
       heroTitle: "NexaOps リソース",
@@ -1241,6 +1256,13 @@ const translations: Record<Language, Translations> = {
       invoiceText:
         "एंटरप्राइज़ बिलिंग, खरीद और कस्टम रोलआउट समर्थन के लिए बिक्री से बात करें।",
       contactSales: "बिक्री से संपर्क करें",
+      planFeatures: [
+        "असीमित घटनाएं",
+        "असीमित टीम सदस्य",
+        "Slack और Discord इंटीग्रेशन",
+        "पोस्टमार्टम जेनरेटर",
+        "बुनियादी ऑन-कॉल शेड्यूलिंग",
+      ],
     },
     resources: {
       heroTitle: "नेक्साऑप्स संसाधन",

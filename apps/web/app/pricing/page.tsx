@@ -2,9 +2,7 @@
 
 import { Check, Heart } from "lucide-react";
 import Link from "next/link";
-import { LanguageSelector } from "../../components/language-selector";
-import { Logo } from "../../components/logo";
-import { ThemeToggle } from "../../components/theme-toggle";
+import { LandingNavbar } from "../../components/landing/navbar";
 import { useLanguage } from "../../contexts/language-context";
 
 export default function PricingPage() {
@@ -12,26 +10,7 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors">
-      <header className="border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-30 transition-colors">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <Logo className="w-8 h-8" />
-            <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              {t.brandName}
-            </span>
-          </Link>
-          <div className="flex items-center gap-3 text-sm">
-            <LanguageSelector />
-            <ThemeToggle />
-            <Link
-              href="/dashboard"
-              className="px-4 py-2 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition"
-            >
-              {t.pricing.getStarted}
-            </Link>
-          </div>
-        </div>
-      </header>
+      <LandingNavbar />
       <main className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white sm:text-5xl sm:tracking-tight lg:text-6xl">
@@ -61,13 +40,7 @@ export default function PricingPage() {
           </div>
           <div className="px-6 pt-6 pb-8 bg-gray-50 dark:bg-gray-800/50 sm:px-10 sm:py-10">
             <ul className="space-y-4">
-              {[
-                "Unlimited Incidents",
-                "Unlimited Team Members",
-                "Slack & Discord Integration",
-                "Post-Mortem Generator",
-                "Basic On-Call Scheduling",
-              ].map((feature) => (
+              {t.pricing.planFeatures.map((feature) => (
                 <li key={feature} className="flex items-start">
                   <div className="flex-shrink-0">
                     <Check className="h-6 w-6 text-green-500" />
@@ -80,7 +53,7 @@ export default function PricingPage() {
             </ul>
             <div className="mt-10">
               <Link
-                href="/dashboard"
+                href="/auth/register"
                 className="block w-full text-center rounded-lg border border-transparent bg-indigo-600 px-6 py-4 text-xl font-medium text-white hover:bg-indigo-700 shadow-md transition-all"
               >
                 {t.pricing.startFree}
