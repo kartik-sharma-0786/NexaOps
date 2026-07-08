@@ -226,6 +226,21 @@ type Translations = {
     creatingAccount: string;
     errorInvalid: string;
     errorGeneric: string;
+    forgotPasswordLink: string;
+    forgotTitle: string;
+    forgotSubtitle: string;
+    sendResetLink: string;
+    sending: string;
+    forgotSuccess: string;
+    resetTitle: string;
+    newPasswordLabel: string;
+    confirmPasswordLabel: string;
+    resetButton: string;
+    resetting: string;
+    resetSuccess: string;
+    resetInvalid: string;
+    passwordMismatch: string;
+    backToLogin: string;
   };
   settings: {
     title: string;
@@ -597,6 +612,23 @@ const translations: Record<Language, Translations> = {
       creatingAccount: "Creating...",
       errorInvalid: "Invalid email or password",
       errorGeneric: "Registration failed",
+      forgotPasswordLink: "Forgot password?",
+      forgotTitle: "Reset your password",
+      forgotSubtitle:
+        "Enter your email address and we'll send you a reset link.",
+      sendResetLink: "Send reset link",
+      sending: "Sending...",
+      forgotSuccess:
+        "If that email is registered, a reset link has been sent. Check your inbox.",
+      resetTitle: "Choose a new password",
+      newPasswordLabel: "New password",
+      confirmPasswordLabel: "Confirm password",
+      resetButton: "Reset password",
+      resetting: "Resetting...",
+      resetSuccess: "Password updated! You can now sign in.",
+      resetInvalid: "This reset link is invalid or has expired.",
+      passwordMismatch: "Passwords do not match",
+      backToLogin: "Back to sign in",
     },
     settings: {
       title: "Settings",
@@ -970,6 +1002,23 @@ const translations: Record<Language, Translations> = {
       creatingAccount: "作成中...",
       errorInvalid: "メールアドレスまたはパスワードが無効です",
       errorGeneric: "登録に失敗しました",
+      forgotPasswordLink: "パスワードをお忘れですか？",
+      forgotTitle: "パスワードをリセット",
+      forgotSubtitle:
+        "メールアドレスを入力すると、リセットリンクをお送りします。",
+      sendResetLink: "リセットリンクを送信",
+      sending: "送信中...",
+      forgotSuccess:
+        "そのメールアドレスが登録されている場合、リセットリンクを送信しました。受信トレイをご確認ください。",
+      resetTitle: "新しいパスワードを設定",
+      newPasswordLabel: "新しいパスワード",
+      confirmPasswordLabel: "パスワードの確認",
+      resetButton: "パスワードをリセット",
+      resetting: "リセット中...",
+      resetSuccess: "パスワードが更新されました！サインインできます。",
+      resetInvalid: "このリセットリンクは無効か期限切れです。",
+      passwordMismatch: "パスワードが一致しません",
+      backToLogin: "サインインに戻る",
     },
     settings: {
       title: "設定",
@@ -1343,6 +1392,23 @@ const translations: Record<Language, Translations> = {
       creatingAccount: "बना रहा है...",
       errorInvalid: "अमान्य ईमेल या पासवर्ड",
       errorGeneric: "पंजीकरण विफल रहा",
+      forgotPasswordLink: "पासवर्ड भूल गए?",
+      forgotTitle: "अपना पासवर्ड रीसेट करें",
+      forgotSubtitle:
+        "अपना ईमेल पता दर्ज करें और हम आपको एक रीसेट लिंक भेजेंगे।",
+      sendResetLink: "रीसेट लिंक भेजें",
+      sending: "भेज रहा है...",
+      forgotSuccess:
+        "यदि वह ईमेल पंजीकृत है, तो एक रीसेट लिंक भेज दिया गया है। अपना इनबॉक्स देखें।",
+      resetTitle: "नया पासवर्ड चुनें",
+      newPasswordLabel: "नया पासवर्ड",
+      confirmPasswordLabel: "पासवर्ड की पुष्टि करें",
+      resetButton: "पासवर्ड रीसेट करें",
+      resetting: "रीसेट हो रहा है...",
+      resetSuccess: "पासवर्ड अपडेट हो गया! अब आप साइन इन कर सकते हैं।",
+      resetInvalid: "यह रीसेट लिंक अमान्य है या समाप्त हो गया है।",
+      passwordMismatch: "पासवर्ड मेल नहीं खाते",
+      backToLogin: "साइन इन पर वापस जाएं",
     },
     settings: {
       title: "सेटिंग्स",
