@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import { BillingSettings } from "../../../components/billing-settings";
 import { IntegrationsSettings } from "../../../components/integrations-settings";
 import { LanguageSelector } from "../../../components/language-selector";
 import { ThemeToggle } from "../../../components/theme-toggle";
@@ -89,6 +90,9 @@ export default function SettingsPage() {
             </div>
           </dl>
         </div>
+
+        {/* Billing (managers only) */}
+        {canManageTeam(user?.role) && <BillingSettings />}
 
         {/* Integrations (managers only) */}
         {canManageTeam(user?.role) && <IntegrationsSettings />}

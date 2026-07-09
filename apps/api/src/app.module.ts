@@ -7,6 +7,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { BillingModule } from './billing/billing.module';
 import { EventsModule } from './events/events.module';
 import { HealthModule } from './health/health.module';
 import { IncidentsModule } from './incidents/incidents.module';
@@ -50,6 +51,7 @@ const isProduction = process.env.NODE_ENV === 'production';
     NotificationsModule,
     TeamModule,
     IntegrationsModule,
+    BillingModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

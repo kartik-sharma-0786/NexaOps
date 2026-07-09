@@ -28,12 +28,17 @@ export const incidentSeverityEnum = pgEnum("incident_severity", [
   "MEDIUM",
   "LOW",
 ]);
+export const planEnum = pgEnum("plan", ["FREE", "PRO"]);
 
 // 1. Tenants (Companies)
 export const tenants = pgTable("tenants", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(), // e.g. "acme-corp"
+  plan: planEnum("plan").default("FREE").notNull(),
+  stripeCustomerId: text("stripe_customer_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  currentPeriodEnd: timestamp("current_period_end"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

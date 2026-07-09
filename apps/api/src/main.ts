@@ -29,7 +29,11 @@ function getCorsOrigins(): string[] {
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  // rawBody is required to verify Stripe webhook signatures.
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+    rawBody: true,
+  });
   app.useLogger(app.get(Logger));
 
   // CSP disabled: this service serves JSON plus Swagger UI (which relies on

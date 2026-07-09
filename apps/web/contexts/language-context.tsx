@@ -282,6 +282,19 @@ type Translations = {
     inviteInvalid: string;
     acceptTitle: string;
   };
+  billing: {
+    title: string;
+    currentPlan: string;
+    free: string;
+    pro: string;
+    renews: string;
+    upgrade: string;
+    redirecting: string;
+    manage: string;
+    notConfigured: string;
+    success: string;
+    cancelled: string;
+  };
   integrations: {
     title: string;
     slackLabel: string;
@@ -735,6 +748,20 @@ const translations: Record<Language, Translations> = {
       joining: "Joining...",
       inviteInvalid: "This invitation is invalid or has expired.",
       acceptTitle: "Accept Invitation",
+    },
+    billing: {
+      title: "Billing",
+      currentPlan: "Current plan",
+      free: "Free",
+      pro: "Pro",
+      renews: "Renews",
+      upgrade: "Upgrade to Pro — $50/mo",
+      redirecting: "Redirecting...",
+      manage: "Manage billing",
+      notConfigured:
+        "Payments are not configured on this deployment yet.",
+      success: "Payment successful! Your workspace is now on Pro.",
+      cancelled: "Checkout cancelled — no charge was made.",
     },
     integrations: {
       title: "Integrations",
@@ -1193,6 +1220,19 @@ const translations: Record<Language, Translations> = {
       inviteInvalid: "この招待は無効か期限切れです。",
       acceptTitle: "招待を承認",
     },
+    billing: {
+      title: "請求",
+      currentPlan: "現在のプラン",
+      free: "無料",
+      pro: "Pro",
+      renews: "更新日",
+      upgrade: "Proにアップグレード — $50/月",
+      redirecting: "リダイレクト中...",
+      manage: "請求を管理",
+      notConfigured: "このデプロイでは支払いがまだ設定されていません。",
+      success: "支払いが完了しました！ワークスペースはProになりました。",
+      cancelled: "チェックアウトがキャンセルされました — 請求はありません。",
+    },
     integrations: {
       title: "統合",
       slackLabel: "Slack Webhook URL",
@@ -1649,6 +1689,19 @@ const translations: Record<Language, Translations> = {
       joining: "शामिल हो रहे हैं...",
       inviteInvalid: "यह निमंत्रण अमान्य है या समाप्त हो गया है।",
       acceptTitle: "निमंत्रण स्वीकार करें",
+    },
+    billing: {
+      title: "बिलिंग",
+      currentPlan: "वर्तमान योजना",
+      free: "मुफ़्त",
+      pro: "प्रो",
+      renews: "नवीनीकरण",
+      upgrade: "प्रो में अपग्रेड करें — $50/माह",
+      redirecting: "रीडायरेक्ट हो रहा है...",
+      manage: "बिलिंग प्रबंधित करें",
+      notConfigured: "इस डिप्लॉयमेंट पर भुगतान अभी कॉन्फ़िगर नहीं किया गया है।",
+      success: "भुगतान सफल! आपका वर्कस्पेस अब प्रो पर है।",
+      cancelled: "चेकआउट रद्द कर दिया गया — कोई शुल्क नहीं लगा।",
     },
     integrations: {
       title: "इंटीग्रेशन",

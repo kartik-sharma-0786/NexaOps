@@ -36,6 +36,13 @@
       "when": 1783575591906,
       "tag": "0004_tired_talisman",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1783576181696,
+      "tag": "0005_stale_synch",
+      "breakpoints": true
     }
   ]
 }
