@@ -5,63 +5,40 @@ import { LanguageSelector } from "../../components/language-selector";
 import { ThemeToggle } from "../../components/theme-toggle";
 import { useLanguage } from "../../contexts/language-context";
 import { canManageIncidents } from "../../lib/roles";
-import IncidentList from "./incident-list";
-
-interface Incident {
-  id: string;
-  title: string;
-  severity: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
-  status: string;
-  creator?: {
-    email: string;
-  };
-}
+import IncidentList, { IncidentPage, IncidentStats } from "./incident-list";
 
 interface DashboardClientProps {
-  incidents: Incident[];
+  initialIncidents: IncidentPage;
+  stats: IncidentStats;
   userRole?: string;
 }
 
 export default function DashboardClient({
-  incidents,
+  initialIncidents,
+  stats,
   userRole,
 }: DashboardClientProps) {
   const { t } = useLanguage();
 
-  const counts = incidents.reduce(
-    (acc, inc) => {
-      acc.total += 1;
-      acc[inc.severity] = (acc[inc.severity] || 0) + 1;
-      if (inc.status === "OPEN" || inc.status === "ACKNOWLEDGED") {
-        acc.active += 1;
-      }
-      return acc;
-    },
-    { total: 0, CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0, active: 0 } as Record<
-      string,
-      number
-    >,
-  );
-
   const summaryCards = [
     {
       label: t.dashboard.totalIncidents,
-      value: counts.total,
+      value: stats.total,
       tone: "bg-indigo-50 text-indigo-700",
     },
     {
       label: t.dashboard.activeNow,
-      value: counts.active,
+      value: stats.active,
       tone: "bg-amber-50 text-amber-700",
     },
     {
       label: t.dashboard.critical,
-      value: counts.CRITICAL,
+      value: stats.CRITICAL,
       tone: "bg-red-50 text-red-700",
     },
     {
       label: t.dashboard.high,
-      value: counts.HIGH,
+      value: stats.HIGH,
       tone: "bg-orange-50 text-orange-700",
     },
   ];
@@ -109,7 +86,7 @@ export default function DashboardClient({
         </div>
       </div>
 
-      <IncidentList initialIncidents={incidents} />
+      <IncidentList initialData={initialIncidents} />
     </div>
   );
 }

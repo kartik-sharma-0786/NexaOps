@@ -16,6 +16,7 @@ import { RolesGuard } from '../auth/roles.guard';
 import { AddCommentDto } from './dto/add-comment.dto';
 import { AssignIncidentDto } from './dto/assign-incident.dto';
 import { CreateIncidentDto } from './dto/create-incident.dto';
+import { ListIncidentsQueryDto } from './dto/list-incidents.dto';
 import { UpdateIncidentStatusDto } from './dto/update-incident-status.dto';
 import { IncidentsService } from './incidents.service';
 
@@ -36,10 +37,24 @@ export class IncidentsController {
   }
 
   @Get()
-  findAll(@Request() req: any, @Query('assignee') assignee?: string) {
+  findAll(@Request() req: any, @Query() query: ListIncidentsQueryDto) {
     const user = req.user;
-    const assigneeId = assignee === 'me' ? user.userId : assignee;
-    return this.incidentsService.findAll(user.tenantId, assigneeId);
+    const assigneeId =
+      query.assignee === 'me' ? user.userId : query.assignee;
+    return this.incidentsService.findAll(user.tenantId, {
+      assigneeId,
+      status: query.status,
+      severity: query.severity,
+      q: query.q,
+      page: query.page,
+      limit: query.limit,
+    });
+  }
+
+  // Must stay above the ':id' route.
+  @Get('stats')
+  stats(@Request() req: any) {
+    return this.incidentsService.stats(req.user.tenantId);
   }
 
   @Patch(':id/assign')

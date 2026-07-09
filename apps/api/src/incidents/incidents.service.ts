@@ -10,7 +10,7 @@ import {
   tenantMembers,
   users,
 } from '@nexaops/database';
-import { and, desc, eq, inArray } from 'drizzle-orm';
+import { and, desc, eq, ilike, inArray, sql, SQL } from 'drizzle-orm';
 import {
   publicUserColumns,
   stripPasswordHashFromIncident,
@@ -74,21 +74,84 @@ export class IncidentsService {
     return incident;
   }
 
-  async findAll(tenantId: string, assigneeId?: string) {
-    const rows = await db.query.incidents.findMany({
-      where: assigneeId
-        ? and(
-            eq(incidents.tenantId, tenantId),
-            eq(incidents.assigneeId, assigneeId),
-          )
-        : eq(incidents.tenantId, tenantId),
-      orderBy: [desc(incidents.createdAt)],
-      with: {
-        creator: publicUserColumns,
-        assignee: publicUserColumns,
-      },
-    });
-    return rows.map(stripPasswordHashFromIncident);
+  async findAll(
+    tenantId: string,
+    opts: {
+      assigneeId?: string;
+      status?: 'OPEN' | 'ACKNOWLEDGED' | 'RESOLVED';
+      severity?: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+      q?: string;
+      page?: number;
+      limit?: number;
+    } = {},
+  ) {
+    const page = opts.page ?? 1;
+    const limit = opts.limit ?? 20;
+
+    const conditions: SQL[] = [eq(incidents.tenantId, tenantId)];
+    if (opts.assigneeId) {
+      conditions.push(eq(incidents.assigneeId, opts.assigneeId));
+    }
+    if (opts.status) {
+      conditions.push(eq(incidents.status, opts.status));
+    }
+    if (opts.severity) {
+      conditions.push(eq(incidents.severity, opts.severity));
+    }
+    if (opts.q) {
+      conditions.push(ilike(incidents.title, `%${opts.q}%`));
+    }
+    const where = and(...conditions);
+
+    const [rows, countRows] = await Promise.all([
+      db.query.incidents.findMany({
+        where,
+        orderBy: [desc(incidents.createdAt)],
+        with: {
+          creator: publicUserColumns,
+          assignee: publicUserColumns,
+        },
+        limit,
+        offset: (page - 1) * limit,
+      }),
+      db
+        .select({ count: sql<number>`cast(count(*) as int)` })
+        .from(incidents)
+        .where(where),
+    ]);
+
+    const total = Number(countRows[0]?.count ?? 0);
+    return {
+      data: rows.map(stripPasswordHashFromIncident),
+      total,
+      page,
+      pageCount: Math.max(1, Math.ceil(total / limit)),
+    };
+  }
+
+  // Tenant-wide counters for the dashboard summary cards (not affected by
+  // pagination or filters).
+  async stats(tenantId: string) {
+    const rows = await db
+      .select({
+        status: incidents.status,
+        severity: incidents.severity,
+        count: sql<number>`cast(count(*) as int)`,
+      })
+      .from(incidents)
+      .where(eq(incidents.tenantId, tenantId))
+      .groupBy(incidents.status, incidents.severity);
+
+    const out = { total: 0, active: 0, CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
+    for (const row of rows) {
+      const count = Number(row.count);
+      out.total += count;
+      if (row.status === 'OPEN' || row.status === 'ACKNOWLEDGED') {
+        out.active += count;
+      }
+      out[row.severity] += count;
+    }
+    return out;
   }
 
   async findOne(id: string, tenantId: string) {

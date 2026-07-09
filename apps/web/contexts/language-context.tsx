@@ -110,6 +110,9 @@ type Translations = {
     unassigned: string;
     filterAll: string;
     filterMine: string;
+    searchPlaceholder: string;
+    allStatuses: string;
+    allSeverities: string;
     severity: {
       CRITICAL: string;
       HIGH: string;
@@ -338,6 +341,9 @@ const translations: Record<Language, Translations> = {
       unassigned: "Unassigned",
       filterAll: "All",
       filterMine: "Assigned to me",
+      searchPlaceholder: "Search incidents...",
+      allStatuses: "All statuses",
+      allSeverities: "All severities",
       severity: {
         CRITICAL: "Critical",
         HIGH: "High",
@@ -764,6 +770,9 @@ const translations: Record<Language, Translations> = {
       unassigned: "未割り当て",
       filterAll: "すべて",
       filterMine: "自分の担当",
+      searchPlaceholder: "インシデントを検索...",
+      allStatuses: "すべてのステータス",
+      allSeverities: "すべての重大度",
       severity: {
         CRITICAL: "重大",
         HIGH: "高",
@@ -1191,6 +1200,9 @@ const translations: Record<Language, Translations> = {
       unassigned: "असाइन नहीं किया गया",
       filterAll: "सभी",
       filterMine: "मुझे सौंपे गए",
+      searchPlaceholder: "घटनाएं खोजें...",
+      allStatuses: "सभी स्थितियाँ",
+      allSeverities: "सभी गंभीरताएँ",
       severity: {
         CRITICAL: "महत्वपूर्ण",
         HIGH: "उच्च",

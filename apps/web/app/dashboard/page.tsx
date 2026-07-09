@@ -1,46 +1,58 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/auth";
 import DashboardClient from "./dashboard-client";
+import type { IncidentPage, IncidentStats } from "./incident-list";
 
-async function getIncidents() {
+const EMPTY_PAGE: IncidentPage = { data: [], total: 0, page: 1, pageCount: 1 };
+const EMPTY_STATS: IncidentStats = {
+  total: 0,
+  active: 0,
+  CRITICAL: 0,
+  HIGH: 0,
+  MEDIUM: 0,
+  LOW: 0,
+};
+
+async function getDashboardData(): Promise<{
+  incidents: IncidentPage;
+  stats: IncidentStats;
+}> {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.jwt) return [];
+  if (!session?.user?.jwt) {
+    return { incidents: EMPTY_PAGE, stats: EMPTY_STATS };
+  }
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+  const headers = { Authorization: `Bearer ${session.user.jwt}` };
 
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-    const res = await fetch(`${apiUrl}/incidents`, {
-      headers: {
-        Authorization: `Bearer ${session.user.jwt}`,
-      },
-      cache: "no-store", // Dynamic data
-    });
+    const [incidentsRes, statsRes] = await Promise.all([
+      fetch(`${apiUrl}/incidents?page=1&limit=20`, {
+        headers,
+        cache: "no-store",
+      }),
+      fetch(`${apiUrl}/incidents/stats`, { headers, cache: "no-store" }),
+    ]);
 
-    if (!res.ok) {
-      throw new Error("Failed to fetch incidents");
-    }
-
-    return res.json();
+    return {
+      incidents: incidentsRes.ok ? await incidentsRes.json() : EMPTY_PAGE,
+      stats: statsRes.ok ? await statsRes.json() : EMPTY_STATS,
+    };
   } catch (error) {
     console.error(error);
-    return [];
+    return { incidents: EMPTY_PAGE, stats: EMPTY_STATS };
   }
-}
-
-interface Incident {
-  id: string;
-  title: string;
-  severity: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
-  status: string;
-  creator?: {
-    email: string;
-  };
 }
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
-  const incidents: Incident[] = await getIncidents();
+  const { incidents, stats } = await getDashboardData();
 
   return (
-    <DashboardClient incidents={incidents} userRole={session?.user?.role} />
+    <DashboardClient
+      initialIncidents={incidents}
+      stats={stats}
+      userRole={session?.user?.role}
+    />
   );
 }

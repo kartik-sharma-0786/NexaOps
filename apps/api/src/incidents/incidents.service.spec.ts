@@ -7,6 +7,7 @@ import { IncidentsService } from './incidents.service';
 jest.mock('@nexaops/database', () => ({
   db: {
     insert: jest.fn(),
+    select: jest.fn(),
     query: {
       incidents: {
         findFirst: jest.fn(),
@@ -17,6 +18,8 @@ jest.mock('@nexaops/database', () => ({
   },
   incidents: {},
   incidentEvents: {},
+  tenantMembers: {},
+  users: {},
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -24,6 +27,7 @@ const { db } = require('@nexaops/database');
 
 const mockedDb = db as {
   insert: jest.Mock;
+  select: jest.Mock;
   transaction: jest.Mock;
   query: {
     incidents: {
@@ -98,17 +102,28 @@ describe('IncidentsService', () => {
   });
 
   describe('findAll', () => {
-    it('strips passwordHash from all incidents', async () => {
+    it('returns paginated data and strips passwordHash', async () => {
       mockedDb.query.incidents.findMany.mockResolvedValue([
         {
           id: 'inc-1',
           creator: { id: 'u1', email: 'a@b.com', name: 'Alice' },
         },
       ]);
+      mockedDb.select.mockReturnValue({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockResolvedValue([{ count: 41 }]),
+        }),
+      });
 
-      const incidents = await service.findAll('tenant-1');
+      const result = await service.findAll('tenant-1', {
+        page: 1,
+        limit: 20,
+      });
 
-      expect(incidents[0].creator).not.toHaveProperty('passwordHash');
+      expect(result.data[0].creator).not.toHaveProperty('passwordHash');
+      expect(result.total).toBe(41);
+      expect(result.page).toBe(1);
+      expect(result.pageCount).toBe(3);
     });
   });
 });
