@@ -32,7 +32,7 @@ export default function PricingPage() {
               </span>
             </div>
             <div className="mt-4 flex justify-center text-6xl font-extrabold text-gray-900 dark:text-white">
-              $50
+              ₹1,000
               <span className="ml-2 text-2xl font-medium text-gray-500 self-end mb-2">
                 {t.pricing.perMonth}
               </span>

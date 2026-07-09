@@ -468,7 +468,7 @@ const translations: Record<Language, Translations> = {
       ctaTitle: "Ready to improve your reliability?",
       ctaSubtitle:
         "Join thousands of developers who trust NexaOps to manage their critical incidents.",
-      ctaPrimary: "Get Started for Free",
+      ctaPrimary: "Get Started",
       ctaSecondary: "Contact Sales",
     },
     footer: {
@@ -510,7 +510,7 @@ const translations: Record<Language, Translations> = {
       titleEnd: "modern engineering teams",
       subtitle:
         "Automate incident response, manage on-call schedules, and conduct blameless post-mortems. NexaOps helps you build more reliable software, faster.",
-      ctaPrimary: "Start handling incidents free",
+      ctaPrimary: "Start handling incidents",
       ctaSecondary: "Watch Demo",
       trustedBy: "Trusted by engineering teams everywhere",
     },
@@ -599,11 +599,11 @@ const translations: Record<Language, Translations> = {
     pricing: {
       heroTitle: "Simple, transparent pricing",
       heroSubtitle:
-        "One plan with everything included. Try it free — upgrade when your team is ready.",
+        "One plan with everything included, for every team.",
       earlyAccess: "Pro Plan",
       perMonth: "/mo",
       freeForever: "Everything included. Per workspace. Cancel anytime.",
-      startFree: "Start free — upgrade anytime",
+      startFree: "Subscribe now",
       upgradeCta: "Upgrade to Pro in Settings",
       supportTitle: "Support the Developer",
       supportText:
@@ -758,7 +758,7 @@ const translations: Record<Language, Translations> = {
       free: "Free",
       pro: "Pro",
       renews: "Renews",
-      upgrade: "Upgrade to Pro — $50/mo",
+      upgrade: "Upgrade to Pro — ₹1,000/mo",
       redirecting: "Opening checkout...",
       cancelSubscription: "Cancel subscription",
       confirmCancel: "Cancel your Pro subscription? You'll be moved to the Free plan immediately.",
@@ -941,7 +941,7 @@ const translations: Record<Language, Translations> = {
       ctaTitle: "信頼性を向上させる準備はできましたか？",
       ctaSubtitle:
         "重大インシデントの管理をNexaOpsに任せる数千人の開発者に加わりましょう。",
-      ctaPrimary: "無料で始める",
+      ctaPrimary: "始める",
       ctaSecondary: "営業に問い合わせる",
     },
     footer: {
@@ -983,7 +983,7 @@ const translations: Record<Language, Translations> = {
       titleEnd: "インシデント管理",
       subtitle:
         "インシデント対応の自動化、オンコールスケジュールの管理、非難のないポストモーテムの実施。NexaOpsは、信頼性の高いソフトウェアをより迅速に構築するのを支援します。",
-      ctaPrimary: "無料でインシデント対応を開始",
+      ctaPrimary: "インシデント対応を開始",
       ctaSecondary: "デモを見る",
       trustedBy: "世界中のエンジニアリングチームから信頼されています",
     },
@@ -1072,11 +1072,11 @@ const translations: Record<Language, Translations> = {
     pricing: {
       heroTitle: "シンプルで透明な料金",
       heroSubtitle:
-        "すべてが含まれた1つのプラン。無料でお試しいただき、チームの準備ができたらアップグレードしてください。",
+        "すべてが含まれた、すべてのチームのための1つのプラン。",
       earlyAccess: "Proプラン",
       perMonth: "/月",
       freeForever: "すべての機能を含む。ワークスペースごと。いつでもキャンセル可能。",
-      startFree: "無料で始める — いつでもアップグレード可能",
+      startFree: "今すぐ購読",
       upgradeCta: "設定でProにアップグレード",
       supportTitle: "開発者を支援する",
       supportText:
@@ -1231,7 +1231,7 @@ const translations: Record<Language, Translations> = {
       free: "無料",
       pro: "Pro",
       renews: "更新日",
-      upgrade: "Proにアップグレード — $50/月",
+      upgrade: "Proにアップグレード — ₹1,000/月",
       redirecting: "チェックアウトを開いています...",
       cancelSubscription: "サブスクリプションを解約",
       confirmCancel: "Proサブスクリプションを解約しますか？すぐに無料プランに変更されます。",
@@ -1413,7 +1413,7 @@ const translations: Record<Language, Translations> = {
       ctaTitle: "अपनी विश्वसनीयता सुधारने के लिए तैयार हैं?",
       ctaSubtitle:
         "हजारों डेवलपर्स से जुड़ें जो अपनी गंभीर घटनाओं के प्रबंधन के लिए नेक्साऑप्स पर भरोसा करते हैं।",
-      ctaPrimary: "मुफ़्त में शुरू करें",
+      ctaPrimary: "शुरू करें",
       ctaSecondary: "बिक्री से संपर्क करें",
     },
     footer: {
@@ -1455,7 +1455,7 @@ const translations: Record<Language, Translations> = {
       titleEnd: "घटना प्रबंधन",
       subtitle:
         "घटना प्रतिक्रिया को स्वचालित करें, ऑन-कॉल शेड्यूल प्रबंधित करें, और दोषरहित पोस्टमार्टम आयोजित करें। नेक्साऑप्स आपको अधिक विश्वसनीय सॉफ़्टवेयर तेजी से बनाने में मदद करता है।",
-      ctaPrimary: "निःशुल्क घटनाएं संभालना शुरू करें",
+      ctaPrimary: "घटनाएं संभालना शुरू करें",
       ctaSecondary: "डेमो देखें",
       trustedBy: "हर जगह इंजीनियरिंग टीमों द्वारा विश्वसनीय",
     },
@@ -1544,11 +1544,11 @@ const translations: Record<Language, Translations> = {
     pricing: {
       heroTitle: "सरल, पारदर्शी मूल्य निर्धारण",
       heroSubtitle:
-        "एक योजना जिसमें सब कुछ शामिल है। मुफ़्त में आज़माएं — जब आपकी टीम तैयार हो तो अपग्रेड करें।",
+        "एक योजना जिसमें सब कुछ शामिल है, हर टीम के लिए।",
       earlyAccess: "प्रो प्लान",
       perMonth: "/माह",
       freeForever: "सब कुछ शामिल। प्रति वर्कस्पेस। कभी भी रद्द करें।",
-      startFree: "मुफ़्त में शुरू करें — कभी भी अपग्रेड करें",
+      startFree: "अभी सदस्यता लें",
       upgradeCta: "सेटिंग्स में प्रो में अपग्रेड करें",
       supportTitle: "डेवलपर का समर्थन करें",
       supportText:
@@ -1703,7 +1703,7 @@ const translations: Record<Language, Translations> = {
       free: "मुफ़्त",
       pro: "प्रो",
       renews: "नवीनीकरण",
-      upgrade: "प्रो में अपग्रेड करें — $50/माह",
+      upgrade: "प्रो में अपग्रेड करें — ₹1,000/माह",
       redirecting: "चेकआउट खोला जा रहा है...",
       cancelSubscription: "सदस्यता रद्द करें",
       confirmCancel: "अपनी प्रो सदस्यता रद्द करें? आप तुरंत मुफ़्त योजना पर चले जाएंगे।",

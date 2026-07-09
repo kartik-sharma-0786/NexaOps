@@ -106,7 +106,7 @@ export function BillingSettings() {
         key: keyId,
         subscription_id: subscriptionId,
         name: "NexaOps",
-        description: "NexaOps Pro — $50/mo",
+        description: "NexaOps Pro — ₹1,000/mo",
         prefill: { email: user?.email, name: user?.name },
         theme: { color: "#4f46e5" },
         handler: async (response: {
