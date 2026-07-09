@@ -367,19 +367,28 @@ export default function Home() {
               </h4>
               <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                 <li>
-                  <span className="text-gray-500 dark:text-gray-500">
+                  <Link
+                    href="/privacy"
+                    className="hover:text-indigo-600 dark:hover:text-indigo-400"
+                  >
                     {t.footer.privacy}
-                  </span>
+                  </Link>
                 </li>
                 <li>
-                  <span className="text-gray-500 dark:text-gray-500">
+                  <Link
+                    href="/terms"
+                    className="hover:text-indigo-600 dark:hover:text-indigo-400"
+                  >
                     {t.footer.terms}
-                  </span>
+                  </Link>
                 </li>
                 <li>
-                  <span className="text-gray-500 dark:text-gray-500">
+                  <Link
+                    href="/privacy#security"
+                    className="hover:text-indigo-600 dark:hover:text-indigo-400"
+                  >
                     {t.footer.security}
-                  </span>
+                  </Link>
                 </li>
               </ul>
             </div>

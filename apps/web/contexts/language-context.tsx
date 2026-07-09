@@ -457,7 +457,8 @@ const translations: Record<Language, Translations> = {
     chat: {
       title: "NexaOps Support",
       greeting: "Hello! How can I help you with NexaOps today?",
-      fallback: "Thanks for reaching out! Our team will get back to you shortly.",
+      fallback:
+        "I'm an automated assistant with limited answers. For anything else, please use the Contact page — a real person will reply by email.",
       pricingReply:
         "NexaOps is currently free while in active development. Check our Pricing section for details.",
       featuresReply:
@@ -574,10 +575,11 @@ const translations: Record<Language, Translations> = {
       contactSales: "Contact sales",
       planFeatures: [
         "Unlimited Incidents",
-        "Unlimited Team Members",
-        "Slack & Discord Integration",
-        "Post-Mortem Generator",
-        "Basic On-Call Scheduling",
+        "Unlimited Team Members & Invitations",
+        "Role-Based Access Control",
+        "Real-time Incident Updates",
+        "Incident Assignment & Timeline",
+        "Email Notifications",
       ],
     },
     resources: {
@@ -887,7 +889,7 @@ const translations: Record<Language, Translations> = {
       title: "NexaOpsサポート",
       greeting: "こんにちは！NexaOpsについて何かお手伝いできますか？",
       fallback:
-        "お問い合わせありがとうございます！担当者がまもなくご連絡いたします。",
+        "私は回答が限られた自動アシスタントです。その他のご質問は、お問い合わせページをご利用ください。担当者がメールで返信いたします。",
       pricingReply:
         "NexaOpsは現在開発中のため無料でご利用いただけます。詳細は料金セクションをご覧ください。",
       featuresReply:
@@ -1004,10 +1006,11 @@ const translations: Record<Language, Translations> = {
       contactSales: "営業に問い合わせる",
       planFeatures: [
         "無制限のインシデント",
-        "無制限のチームメンバー",
-        "SlackとDiscordの統合",
-        "ポストモーテムジェネレーター",
-        "基本的なオンコールスケジューリング",
+        "無制限のチームメンバーと招待",
+        "ロールベースのアクセス制御",
+        "リアルタイムのインシデント更新",
+        "インシデントの割り当てとタイムライン",
+        "メール通知",
       ],
     },
     resources: {
@@ -1317,7 +1320,7 @@ const translations: Record<Language, Translations> = {
       title: "नेक्साऑप्स सहायता",
       greeting: "नमस्ते! आज मैं नेक्साऑप्स के बारे में आपकी कैसे मदद कर सकता हूं?",
       fallback:
-        "संपर्क करने के लिए धन्यवाद! हमारी टीम जल्द ही आपसे संपर्क करेगी।",
+        "मैं सीमित उत्तरों वाला एक स्वचालित सहायक हूं। किसी और चीज़ के लिए, कृपया संपर्क पेज का उपयोग करें — एक वास्तविक व्यक्ति ईमेल से जवाब देगा।",
       pricingReply:
         "नेक्साऑप्स सक्रिय विकास के दौरान वर्तमान में मुफ़्त है। विवरण के लिए हमारा मूल्य निर्धारण अनुभाग देखें।",
       featuresReply:
@@ -1434,10 +1437,11 @@ const translations: Record<Language, Translations> = {
       contactSales: "बिक्री से संपर्क करें",
       planFeatures: [
         "असीमित घटनाएं",
-        "असीमित टीम सदस्य",
-        "Slack और Discord इंटीग्रेशन",
-        "पोस्टमार्टम जेनरेटर",
-        "बुनियादी ऑन-कॉल शेड्यूलिंग",
+        "असीमित टीम सदस्य और निमंत्रण",
+        "भूमिका-आधारित पहुंच नियंत्रण",
+        "रीयल-टाइम घटना अपडेट",
+        "घटना असाइनमेंट और टाइमलाइन",
+        "ईमेल सूचनाएं",
       ],
     },
     resources: {
