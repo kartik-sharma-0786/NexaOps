@@ -1,6 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventsGateway } from '../events/events.gateway';
+import { ChatopsService } from '../notifications/chatops.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { IncidentsService } from './incidents.service';
 
@@ -45,6 +46,9 @@ describe('IncidentsService', () => {
   const notificationsService = {
     enqueueEmail: jest.fn().mockResolvedValue(undefined),
   };
+  const chatopsService = {
+    notify: jest.fn().mockResolvedValue(undefined),
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -54,6 +58,7 @@ describe('IncidentsService', () => {
         IncidentsService,
         { provide: EventsGateway, useValue: eventsGateway },
         { provide: NotificationsService, useValue: notificationsService },
+        { provide: ChatopsService, useValue: chatopsService },
       ],
     }).compile();
 

@@ -84,6 +84,28 @@ export const usersRelations = relations(users, ({ many }) => ({
   assignedIncidents: many(incidents, { relationName: "incidentAssignee" }),
 }));
 
+// Per-tenant API keys for alert ingestion (hashed at rest)
+export const apiKeys = pgTable("api_keys", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id)
+    .notNull(),
+  name: text("name").default("Default").notNull(),
+  keyHash: text("key_hash").notNull().unique(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  lastUsedAt: timestamp("last_used_at"),
+});
+
+// Per-tenant chat integrations (Slack / Discord incoming webhooks)
+export const tenantIntegrations = pgTable("tenant_integrations", {
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id)
+    .primaryKey(),
+  slackWebhookUrl: text("slack_webhook_url"),
+  discordWebhookUrl: text("discord_webhook_url"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Team invitations (single-use, hashed at rest)
 export const invitations = pgTable("invitations", {
   id: uuid("id").defaultRandom().primaryKey(),

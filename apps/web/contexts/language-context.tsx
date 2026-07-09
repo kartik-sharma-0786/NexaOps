@@ -282,6 +282,30 @@ type Translations = {
     inviteInvalid: string;
     acceptTitle: string;
   };
+  integrations: {
+    title: string;
+    slackLabel: string;
+    discordLabel: string;
+    webhookHelp: string;
+    save: string;
+    saving: string;
+    saved: string;
+    configured: string;
+    notConfigured: string;
+    apiKeysTitle: string;
+    apiKeysHelp: string;
+    generateKey: string;
+    generating: string;
+    keyNamePlaceholder: string;
+    copy: string;
+    copied: string;
+    keyOnceWarning: string;
+    created: string;
+    lastUsed: string;
+    never: string;
+    revoke: string;
+    endpointTitle: string;
+  };
   settings: {
     title: string;
     profile: string;
@@ -558,13 +582,13 @@ const translations: Record<Language, Translations> = {
       },
     },
     pricing: {
-      heroTitle: "Currently Building 🛠️",
+      heroTitle: "Simple, transparent pricing",
       heroSubtitle:
-        "NexaOps is free to use while we are in active development. All features are available to everyone.",
-      earlyAccess: "Early Access",
+        "One plan with everything included. Try it free — upgrade when your team is ready.",
+      earlyAccess: "Pro Plan",
       perMonth: "/mo",
-      freeForever: "Free forever for community and early adopters.",
-      startFree: "Start using for free",
+      freeForever: "Everything included. Per workspace. Cancel anytime.",
+      startFree: "Start free trial",
       supportTitle: "Support the Developer",
       supportText:
         "If you like what we're building and want to support the infrastructure costs or buy me a coffee, you can donate below.",
@@ -711,6 +735,32 @@ const translations: Record<Language, Translations> = {
       joining: "Joining...",
       inviteInvalid: "This invitation is invalid or has expired.",
       acceptTitle: "Accept Invitation",
+    },
+    integrations: {
+      title: "Integrations",
+      slackLabel: "Slack webhook URL",
+      discordLabel: "Discord webhook URL",
+      webhookHelp:
+        "Incident created / status / assignment events are posted to these channels. Paste an incoming-webhook URL and save; leave empty to disable.",
+      save: "Save",
+      saving: "Saving...",
+      saved: "Saved!",
+      configured: "Configured",
+      notConfigured: "Not configured",
+      apiKeysTitle: "Alert API Keys",
+      apiKeysHelp:
+        "Let monitoring tools (Grafana, UptimeRobot, Sentry...) create incidents automatically by calling the ingestion endpoint with a key.",
+      generateKey: "Generate key",
+      generating: "Generating...",
+      keyNamePlaceholder: "Key name (e.g. grafana-prod)",
+      copy: "Copy",
+      copied: "Copied!",
+      keyOnceWarning: "Copy this key now — it won't be shown again.",
+      created: "Created",
+      lastUsed: "Last used",
+      never: "Never",
+      revoke: "Revoke",
+      endpointTitle: "Ingestion endpoint",
     },
     settings: {
       title: "Settings",
@@ -989,13 +1039,13 @@ const translations: Record<Language, Translations> = {
       },
     },
     pricing: {
-      heroTitle: "現在構築中 🛠️",
+      heroTitle: "シンプルで透明な料金",
       heroSubtitle:
-        "NexaOpsは開発中は無料で使用できます。すべての機能が誰でも利用可能です。",
-      earlyAccess: "早期アクセス",
+        "すべてが含まれた1つのプラン。無料でお試しいただき、チームの準備ができたらアップグレードしてください。",
+      earlyAccess: "Proプラン",
       perMonth: "/月",
-      freeForever: "コミュニティおよび早期導入者向けに永久無料。",
-      startFree: "無料で使い始める",
+      freeForever: "すべての機能を含む。ワークスペースごと。いつでもキャンセル可能。",
+      startFree: "無料トライアルを開始",
       supportTitle: "開発者を支援する",
       supportText:
         "私たちが作っているものが気に入って、インフラストラクチャのコストを支援したい、またはコーヒーを奢りたい場合は、以下から寄付できます。",
@@ -1142,6 +1192,32 @@ const translations: Record<Language, Translations> = {
       joining: "参加中...",
       inviteInvalid: "この招待は無効か期限切れです。",
       acceptTitle: "招待を承認",
+    },
+    integrations: {
+      title: "統合",
+      slackLabel: "Slack Webhook URL",
+      discordLabel: "Discord Webhook URL",
+      webhookHelp:
+        "インシデントの作成・ステータス・割り当てイベントがこれらのチャンネルに投稿されます。着信WebhookのURLを貼り付けて保存してください。空にすると無効になります。",
+      save: "保存",
+      saving: "保存中...",
+      saved: "保存しました！",
+      configured: "設定済み",
+      notConfigured: "未設定",
+      apiKeysTitle: "アラートAPIキー",
+      apiKeysHelp:
+        "監視ツール（Grafana、UptimeRobot、Sentryなど）がキーを使って取り込みエンドポイントを呼び出し、インシデントを自動作成できます。",
+      generateKey: "キーを生成",
+      generating: "生成中...",
+      keyNamePlaceholder: "キー名（例：grafana-prod）",
+      copy: "コピー",
+      copied: "コピーしました！",
+      keyOnceWarning: "今すぐキーをコピーしてください — 二度と表示されません。",
+      created: "作成日",
+      lastUsed: "最終使用",
+      never: "未使用",
+      revoke: "取り消す",
+      endpointTitle: "取り込みエンドポイント",
     },
     settings: {
       title: "設定",
@@ -1420,13 +1496,13 @@ const translations: Record<Language, Translations> = {
       },
     },
     pricing: {
-      heroTitle: "वर्तमान में निर्माणधीन 🛠️",
+      heroTitle: "सरल, पारदर्शी मूल्य निर्धारण",
       heroSubtitle:
-        "NexaOps सक्रिय विकास के दौरान उपयोग करने के लिए स्वतंत्र है। सभी सुविधाएं सभी के लिए उपलब्ध हैं।",
-      earlyAccess: "प्रारंभिक प्रवेश",
+        "एक योजना जिसमें सब कुछ शामिल है। मुफ़्त में आज़माएं — जब आपकी टीम तैयार हो तो अपग्रेड करें।",
+      earlyAccess: "प्रो प्लान",
       perMonth: "/माह",
-      freeForever: "समुदाय और शुरुआती अपनाने वालों के लिए हमेशा के लिए मुफ़्त।",
-      startFree: "मुफ़्त में उपयोग करना शुरू करें",
+      freeForever: "सब कुछ शामिल। प्रति वर्कस्पेस। कभी भी रद्द करें।",
+      startFree: "मुफ़्त ट्रायल शुरू करें",
       supportTitle: "डेवलपर का समर्थन करें",
       supportText:
         "यदि आप जो हम बना रहे हैं उसे पसंद करते हैं और बुनियादी ढांचे की लागत का समर्थन करना चाहते हैं या मुझे कॉफी खरीदना चाहते हैं, तो आप नीचे दान कर सकते हैं।",
@@ -1573,6 +1649,32 @@ const translations: Record<Language, Translations> = {
       joining: "शामिल हो रहे हैं...",
       inviteInvalid: "यह निमंत्रण अमान्य है या समाप्त हो गया है।",
       acceptTitle: "निमंत्रण स्वीकार करें",
+    },
+    integrations: {
+      title: "इंटीग्रेशन",
+      slackLabel: "Slack वेबहुक URL",
+      discordLabel: "Discord वेबहुक URL",
+      webhookHelp:
+        "घटना निर्माण / स्थिति / असाइनमेंट इवेंट इन चैनलों पर पोस्ट किए जाते हैं। इनकमिंग-वेबहुक URL पेस्ट करें और सहेजें; अक्षम करने के लिए खाली छोड़ें।",
+      save: "सहेजें",
+      saving: "सहेज रहा है...",
+      saved: "सहेजा गया!",
+      configured: "कॉन्फ़िगर किया गया",
+      notConfigured: "कॉन्फ़िगर नहीं किया गया",
+      apiKeysTitle: "अलर्ट API कुंजियाँ",
+      apiKeysHelp:
+        "मॉनिटरिंग टूल्स (Grafana, UptimeRobot, Sentry...) को कुंजी के साथ इंजेशन एंडपॉइंट कॉल करके स्वचालित रूप से घटनाएं बनाने दें।",
+      generateKey: "कुंजी बनाएं",
+      generating: "बना रहा है...",
+      keyNamePlaceholder: "कुंजी का नाम (जैसे grafana-prod)",
+      copy: "कॉपी करें",
+      copied: "कॉपी हो गया!",
+      keyOnceWarning: "इस कुंजी को अभी कॉपी करें — यह दोबारा नहीं दिखाई जाएगी।",
+      created: "बनाई गई",
+      lastUsed: "अंतिम उपयोग",
+      never: "कभी नहीं",
+      revoke: "रद्द करें",
+      endpointTitle: "इंजेशन एंडपॉइंट",
     },
     settings: {
       title: "सेटिंग्स",

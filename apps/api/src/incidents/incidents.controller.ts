@@ -39,8 +39,7 @@ export class IncidentsController {
   @Get()
   findAll(@Request() req: any, @Query() query: ListIncidentsQueryDto) {
     const user = req.user;
-    const assigneeId =
-      query.assignee === 'me' ? user.userId : query.assignee;
+    const assigneeId = query.assignee === 'me' ? user.userId : query.assignee;
     return this.incidentsService.findAll(user.tenantId, {
       assigneeId,
       status: query.status,

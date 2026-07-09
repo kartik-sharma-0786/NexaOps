@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { EventsModule } from './events/events.module';
 import { HealthModule } from './health/health.module';
 import { IncidentsModule } from './incidents/incidents.module';
+import { IntegrationsModule } from './integrations/integrations.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { TeamModule } from './team/team.module';
 
@@ -48,6 +49,7 @@ const isProduction = process.env.NODE_ENV === 'production';
     EventsModule,
     NotificationsModule,
     TeamModule,
+    IntegrationsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

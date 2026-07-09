@@ -16,6 +16,7 @@ import {
   stripPasswordHashFromIncident,
 } from '../common/public-user';
 import { EventsGateway } from '../events/events.gateway';
+import { ChatopsService } from '../notifications/chatops.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CreateIncidentDto } from './dto/create-incident.dto';
 import { UpdateIncidentStatusDto } from './dto/update-incident-status.dto';
@@ -25,9 +26,15 @@ export class IncidentsService {
   constructor(
     private readonly eventsGateway: EventsGateway,
     private readonly notificationsService: NotificationsService,
+    private readonly chatopsService: ChatopsService,
   ) {}
 
-  async create(dto: CreateIncidentDto, userId: string, tenantId: string) {
+  // userId is null when the incident comes from the alert-ingestion API.
+  async create(
+    dto: CreateIncidentDto,
+    userId: string | null,
+    tenantId: string,
+  ) {
     if (dto.assigneeId) {
       await this.assertTenantMember(tenantId, dto.assigneeId);
     }
@@ -61,6 +68,11 @@ export class IncidentsService {
     this.eventsGateway.server
       .to(`tenant:${tenantId}`)
       .emit('incidentCreated', safePayload);
+
+    void this.chatopsService.notify(
+      tenantId,
+      `🚨 [${incident.severity}] New incident: ${incident.title}`,
+    );
 
     // Add Email Job
     if (incidentWithCreator?.creator?.email) {
@@ -142,7 +154,14 @@ export class IncidentsService {
       .where(eq(incidents.tenantId, tenantId))
       .groupBy(incidents.status, incidents.severity);
 
-    const out = { total: 0, active: 0, CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
+    const out = {
+      total: 0,
+      active: 0,
+      CRITICAL: 0,
+      HIGH: 0,
+      MEDIUM: 0,
+      LOW: 0,
+    };
     for (const row of rows) {
       const count = Number(row.count);
       out.total += count;
@@ -210,6 +229,11 @@ export class IncidentsService {
       .to(`tenant:${tenantId}`)
       .emit('incidentUpdated', updated);
 
+    void this.chatopsService.notify(
+      tenantId,
+      `${dto.status === 'RESOLVED' ? '✅' : '🔁'} Incident "${incident.title}": ${incident.status} → ${dto.status}`,
+    );
+
     // Notify the tenant's responders rather than a hardcoded address.
     const recipients = await this.getNotifiableMemberEmails(tenantId);
     await Promise.all(
@@ -265,6 +289,10 @@ export class IncidentsService {
       .emit('incidentUpdated', updated);
 
     if (assigneeEmail) {
+      void this.chatopsService.notify(
+        tenantId,
+        `👤 Incident "${incident.title}" assigned to ${assigneeName ?? assigneeEmail}`,
+      );
       await this.notificationsService.enqueueEmail({
         to: assigneeEmail,
         subject: `[${incident.severity}] Incident assigned to you: ${incident.title}`,

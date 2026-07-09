@@ -1,9 +1,11 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import { IntegrationsSettings } from "../../../components/integrations-settings";
 import { LanguageSelector } from "../../../components/language-selector";
 import { ThemeToggle } from "../../../components/theme-toggle";
 import { useLanguage } from "../../../contexts/language-context";
+import { canManageTeam } from "../../../lib/roles";
 
 export default function SettingsPage() {
   const { data: session } = useSession();
@@ -87,6 +89,9 @@ export default function SettingsPage() {
             </div>
           </dl>
         </div>
+
+        {/* Integrations (managers only) */}
+        {canManageTeam(user?.role) && <IntegrationsSettings />}
 
         {/* Account/Tenant Section */}
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-100 dark:border-gray-700 md:col-span-2">
