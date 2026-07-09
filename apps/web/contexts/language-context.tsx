@@ -172,6 +172,7 @@ type Translations = {
     perMonth: string;
     freeForever: string;
     startFree: string;
+    upgradeCta: string;
     supportTitle: string;
     supportText: string;
     getStarted: string;
@@ -602,7 +603,8 @@ const translations: Record<Language, Translations> = {
       earlyAccess: "Pro Plan",
       perMonth: "/mo",
       freeForever: "Everything included. Per workspace. Cancel anytime.",
-      startFree: "Start free trial",
+      startFree: "Start free — upgrade anytime",
+      upgradeCta: "Upgrade to Pro in Settings",
       supportTitle: "Support the Developer",
       supportText:
         "If you like what we're building and want to support the infrastructure costs or buy me a coffee, you can donate below.",
@@ -1074,7 +1076,8 @@ const translations: Record<Language, Translations> = {
       earlyAccess: "Proプラン",
       perMonth: "/月",
       freeForever: "すべての機能を含む。ワークスペースごと。いつでもキャンセル可能。",
-      startFree: "無料トライアルを開始",
+      startFree: "無料で始める — いつでもアップグレード可能",
+      upgradeCta: "設定でProにアップグレード",
       supportTitle: "開発者を支援する",
       supportText:
         "私たちが作っているものが気に入って、インフラストラクチャのコストを支援したい、またはコーヒーを奢りたい場合は、以下から寄付できます。",
@@ -1545,7 +1548,8 @@ const translations: Record<Language, Translations> = {
       earlyAccess: "प्रो प्लान",
       perMonth: "/माह",
       freeForever: "सब कुछ शामिल। प्रति वर्कस्पेस। कभी भी रद्द करें।",
-      startFree: "मुफ़्त ट्रायल शुरू करें",
+      startFree: "मुफ़्त में शुरू करें — कभी भी अपग्रेड करें",
+      upgradeCta: "सेटिंग्स में प्रो में अपग्रेड करें",
       supportTitle: "डेवलपर का समर्थन करें",
       supportText:
         "यदि आप जो हम बना रहे हैं उसे पसंद करते हैं और बुनियादी ढांचे की लागत का समर्थन करना चाहते हैं या मुझे कॉफी खरीदना चाहते हैं, तो आप नीचे दान कर सकते हैं।",

@@ -1,10 +1,10 @@
 "use client";
 
 import { Button } from "@nexaops/ui";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { LanguageSelector } from "../../../components/language-selector";
 import { Logo } from "../../../components/logo";
@@ -14,6 +14,14 @@ import { useLanguage } from "../../../contexts/language-context";
 export default function LoginPage() {
   const router = useRouter();
   const { t } = useLanguage();
+  const { status } = useSession();
+
+  // Already signed in — go straight to the dashboard.
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.replace("/dashboard");
+    }
+  }, [status, router]);
   const { register, handleSubmit } = useForm<{
     email: string;
     password: string;

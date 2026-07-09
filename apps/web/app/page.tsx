@@ -10,6 +10,7 @@ import {
     Users,
     Zap,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { ChatWidget } from "../components/landing/chat-widget";
 import { FeatureStatusBadge } from "../components/landing/feature-status-badge";
@@ -18,6 +19,8 @@ import { useLanguage } from "../contexts/language-context";
 
 export default function Home() {
   const { t } = useLanguage();
+  const { status } = useSession();
+  const signupHref = status === "authenticated" ? "/dashboard" : "/auth/register";
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors">
@@ -40,7 +43,7 @@ export default function Home() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mb-12">
                 <Link
-                  href="/auth/register"
+                  href={signupHref}
                   className="inline-flex items-center justify-center px-8 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-all shadow-lg hover:shadow-xl"
                 >
                   {t.hero.ctaPrimary}
@@ -227,7 +230,7 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/auth/register"
+                href={signupHref}
                 className="px-8 py-4 bg-white text-indigo-900 font-bold rounded-lg hover:bg-gray-100 transition shadow-lg"
               >
                 {t.landing.ctaPrimary}

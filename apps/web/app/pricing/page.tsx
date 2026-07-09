@@ -1,12 +1,15 @@
 "use client";
 
 import { Check, Heart } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { LandingNavbar } from "../../components/landing/navbar";
 import { useLanguage } from "../../contexts/language-context";
 
 export default function PricingPage() {
   const { t } = useLanguage();
+  const { status } = useSession();
+  const isAuthed = status === "authenticated";
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors">
@@ -53,10 +56,10 @@ export default function PricingPage() {
             </ul>
             <div className="mt-10">
               <Link
-                href="/auth/register"
+                href={isAuthed ? "/dashboard/settings" : "/auth/register"}
                 className="block w-full text-center rounded-lg border border-transparent bg-indigo-600 px-6 py-4 text-xl font-medium text-white hover:bg-indigo-700 shadow-md transition-all"
               >
-                {t.pricing.startFree}
+                {isAuthed ? t.pricing.upgradeCta : t.pricing.startFree}
               </Link>
             </div>
           </div>
