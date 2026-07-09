@@ -6,17 +6,14 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { db, tenants } from '@nexaops/database';
+import { createHmac, timingSafeEqual } from 'crypto';
 import { eq } from 'drizzle-orm';
-import Stripe from 'stripe';
+import Razorpay from 'razorpay';
 
-function getWebAppUrl(): string {
-  return (
-    process.env.WEB_APP_URL ??
-    process.env.NEXTAUTH_URL ??
-    process.env.CORS_ORIGINS?.split(',')[0]?.trim() ??
-    'http://localhost:3000'
-  );
-}
+// Razorpay subscriptions require a finite total_count of billing cycles.
+// 120 monthly cycles = 10 years, effectively "recurring until cancelled"
+// for a product at this stage.
+const TOTAL_BILLING_CYCLES = 120;
 
 type Actor = {
   userId: string;
@@ -25,30 +22,41 @@ type Actor = {
   tenantId: string;
 };
 
+function timingSafeEqualHex(a: string, b: string): boolean {
+  const bufA = Buffer.from(a, 'hex');
+  const bufB = Buffer.from(b, 'hex');
+  return bufA.length === bufB.length && timingSafeEqual(bufA, bufB);
+}
+
 @Injectable()
 export class BillingService {
   private readonly logger = new Logger(BillingService.name);
-  private readonly stripe?: Stripe;
+  private readonly razorpay?: Razorpay;
 
   constructor() {
-    const key = process.env.STRIPE_SECRET_KEY;
-    if (key) {
-      this.stripe = new Stripe(key);
-      this.logger.log('Stripe billing configured');
+    const keyId = process.env.RAZORPAY_KEY_ID;
+    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    if (keyId && keySecret) {
+      this.razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
+      this.logger.log('Razorpay billing configured');
     } else {
       this.logger.warn(
-        'STRIPE_SECRET_KEY not set — billing endpoints are disabled',
+        'RAZORPAY_KEY_ID/RAZORPAY_KEY_SECRET not set — billing endpoints are disabled',
       );
     }
   }
 
-  private requireStripe(): Stripe {
-    if (!this.stripe) {
+  private requireRazorpay(): Razorpay {
+    if (!this.razorpay) {
       throw new ServiceUnavailableException(
         'Billing is not configured on this deployment',
       );
     }
-    return this.stripe;
+    return this.razorpay;
+  }
+
+  private isConfigured(): boolean {
+    return !!this.razorpay && !!process.env.RAZORPAY_PLAN_ID;
   }
 
   async getStatus(tenantId: string) {
@@ -56,7 +64,7 @@ export class BillingService {
       .select({
         plan: tenants.plan,
         currentPeriodEnd: tenants.currentPeriodEnd,
-        stripeCustomerId: tenants.stripeCustomerId,
+        razorpaySubscriptionId: tenants.razorpaySubscriptionId,
       })
       .from(tenants)
       .where(eq(tenants.id, tenantId));
@@ -65,139 +73,145 @@ export class BillingService {
     return {
       plan: tenant.plan,
       currentPeriodEnd: tenant.currentPeriodEnd,
-      configured: !!this.stripe && !!process.env.STRIPE_PRICE_ID,
-      hasCustomer: !!tenant.stripeCustomerId,
+      configured: this.isConfigured(),
+      hasSubscription: !!tenant.razorpaySubscriptionId,
     };
   }
 
-  async createCheckoutSession(actor: Actor) {
-    const stripe = this.requireStripe();
-    const priceId = process.env.STRIPE_PRICE_ID;
-    if (!priceId) {
+  async createSubscription(actor: Actor) {
+    const razorpay = this.requireRazorpay();
+    const planId = process.env.RAZORPAY_PLAN_ID;
+    if (!planId) {
       throw new ServiceUnavailableException(
-        'STRIPE_PRICE_ID is not configured',
+        'RAZORPAY_PLAN_ID is not configured',
       );
     }
 
-    const [tenant] = await db
-      .select()
-      .from(tenants)
-      .where(eq(tenants.id, actor.tenantId));
-    if (!tenant) throw new NotFoundException('Tenant not found');
-
-    let customerId = tenant.stripeCustomerId;
-    if (!customerId) {
-      const customer = await stripe.customers.create({
-        name: tenant.name,
-        email: actor.email,
-        metadata: { tenantId: tenant.id },
-      });
-      customerId = customer.id;
-      await db
-        .update(tenants)
-        .set({ stripeCustomerId: customerId, updatedAt: new Date() })
-        .where(eq(tenants.id, tenant.id));
-    }
-
-    const webUrl = getWebAppUrl();
-    const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
-      customer: customerId,
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${webUrl}/dashboard/settings?billing=success`,
-      cancel_url: `${webUrl}/dashboard/settings?billing=cancelled`,
-      metadata: { tenantId: tenant.id },
-      subscription_data: { metadata: { tenantId: tenant.id } },
+    const subscription = await razorpay.subscriptions.create({
+      plan_id: planId,
+      customer_notify: 1,
+      total_count: TOTAL_BILLING_CYCLES,
+      notes: { tenantId: actor.tenantId },
     });
 
-    return { url: session.url };
+    return {
+      subscriptionId: subscription.id,
+      keyId: process.env.RAZORPAY_KEY_ID,
+    };
   }
 
-  async createPortalSession(tenantId: string) {
-    const stripe = this.requireStripe();
-    const [tenant] = await db
-      .select({ stripeCustomerId: tenants.stripeCustomerId })
-      .from(tenants)
-      .where(eq(tenants.id, tenantId));
-    if (!tenant?.stripeCustomerId) {
-      throw new BadRequestException('No billing account for this workspace');
+  async verifyPayment(
+    tenantId: string,
+    paymentId: string,
+    subscriptionId: string,
+    signature: string,
+  ) {
+    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    if (!keySecret) {
+      throw new ServiceUnavailableException('Billing is not configured');
     }
 
-    const session = await stripe.billingPortal.sessions.create({
-      customer: tenant.stripeCustomerId,
-      return_url: `${getWebAppUrl()}/dashboard/settings`,
-    });
-    return { url: session.url };
+    const expected = createHmac('sha256', keySecret)
+      .update(`${paymentId}|${subscriptionId}`)
+      .digest('hex');
+
+    if (!timingSafeEqualHex(expected, signature)) {
+      throw new BadRequestException('Invalid payment signature');
+    }
+
+    await db
+      .update(tenants)
+      .set({
+        plan: 'PRO',
+        razorpaySubscriptionId: subscriptionId,
+        updatedAt: new Date(),
+      })
+      .where(eq(tenants.id, tenantId));
+
+    this.logger.log(`Tenant ${tenantId} upgraded to PRO (payment verified)`);
+    return { message: 'Subscription activated' };
+  }
+
+  async cancelSubscription(tenantId: string) {
+    const razorpay = this.requireRazorpay();
+    const [tenant] = await db
+      .select({ razorpaySubscriptionId: tenants.razorpaySubscriptionId })
+      .from(tenants)
+      .where(eq(tenants.id, tenantId));
+
+    if (!tenant?.razorpaySubscriptionId) {
+      throw new BadRequestException(
+        'No active subscription for this workspace',
+      );
+    }
+
+    await razorpay.subscriptions.cancel(tenant.razorpaySubscriptionId);
+    await db
+      .update(tenants)
+      .set({ plan: 'FREE', updatedAt: new Date() })
+      .where(eq(tenants.id, tenantId));
+
+    return { message: 'Subscription cancelled' };
   }
 
   async handleWebhook(rawBody: Buffer, signature: string) {
-    const stripe = this.requireStripe();
-    const secret = process.env.STRIPE_WEBHOOK_SECRET;
+    const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
     if (!secret) {
       throw new ServiceUnavailableException(
-        'STRIPE_WEBHOOK_SECRET is not configured',
+        'RAZORPAY_WEBHOOK_SECRET is not configured',
       );
     }
 
-    let event: Stripe.Event;
-    try {
-      event = stripe.webhooks.constructEvent(rawBody, signature, secret);
-    } catch {
+    const expected = createHmac('sha256', secret).update(rawBody).digest('hex');
+    if (!signature || !timingSafeEqualHex(expected, signature)) {
       throw new BadRequestException('Invalid webhook signature');
     }
 
-    switch (event.type) {
-      case 'checkout.session.completed': {
-        const session = event.data.object;
-        const tenantId = session.metadata?.tenantId;
-        if (tenantId) {
-          await db
-            .update(tenants)
-            .set({
-              plan: 'PRO',
-              stripeSubscriptionId:
-                typeof session.subscription === 'string'
-                  ? session.subscription
-                  : (session.subscription?.id ?? null),
-              updatedAt: new Date(),
-            })
-            .where(eq(tenants.id, tenantId));
-          this.logger.log(`Tenant ${tenantId} upgraded to PRO`);
-        }
-        break;
-      }
-      case 'customer.subscription.updated':
-      case 'customer.subscription.deleted': {
-        const sub = event.data.object;
-        const tenantId = await this.resolveTenantForSubscription(sub);
-        if (!tenantId) break;
+    const event = JSON.parse(rawBody.toString('utf8')) as {
+      event: string;
+      payload?: {
+        subscription?: {
+          entity?: {
+            id: string;
+            status: string;
+            current_end?: number | null;
+            notes?: { tenantId?: string };
+          };
+        };
+      };
+    };
 
-        const active =
-          event.type !== 'customer.subscription.deleted' &&
-          (sub.status === 'active' || sub.status === 'trialing');
+    const sub = event.payload?.subscription?.entity;
+    if (!sub) return { received: true };
 
-        const periodEndSeconds =
-          (sub as unknown as { current_period_end?: number })
-            .current_period_end ??
-          sub.items?.data?.[0]?.current_period_end ??
-          null;
+    const tenantId = sub.notes?.tenantId ?? (await this.resolveTenant(sub.id));
+    if (!tenantId) return { received: true };
 
+    const activeStatuses = ['active', 'authenticated'];
+    const isActive = activeStatuses.includes(sub.status);
+
+    switch (event.event) {
+      case 'subscription.activated':
+      case 'subscription.charged':
+      case 'subscription.cancelled':
+      case 'subscription.completed':
+      case 'subscription.halted':
+      case 'subscription.paused':
         await db
           .update(tenants)
           .set({
-            plan: active ? 'PRO' : 'FREE',
-            stripeSubscriptionId: active ? sub.id : null,
-            currentPeriodEnd: periodEndSeconds
-              ? new Date(periodEndSeconds * 1000)
+            plan: isActive ? 'PRO' : 'FREE',
+            razorpaySubscriptionId: isActive ? sub.id : null,
+            currentPeriodEnd: sub.current_end
+              ? new Date(sub.current_end * 1000)
               : null,
             updatedAt: new Date(),
           })
           .where(eq(tenants.id, tenantId));
         this.logger.log(
-          `Tenant ${tenantId} plan set to ${active ? 'PRO' : 'FREE'} (${event.type})`,
+          `Tenant ${tenantId} plan set to ${isActive ? 'PRO' : 'FREE'} (${event.event})`,
         );
         break;
-      }
       default:
         break;
     }
@@ -205,19 +219,11 @@ export class BillingService {
     return { received: true };
   }
 
-  private async resolveTenantForSubscription(
-    sub: Stripe.Subscription,
-  ): Promise<string | null> {
-    if (sub.metadata?.tenantId) return sub.metadata.tenantId;
-
-    const customerId =
-      typeof sub.customer === 'string' ? sub.customer : sub.customer?.id;
-    if (!customerId) return null;
-
+  private async resolveTenant(subscriptionId: string): Promise<string | null> {
     const [tenant] = await db
       .select({ id: tenants.id })
       .from(tenants)
-      .where(eq(tenants.stripeCustomerId, customerId));
+      .where(eq(tenants.razorpaySubscriptionId, subscriptionId));
     return tenant?.id ?? null;
   }
 }

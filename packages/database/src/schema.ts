@@ -36,8 +36,11 @@ export const tenants = pgTable("tenants", {
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(), // e.g. "acme-corp"
   plan: planEnum("plan").default("FREE").notNull(),
-  stripeCustomerId: text("stripe_customer_id"),
-  stripeSubscriptionId: text("stripe_subscription_id"),
+  // Column names predate the Razorpay switch; kept as-is to avoid a
+  // migration since these were never populated (Stripe checkout never
+  // went live).
+  razorpayCustomerId: text("stripe_customer_id"),
+  razorpaySubscriptionId: text("stripe_subscription_id"),
   currentPeriodEnd: timestamp("current_period_end"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

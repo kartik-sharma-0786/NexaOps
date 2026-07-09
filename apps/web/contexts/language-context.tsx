@@ -290,7 +290,8 @@ type Translations = {
     renews: string;
     upgrade: string;
     redirecting: string;
-    manage: string;
+    cancelSubscription: string;
+    confirmCancel: string;
     notConfigured: string;
     success: string;
     cancelled: string;
@@ -756,8 +757,9 @@ const translations: Record<Language, Translations> = {
       pro: "Pro",
       renews: "Renews",
       upgrade: "Upgrade to Pro — $50/mo",
-      redirecting: "Redirecting...",
-      manage: "Manage billing",
+      redirecting: "Opening checkout...",
+      cancelSubscription: "Cancel subscription",
+      confirmCancel: "Cancel your Pro subscription? You'll be moved to the Free plan immediately.",
       notConfigured:
         "Payments are not configured on this deployment yet.",
       success: "Payment successful! Your workspace is now on Pro.",
@@ -1227,8 +1229,9 @@ const translations: Record<Language, Translations> = {
       pro: "Pro",
       renews: "更新日",
       upgrade: "Proにアップグレード — $50/月",
-      redirecting: "リダイレクト中...",
-      manage: "請求を管理",
+      redirecting: "チェックアウトを開いています...",
+      cancelSubscription: "サブスクリプションを解約",
+      confirmCancel: "Proサブスクリプションを解約しますか？すぐに無料プランに変更されます。",
       notConfigured: "このデプロイでは支払いがまだ設定されていません。",
       success: "支払いが完了しました！ワークスペースはProになりました。",
       cancelled: "チェックアウトがキャンセルされました — 請求はありません。",
@@ -1697,8 +1700,9 @@ const translations: Record<Language, Translations> = {
       pro: "प्रो",
       renews: "नवीनीकरण",
       upgrade: "प्रो में अपग्रेड करें — $50/माह",
-      redirecting: "रीडायरेक्ट हो रहा है...",
-      manage: "बिलिंग प्रबंधित करें",
+      redirecting: "चेकआउट खोला जा रहा है...",
+      cancelSubscription: "सदस्यता रद्द करें",
+      confirmCancel: "अपनी प्रो सदस्यता रद्द करें? आप तुरंत मुफ़्त योजना पर चले जाएंगे।",
       notConfigured: "इस डिप्लॉयमेंट पर भुगतान अभी कॉन्फ़िगर नहीं किया गया है।",
       success: "भुगतान सफल! आपका वर्कस्पेस अब प्रो पर है।",
       cancelled: "चेकआउट रद्द कर दिया गया — कोई शुल्क नहीं लगा।",
