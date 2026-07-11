@@ -258,6 +258,9 @@ type Translations = {
     sendInvite: string;
     sending: string;
     inviteSent: string;
+    inviteLinkHint: string;
+    copyLink: string;
+    copied: string;
     member: string;
     role: string;
     joined: string;
@@ -727,6 +730,10 @@ const translations: Record<Language, Translations> = {
       sendInvite: "Send Invite",
       sending: "Sending...",
       inviteSent: "Invitation sent!",
+      inviteLinkHint:
+        "Share this invite link directly — it is shown only once and expires in 7 days.",
+      copyLink: "Copy link",
+      copied: "Copied!",
       member: "Member",
       role: "Role",
       joined: "Joined",
@@ -1200,6 +1207,10 @@ const translations: Record<Language, Translations> = {
       sendInvite: "招待を送信",
       sending: "送信中...",
       inviteSent: "招待を送信しました！",
+      inviteLinkHint:
+        "この招待リンクを直接共有してください。リンクは一度だけ表示され、7日間で期限切れになります。",
+      copyLink: "リンクをコピー",
+      copied: "コピーしました！",
       member: "メンバー",
       role: "役割",
       joined: "参加日",
@@ -1672,6 +1683,10 @@ const translations: Record<Language, Translations> = {
       sendInvite: "निमंत्रण भेजें",
       sending: "भेज रहा है...",
       inviteSent: "निमंत्रण भेजा गया!",
+      inviteLinkHint:
+        "यह आमंत्रण लिंक सीधे साझा करें — यह केवल एक बार दिखाया जाता है और 7 दिनों में समाप्त हो जाता है।",
+      copyLink: "लिंक कॉपी करें",
+      copied: "कॉपी हो गया!",
       member: "सदस्य",
       role: "भूमिका",
       joined: "शामिल हुए",

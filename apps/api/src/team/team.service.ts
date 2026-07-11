@@ -3,6 +3,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -44,6 +45,8 @@ function getWebAppUrl(): string {
 
 @Injectable()
 export class TeamService {
+  private readonly logger = new Logger(TeamService.name);
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly notificationsService: NotificationsService,
@@ -189,16 +192,20 @@ export class TeamService {
     });
 
     const inviteUrl = `${getWebAppUrl()}/auth/accept-invite?token=${token}`;
-    await this.notificationsService.enqueueEmail({
-      to: normalizedEmail,
-      subject: `You've been invited to ${tenant?.name ?? 'a team'} on NexaOps`,
-      text:
-        `${actor.email} invited you to join ${tenant?.name ?? 'their team'} ` +
-        `on NexaOps as ${role}.\n\nAccept the invitation:\n${inviteUrl}\n\n` +
-        `This link expires in 7 days. If you weren't expecting this, you can ignore it.`,
-    });
+    void this.notificationsService
+      .enqueueEmail({
+        to: normalizedEmail,
+        subject: `You've been invited to ${tenant?.name ?? 'a team'} on NexaOps`,
+        text:
+          `${actor.email} invited you to join ${tenant?.name ?? 'their team'} ` +
+          `on NexaOps as ${role}.\n\nAccept the invitation:\n${inviteUrl}\n\n` +
+          `This link expires in 7 days. If you weren't expecting this, you can ignore it.`,
+      })
+      .catch((err) =>
+        this.logger.error(`Failed to send invite email: ${String(err)}`),
+      );
 
-    return { message: 'Invitation sent' };
+    return { message: 'Invitation sent', inviteUrl };
   }
 
   async listInvitations(tenantId: string) {

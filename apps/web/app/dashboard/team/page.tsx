@@ -42,6 +42,8 @@ export default function TeamPage() {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("RESPONDER");
+  const [inviteLink, setInviteLink] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<{
     kind: "ok" | "error";
@@ -105,7 +107,10 @@ export default function TeamPage() {
         await showError(res);
         return;
       }
+      const body = (await res.json()) as { inviteUrl?: string };
       setInviteEmail("");
+      setInviteLink(body.inviteUrl ?? null);
+      setCopied(false);
       setNotice({ kind: "ok", text: t.team.inviteSent });
       await refresh();
     } catch {
@@ -151,6 +156,18 @@ export default function TeamPage() {
       await showError(res);
     }
     await refresh();
+  };
+
+  const copyInviteLink = async () => {
+    if (!inviteLink) return;
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard API unavailable (e.g. insecure context) — the link is
+      // visible and selectable, so the user can still copy it manually.
+    }
   };
 
   const roleLabel = (role: string) =>
@@ -210,6 +227,29 @@ export default function TeamPage() {
               {busy ? t.team.sending : t.team.sendInvite}
             </button>
           </form>
+          {inviteLink && (
+            <div className="mt-4 rounded-lg border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/20 p-4">
+              <p className="text-xs text-indigo-700 dark:text-indigo-300 mb-2">
+                {t.team.inviteLinkHint}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={inviteLink}
+                  onFocus={(e) => e.target.select()}
+                  className="flex-1 rounded-lg border border-indigo-200 dark:border-indigo-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-xs font-mono px-3 py-2 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={copyInviteLink}
+                  className="px-4 py-2 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap"
+                >
+                  {copied ? t.team.copied : t.team.copyLink}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
