@@ -287,7 +287,7 @@ export default function OnCallPage() {
                   <option key={m.userId} value={m.userId}>{m.name || m.email}</option>
                 ))}
               </select>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <label className="block text-xs text-slate-500 mb-1">From</label>
                   <input

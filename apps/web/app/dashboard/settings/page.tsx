@@ -111,7 +111,7 @@ export default function SettingsPage() {
               <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
                 {t.settings.tenantId}
               </dt>
-              <dd className="text-sm font-mono text-gray-900 dark:text-white col-span-2 sm:mt-0 bg-gray-50 dark:bg-gray-900 p-2 rounded">
+              <dd className="text-sm font-mono text-gray-900 dark:text-white col-span-2 sm:mt-0 bg-gray-50 dark:bg-gray-900 p-2 rounded break-all">
                 {user?.tenantId || t.dashboard.unknown}
               </dd>
             </div>

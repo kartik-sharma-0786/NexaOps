@@ -7,6 +7,7 @@ import {
   Clock,
   Settings,
   Users,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -20,6 +21,8 @@ interface SidebarProps {
   tenantId?: string;
   tenantName?: string;
   userEmail?: string | null;
+  /** Rendered inside the mobile drawer: shows a close button and closes on navigation. */
+  onClose?: () => void;
 }
 
 const ROLE_BADGE: Record<string, string> = {
@@ -35,6 +38,7 @@ export function DashboardSidebar({
   tenantId,
   tenantName,
   userEmail,
+  onClose,
 }: SidebarProps) {
   const { t } = useLanguage();
   const pathname = usePathname();
@@ -53,17 +57,29 @@ export function DashboardSidebar({
   const initials = (userEmail?.charAt(0) ?? "?").toUpperCase();
 
   return (
-    <aside className="w-60 bg-slate-900 flex flex-col shrink-0 h-screen">
+    <aside className="w-60 bg-slate-900 flex flex-col shrink-0 h-full">
       {/* Brand */}
       <div className="px-4 pt-5 pb-4 border-b border-slate-800">
-        <Link href="/" className="flex items-center gap-2.5 mb-4 group">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shrink-0 group-hover:bg-indigo-500 transition-colors">
-            <Activity className="w-4 h-4 text-white" />
-          </div>
-          <span className="text-base font-bold text-white tracking-tight leading-none">
-            {t.brandName}
-          </span>
-        </Link>
+        <div className="flex items-center justify-between mb-4">
+          <Link href="/" className="flex items-center gap-2.5 group" onClick={onClose}>
+            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shrink-0 group-hover:bg-indigo-500 transition-colors">
+              <Activity className="w-4 h-4 text-white" />
+            </div>
+            <span className="text-base font-bold text-white tracking-tight leading-none">
+              {t.brandName}
+            </span>
+          </Link>
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close menu"
+              className="lg:hidden w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
+        </div>
 
         <div className="flex items-center gap-2 mb-2">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
@@ -94,6 +110,7 @@ export function DashboardSidebar({
             <Link
               key={href}
               href={href}
+              onClick={onClose}
               className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all duration-100 ${
                 active
                   ? "bg-indigo-600 text-white"

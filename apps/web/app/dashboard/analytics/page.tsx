@@ -139,22 +139,22 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {statCards.map((c) => (
           <div
             key={c.label}
-            className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm hover:shadow-md transition-shadow"
+            className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow"
           >
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2 truncate">
               {c.label}
             </p>
-            <p className={`text-3xl font-bold ${c.tone}`}>{c.value}</p>
+            <p className={`text-2xl sm:text-3xl font-bold ${c.tone}`}>{c.value}</p>
           </div>
         ))}
       </div>
 
       {/* Daily incidents bar chart */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 shadow-sm">
         <h2 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">
           Incidents per Day
         </h2>
@@ -196,7 +196,7 @@ export default function AnalyticsPage() {
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* MTTR by severity */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 shadow-sm">
           <h2 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">
             Avg Time to Resolve (MTTR)
           </h2>
@@ -226,7 +226,7 @@ export default function AnalyticsPage() {
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300 w-16 text-right">
                     {fmtDuration(row.avgMinutes)}
                   </span>
-                  <span className="text-xs text-gray-400 w-16">
+                  <span className="hidden sm:inline text-xs text-gray-400 w-16">
                     ({row.resolved} resolved)
                   </span>
                 </div>
@@ -236,7 +236,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Severity distribution pie */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 shadow-sm">
           <h2 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">
             Severity Distribution
           </h2>

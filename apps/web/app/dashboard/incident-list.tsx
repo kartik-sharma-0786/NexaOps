@@ -235,14 +235,19 @@ export default function IncidentList({
             <li key={incident.id}>
               <Link
                 href={`/dashboard/incidents/${incident.id}`}
-                className={`flex items-center gap-4 px-4 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-l-[3px] ${
+                className={`flex items-center gap-3 sm:gap-4 px-3 sm:px-4 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-l-[3px] ${
                   SEVERITY_LEFT[incident.severity] ?? "border-l-slate-200"
                 }`}
               >
                 {/* Main content */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-white truncate mb-0.5">
-                    {incident.title}
+                  <p className="text-sm font-semibold text-slate-900 dark:text-white mb-0.5 flex items-center gap-1.5">
+                    <span
+                      className={`sm:hidden w-1.5 h-1.5 rounded-full shrink-0 ${
+                        STATUS_DOT[incident.status] ?? "bg-slate-400"
+                      }`}
+                    />
+                    <span className="truncate">{incident.title}</span>
                   </p>
                   <div className="flex items-center gap-3 text-xs text-slate-400 flex-wrap">
                     <span className="truncate">
@@ -271,8 +276,8 @@ export default function IncidentList({
                   </div>
                 </div>
 
-                {/* Status */}
-                <div className="flex items-center gap-1.5 w-28 justify-center shrink-0">
+                {/* Status (desktop only — the dot next to the title covers mobile) */}
+                <div className="hidden sm:flex items-center gap-1.5 w-28 justify-center shrink-0">
                   <span
                     className={`w-1.5 h-1.5 rounded-full shrink-0 ${
                       STATUS_DOT[incident.status] ?? "bg-slate-400"
@@ -286,7 +291,7 @@ export default function IncidentList({
                 </div>
 
                 {/* Severity pill */}
-                <div className="w-20 flex justify-center shrink-0">
+                <div className="w-auto sm:w-20 flex justify-center shrink-0">
                   <span
                     className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${
                       SEVERITY_PILL[incident.severity] ??

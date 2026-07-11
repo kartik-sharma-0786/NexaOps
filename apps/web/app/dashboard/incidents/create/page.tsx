@@ -101,7 +101,7 @@ export default function CreateIncidentPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-lg shadow">
+    <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-5 sm:p-8 rounded-lg shadow">
       <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
         {t.incidentForm.createTitle}
       </h1>

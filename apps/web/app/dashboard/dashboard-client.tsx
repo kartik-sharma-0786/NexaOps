@@ -68,7 +68,7 @@ export default function DashboardClient({
             {t.dashboard.incidents}
           </h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <LanguageSelector />
           <ThemeToggle />
           {canManageIncidents(userRole) && (
@@ -84,25 +84,25 @@ export default function DashboardClient({
       </div>
 
       {/* Stat cards */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
         {summaryCards.map((card) => {
           const Icon = card.icon;
           return (
             <div
               key={card.label}
-              className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm hover:shadow-md transition-shadow"
+              className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow"
             >
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 truncate">
                   {card.label}
                 </p>
                 <div
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center ${card.iconBg}`}
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${card.iconBg}`}
                 >
                   <Icon className={`w-4 h-4 ${card.iconColor}`} />
                 </div>
               </div>
-              <p className={`text-3xl font-bold ${card.valueColor}`}>
+              <p className={`text-2xl sm:text-3xl font-bold ${card.valueColor}`}>
                 {card.value}
               </p>
             </div>

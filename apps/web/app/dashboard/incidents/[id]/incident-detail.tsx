@@ -188,7 +188,7 @@ export default function IncidentDetail({
       <div
         className={`bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden border-l-4 ${severityStyle.border}`}
       >
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -277,8 +277,8 @@ export default function IncidentDetail({
       </div>
 
       {/* AI Summary */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-5">
-        <div className="flex items-center justify-between mb-3">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-5">
+        <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
               <Sparkles className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
@@ -317,7 +317,7 @@ export default function IncidentDetail({
       </div>
 
       {/* Timeline + comment */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-5">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-5">
         <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-5">
           {t.incidentDetail.timeline}
         </h3>
