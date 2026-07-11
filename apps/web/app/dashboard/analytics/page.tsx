@@ -179,7 +179,7 @@ export default function AnalyticsPage() {
               />
               <Tooltip
                 formatter={(v) => [v, "Incidents"]}
-                labelFormatter={fmtDay}
+                labelFormatter={(label) => fmtDay(String(label))}
                 contentStyle={{
                   background: "var(--tw-bg-opacity, #fff)",
                   border: "1px solid #e5e7eb",
