@@ -1,6 +1,16 @@
 "use client";
 
+import {
+  AlertTriangle,
+  ArrowLeft,
+  CheckCircle2,
+  Circle,
+  Clock,
+  Sparkles,
+  User,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { useLanguage } from "../../../../contexts/language-context";
@@ -19,9 +29,7 @@ interface IncidentEvent {
   id: string;
   message: string;
   createdAt: string;
-  actor?: {
-    email: string;
-  };
+  actor?: { email: string };
 }
 
 interface Incident {
@@ -30,22 +38,40 @@ interface Incident {
   description: string;
   status: string;
   severity: string;
-  creator?: {
-    email: string;
-  };
-  assignee?: {
-    id: string;
-    email: string;
-    name?: string;
-  } | null;
+  creator?: { email: string };
+  assignee?: { id: string; email: string; name?: string } | null;
   createdAt: string;
   events?: IncidentEvent[];
 }
 
-type Member = {
-  userId: string;
-  name: string;
-  email: string;
+type Member = { userId: string; name: string; email: string };
+
+const SEVERITY_STYLES: Record<string, { pill: string; border: string }> = {
+  CRITICAL: {
+    pill: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+    border: "border-l-red-500",
+  },
+  HIGH: {
+    pill: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
+    border: "border-l-orange-500",
+  },
+  MEDIUM: {
+    pill: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+    border: "border-l-yellow-500",
+  },
+  LOW: {
+    pill: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+    border: "border-l-blue-400",
+  },
+};
+
+const STATUS_CONFIG: Record<
+  string,
+  { label: string; dot: string; icon: typeof Circle }
+> = {
+  OPEN: { label: "Open", dot: "bg-red-500", icon: AlertTriangle },
+  ACKNOWLEDGED: { label: "Acknowledged", dot: "bg-amber-500", icon: Clock },
+  RESOLVED: { label: "Resolved", dot: "bg-emerald-500", icon: CheckCircle2 },
 };
 
 export default function IncidentDetail({
@@ -62,80 +88,58 @@ export default function IncidentDetail({
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [summarizing, setSummarizing] = useState(false);
 
-  // Helper to safely access extended session properties
   const user = session?.user as ExtendedUser;
-
-  useEffect(() => {
-    if (!user?.jwt || !canManageIncidents(user?.role)) return;
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-    fetch(`${apiUrl}/members`, {
-      headers: { Authorization: `Bearer ${user.jwt}` },
-    })
-      .then(async (res) => {
-        if (res.ok) setMembers(await res.json());
-      })
-      .catch(() => {});
-  }, [user?.jwt, user?.role]);
-
-  const handleAssign = async (assigneeId: string) => {
-    if (!user?.jwt) return;
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-      await fetch(`${apiUrl}/incidents/${incident.id}/assign`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.jwt}`,
-        },
-        body: JSON.stringify({ assigneeId: assigneeId || null }),
-      });
-      // State updates via socket
-    } catch (error) {
-      console.error("Failed to assign incident", error);
-    }
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+  const severityStyle = SEVERITY_STYLES[incident.severity] ?? {
+    pill: "bg-slate-100 text-slate-600",
+    border: "border-l-slate-300",
+  };
+  const statusCfg = STATUS_CONFIG[incident.status] ?? {
+    label: incident.status,
+    dot: "bg-slate-400",
+    icon: Circle,
   };
 
   useEffect(() => {
+    if (!user?.jwt || !canManageIncidents(user?.role)) return;
+    fetch(`${apiUrl}/members`, {
+      headers: { Authorization: `Bearer ${user.jwt}` },
+    })
+      .then(async (res) => { if (res.ok) setMembers(await res.json()); })
+      .catch(() => {});
+  }, [user?.jwt, user?.role]);
+
+  useEffect(() => {
     if (!user?.jwt) return;
-
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-    // The server verifies this JWT on connect and joins the tenant room itself.
     const socket = io(apiUrl, { auth: { token: user.jwt } });
-
-    socket.on("incidentUpdated", (updatedIncident: Incident) => {
-      if (updatedIncident.id === incident.id) {
-        setIncident(updatedIncident);
-      }
+    socket.on("incidentUpdated", (updated: Incident) => {
+      if (updated.id === incident.id) setIncident(updated);
     });
-
-    return () => {
-      socket.disconnect();
-    };
+    return () => { socket.disconnect(); };
   }, [session, incident.id, user?.jwt]);
 
   const handleStatusChange = async (newStatus: string) => {
     if (!user?.jwt) return;
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-      await fetch(`${apiUrl}/incidents/${incident.id}/status`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.jwt}`,
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
-      // State updates via socket
-    } catch (error) {
-      console.error("Failed to update status", error);
-    }
+    await fetch(`${apiUrl}/incidents/${incident.id}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.jwt}` },
+      body: JSON.stringify({ status: newStatus }),
+    }).catch(console.error);
+  };
+
+  const handleAssign = async (assigneeId: string) => {
+    if (!user?.jwt) return;
+    await fetch(`${apiUrl}/incidents/${incident.id}/assign`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.jwt}` },
+      body: JSON.stringify({ assigneeId: assigneeId || null }),
+    }).catch(console.error);
   };
 
   const handleSummarize = async () => {
     if (!user?.jwt) return;
     setSummarizing(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       const res = await fetch(`${apiUrl}/incidents/${incident.id}/summarize`, {
         method: "POST",
         headers: { Authorization: `Bearer ${user.jwt}` },
@@ -154,16 +158,11 @@ export default function IncidentDetail({
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user?.jwt || !comment.trim()) return;
-
     setLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       await fetch(`${apiUrl}/incidents/${incident.id}/comments`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.jwt}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.jwt}` },
         body: JSON.stringify({ message: comment }),
       });
       setComment("");
@@ -175,71 +174,89 @@ export default function IncidentDetail({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              {incident.title}
-            </h1>
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-              {t.incidentDetail.reportedBy} {incident.creator?.email}{" "}
-              {t.incidentDetail.on}{" "}
-              {new Date(incident.createdAt).toLocaleString(locale)}
-            </p>
-          </div>
-          <div>
-            {canManageIncidents(user?.role) ? (
-              <select
-                aria-label={t.dashboard.statusLabel}
-                value={incident.status}
-                onChange={(e) => handleStatusChange(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600"
-              >
-                <option value="OPEN">{t.dashboard.status.OPEN}</option>
-                <option value="ACKNOWLEDGED">
-                  {t.dashboard.status.ACKNOWLEDGED}
-                </option>
-                <option value="RESOLVED">{t.dashboard.status.RESOLVED}</option>
-              </select>
-            ) : (
-              <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-md text-sm font-medium">
-                {t.dashboard.status[
-                  incident.status as keyof typeof t.dashboard.status
-                ] || incident.status}
-              </span>
-            )}
-          </div>
-        </div>
-        <p className="mt-4 text-gray-700 dark:text-gray-200">
-          {incident.description}
-        </p>
-        <div className="mt-4 flex flex-wrap items-center gap-4">
-          <span
-            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-            ${
-              incident.severity === "CRITICAL"
-                ? "bg-red-100 text-red-800"
-                : incident.severity === "HIGH"
-                  ? "bg-orange-100 text-orange-800"
-                  : incident.severity === "MEDIUM"
-                    ? "bg-yellow-100 text-yellow-800"
-                    : "bg-blue-100 text-blue-800"
-            }`}
-          >
-            {t.dashboard.severity[
-              incident.severity as keyof typeof t.dashboard.severity
-            ] || incident.severity}
-          </span>
+    <div className="max-w-4xl space-y-5">
+      {/* Back nav */}
+      <Link
+        href="/dashboard"
+        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+      >
+        <ArrowLeft className="w-3.5 h-3.5" />
+        Back to Incidents
+      </Link>
 
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-            <span>{t.dashboard.assignedTo}</span>
+      {/* Header card */}
+      <div
+        className={`bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden border-l-4 ${severityStyle.border}`}
+      >
+        <div className="p-6">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <span
+                  className={`text-xs font-semibold px-2 py-0.5 rounded-full ${severityStyle.pill}`}
+                >
+                  {t.dashboard.severity[
+                    incident.severity as keyof typeof t.dashboard.severity
+                  ] ?? incident.severity}
+                </span>
+                <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                  <span className={`w-1.5 h-1.5 rounded-full ${statusCfg.dot}`} />
+                  {t.dashboard.status[
+                    incident.status as keyof typeof t.dashboard.status
+                  ] ?? incident.status}
+                </span>
+              </div>
+              <h1 className="text-xl font-bold text-slate-900 dark:text-white leading-snug">
+                {incident.title}
+              </h1>
+              <p className="mt-1 text-xs text-slate-400">
+                {t.incidentDetail.reportedBy}{" "}
+                <span className="text-slate-500">{incident.creator?.email}</span>{" "}
+                {t.incidentDetail.on}{" "}
+                {new Date(incident.createdAt).toLocaleString(locale)}
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-col gap-2 shrink-0">
+              {canManageIncidents(user?.role) ? (
+                <select
+                  aria-label={t.dashboard.statusLabel}
+                  value={incident.status}
+                  onChange={(e) => handleStatusChange(e.target.value)}
+                  className="text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition"
+                >
+                  <option value="OPEN">{t.dashboard.status.OPEN}</option>
+                  <option value="ACKNOWLEDGED">{t.dashboard.status.ACKNOWLEDGED}</option>
+                  <option value="RESOLVED">{t.dashboard.status.RESOLVED}</option>
+                </select>
+              ) : (
+                <span className="text-sm font-medium text-slate-600 dark:text-slate-300 px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                  {t.dashboard.status[
+                    incident.status as keyof typeof t.dashboard.status
+                  ] ?? incident.status}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Description */}
+          {incident.description && (
+            <p className="mt-4 text-sm text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 border border-slate-100 dark:border-slate-700/50">
+              {incident.description}
+            </p>
+          )}
+
+          {/* Assignee */}
+          <div className="mt-4 flex items-center gap-2 text-sm">
+            <User className="w-4 h-4 text-slate-400 shrink-0" />
+            <span className="text-slate-500">{t.dashboard.assignedTo}</span>
             {canManageIncidents(user?.role) ? (
               <select
                 aria-label={t.dashboard.assignedTo}
                 value={incident.assignee?.id ?? ""}
                 onChange={(e) => handleAssign(e.target.value)}
-                className="rounded-md border-gray-300 text-sm p-1 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition"
               >
                 <option value="">{t.dashboard.unassigned}</option>
                 {members.map((m) => (
@@ -249,9 +266,9 @@ export default function IncidentDetail({
                 ))}
               </select>
             ) : (
-              <span className="font-medium">
+              <span className="font-medium text-slate-700 dark:text-slate-200">
                 {incident.assignee
-                  ? incident.assignee.name || incident.assignee.email
+                  ? incident.assignee.name ?? incident.assignee.email
                   : t.dashboard.unassigned}
               </span>
             )}
@@ -260,86 +277,99 @@ export default function IncidentDetail({
       </div>
 
       {/* AI Summary */}
-      <div className="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-5">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-            AI Summary
-          </h3>
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+              AI Summary
+            </h3>
+          </div>
           <button
             onClick={handleSummarize}
             disabled={summarizing}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50 transition-colors shadow-sm"
           >
             {summarizing ? (
               <>
-                <span className="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full" />
+                <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 Summarizing…
               </>
             ) : (
-              "✦ Summarize with AI"
+              <>
+                <Sparkles className="w-3 h-3" />
+                Summarize with AI
+              </>
             )}
           </button>
         </div>
         {aiSummary ? (
-          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-4 border border-indigo-100 dark:border-indigo-800">
+          <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-4 border border-indigo-100 dark:border-indigo-800">
             {aiSummary}
           </p>
         ) : (
-          <p className="text-sm text-gray-400 italic">
-            Click "Summarize with AI" to generate an incident summary using Claude.
+          <p className="text-xs text-slate-400 italic">
+            Click &quot;Summarize with AI&quot; to generate an incident summary using the event timeline.
           </p>
         )}
       </div>
 
-      <div className="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
-        <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
+      {/* Timeline + comment */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-5">
+        <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-5">
           {t.incidentDetail.timeline}
         </h3>
 
-        <div className="space-y-4 mb-6">
-          {incident.events?.map((event) => (
-            <div
-              key={event.id}
-              className="border-l-4 border-gray-200 dark:border-gray-600 pl-4 py-2"
-            >
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                <span className="font-semibold text-gray-900 dark:text-white">
-                  {event.actor?.email}
-                </span>{" "}
-                - {new Date(event.createdAt).toLocaleString(locale)}
-              </p>
-              <p className="text-gray-800 dark:text-gray-100 mt-1">
-                {event.message}
-              </p>
-            </div>
-          ))}
-          {(!incident.events || incident.events.length === 0) && (
-            <p className="text-gray-500 italic">
-              {t.incidentDetail.noActivity}
-            </p>
+        <div className="relative">
+          {/* Vertical line */}
+          {incident.events && incident.events.length > 0 && (
+            <div className="absolute left-[11px] top-2 bottom-2 w-px bg-slate-200 dark:bg-slate-700" />
           )}
+
+          <div className="space-y-5 mb-6">
+            {incident.events?.map((event) => (
+              <div key={event.id} className="flex gap-3 relative">
+                <div className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 shrink-0 mt-0.5 z-10" />
+                <div className="flex-1 min-w-0 pb-1">
+                  <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      {event.actor?.email ?? "System"}
+                    </span>
+                    <span className="text-xs text-slate-400">
+                      {new Date(event.createdAt).toLocaleString(locale)}
+                    </span>
+                  </div>
+                  <p className="text-sm text-slate-600 dark:text-slate-300">
+                    {event.message}
+                  </p>
+                </div>
+              </div>
+            ))}
+            {(!incident.events || incident.events.length === 0) && (
+              <p className="text-sm text-slate-400 italic ml-8">
+                {t.incidentDetail.noActivity}
+              </p>
+            )}
+          </div>
         </div>
 
         {canManageIncidents(user?.role) && (
-          <form onSubmit={handleAddComment}>
-            <div>
-              <label htmlFor="comment" className="sr-only">
-                {t.incidentDetail.placeholder}
-              </label>
-              <textarea
-                id="comment"
-                rows={3}
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                className="shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                placeholder={t.incidentDetail.placeholder}
-              />
-            </div>
-            <div className="mt-3 flex justify-end">
+          <form onSubmit={handleAddComment} className="border-t border-slate-100 dark:border-slate-800 pt-4">
+            <textarea
+              id="comment"
+              rows={3}
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              className="w-full text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition resize-none"
+              placeholder={t.incidentDetail.placeholder}
+            />
+            <div className="mt-2 flex justify-end">
               <button
                 type="submit"
-                disabled={loading}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                disabled={loading || !comment.trim()}
+                className="px-4 py-2 text-sm font-medium rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-40 transition-colors shadow-sm"
               >
                 {loading ? t.incidentDetail.posting : t.incidentDetail.post}
               </button>

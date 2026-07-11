@@ -1,5 +1,6 @@
 "use client";
 
+import { Search, SlidersHorizontal } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -11,14 +12,8 @@ type Incident = {
   title: string;
   severity: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
   status: string;
-  creator?: {
-    email: string;
-  };
-  assignee?: {
-    id: string;
-    email: string;
-    name?: string;
-  } | null;
+  creator?: { email: string };
+  assignee?: { id: string; email: string; name?: string } | null;
 };
 
 export type IncidentPage = {
@@ -41,6 +36,26 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 const STATUSES = ["OPEN", "ACKNOWLEDGED", "RESOLVED"] as const;
 const SEVERITIES = ["CRITICAL", "HIGH", "MEDIUM", "LOW"] as const;
 
+const SEVERITY_LEFT: Record<string, string> = {
+  CRITICAL: "border-l-red-500",
+  HIGH: "border-l-orange-500",
+  MEDIUM: "border-l-yellow-500",
+  LOW: "border-l-blue-400",
+};
+
+const SEVERITY_PILL: Record<string, string> = {
+  CRITICAL: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+  HIGH: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
+  MEDIUM: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+  LOW: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+};
+
+const STATUS_DOT: Record<string, string> = {
+  OPEN: "bg-red-500",
+  ACKNOWLEDGED: "bg-amber-500",
+  RESOLVED: "bg-emerald-500",
+};
+
 export default function IncidentList({
   initialData,
 }: {
@@ -60,11 +75,8 @@ export default function IncidentList({
   const user = session?.user as
     | { id?: string; tenantId?: string; email?: string; jwt?: string }
     | undefined;
-
   const jwt = user?.jwt;
 
-  // Refetch when filters/page change (debounced for typing); the server
-  // already provided the initial unfiltered first page.
   useEffect(() => {
     if (isFirstQuery.current) {
       isFirstQuery.current = false;
@@ -95,8 +107,6 @@ export default function IncidentList({
 
   useEffect(() => {
     if (!user?.jwt) return;
-
-    // The server verifies this JWT on connect and joins the tenant room itself.
     const socket = io(API_URL, { auth: { token: user.jwt } });
 
     socket.on("incidentCreated", (newIncident: Incident) => {
@@ -124,127 +134,169 @@ export default function IncidentList({
   const resetToFirstPage = () => setPage(1);
 
   return (
-    <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
-      <div className="px-4 pt-4 sm:px-6 flex flex-col lg:flex-row gap-3 lg:items-center">
-        <div className="flex gap-2">
-          {([false, true] as const).map((mineOption) => (
+    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+      {/* Toolbar */}
+      <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex flex-wrap gap-2 items-center">
+        {/* Mine/All toggle */}
+        <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5 shrink-0">
+          {([false, true] as const).map((opt) => (
             <button
-              key={String(mineOption)}
+              key={String(opt)}
               type="button"
               onClick={() => {
-                setMine(mineOption);
+                setMine(opt);
                 resetToFirstPage();
               }}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition ${
-                mine === mineOption
-                  ? "bg-indigo-600 text-white"
-                  : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                mine === opt
+                  ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
+                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
               }`}
             >
-              {mineOption ? t.dashboard.filterMine : t.dashboard.filterAll}
+              {opt ? t.dashboard.filterMine : t.dashboard.filterAll}
             </button>
           ))}
         </div>
-        <input
-          type="search"
-          value={q}
-          onChange={(e) => {
-            setQ(e.target.value);
-            resetToFirstPage();
-          }}
-          placeholder={t.dashboard.searchPlaceholder}
-          className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-        />
-        <select
-          aria-label={t.dashboard.allStatuses}
-          value={status}
-          onChange={(e) => {
-            setStatus(e.target.value);
-            resetToFirstPage();
-          }}
-          className="rounded-md border-gray-300 text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-        >
-          <option value="">{t.dashboard.allStatuses}</option>
-          {STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {t.dashboard.status[s]}
-            </option>
-          ))}
-        </select>
-        <select
-          aria-label={t.dashboard.allSeverities}
-          value={severity}
-          onChange={(e) => {
-            setSeverity(e.target.value);
-            resetToFirstPage();
-          }}
-          className="rounded-md border-gray-300 text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-        >
-          <option value="">{t.dashboard.allSeverities}</option>
-          {SEVERITIES.map((s) => (
-            <option key={s} value={s}>
-              {t.dashboard.severity[s]}
-            </option>
-          ))}
-        </select>
+
+        {/* Search */}
+        <div className="relative flex-1 min-w-[160px]">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+          <input
+            type="search"
+            value={q}
+            onChange={(e) => {
+              setQ(e.target.value);
+              resetToFirstPage();
+            }}
+            placeholder={t.dashboard.searchPlaceholder}
+            className="w-full pl-8 pr-3 py-1.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition"
+          />
+        </div>
+
+        {/* Filters */}
+        <div className="flex items-center gap-1.5">
+          <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+          <select
+            aria-label={t.dashboard.allStatuses}
+            value={status}
+            onChange={(e) => {
+              setStatus(e.target.value);
+              resetToFirstPage();
+            }}
+            className="text-sm py-1.5 px-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition"
+          >
+            <option value="">{t.dashboard.allStatuses}</option>
+            {STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {t.dashboard.status[s]}
+              </option>
+            ))}
+          </select>
+          <select
+            aria-label={t.dashboard.allSeverities}
+            value={severity}
+            onChange={(e) => {
+              setSeverity(e.target.value);
+              resetToFirstPage();
+            }}
+            className="text-sm py-1.5 px-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition"
+          >
+            <option value="">{t.dashboard.allSeverities}</option>
+            {SEVERITIES.map((s) => (
+              <option key={s} value={s}>
+                {t.dashboard.severity[s]}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
+      {/* Column headers */}
+      <div className="hidden sm:grid sm:grid-cols-[1fr_auto_auto] gap-4 px-4 py-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50">
+        <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 pl-3">
+          Incident
+        </span>
+        <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 w-28 text-center">
+          Status
+        </span>
+        <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 w-20 text-center">
+          Severity
+        </span>
+      </div>
+
+      {/* Incident rows */}
+      <ul role="list" className="divide-y divide-slate-100 dark:divide-slate-800">
         {pageData.data.length === 0 ? (
-          <li className="px-4 py-4 sm:px-6 text-center text-gray-500">
-            {t.dashboard.noIncidents}
+          <li className="px-6 py-12 text-center">
+            <p className="text-sm text-slate-400">{t.dashboard.noIncidents}</p>
           </li>
         ) : (
           pageData.data.map((incident) => (
             <li key={incident.id}>
               <Link
                 href={`/dashboard/incidents/${incident.id}`}
-                className="block hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150 ease-in-out"
+                className={`flex items-center gap-4 px-4 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-l-[3px] ${
+                  SEVERITY_LEFT[incident.severity] ?? "border-l-slate-200"
+                }`}
               >
-                <div className="px-4 py-4 sm:px-6">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-indigo-600 truncate">
-                      {incident.title}
-                    </p>
-                    <div className="ml-2 flex-shrink-0 flex">
-                      <p
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                        ${
-                          incident.severity === "CRITICAL"
-                            ? "bg-red-100 text-red-800"
-                            : incident.severity === "HIGH"
-                              ? "bg-orange-100 text-orange-800"
-                              : incident.severity === "MEDIUM"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-blue-100 text-blue-800"
-                        }`}
-                      >
-                        {t.dashboard.severity[
-                          incident.severity as keyof typeof t.dashboard.severity
-                        ] || incident.severity}
-                      </p>
-                    </div>
+                {/* Main content */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-slate-900 dark:text-white truncate mb-0.5">
+                    {incident.title}
+                  </p>
+                  <div className="flex items-center gap-3 text-xs text-slate-400 flex-wrap">
+                    <span className="truncate">
+                      {t.dashboard.createdBy}{" "}
+                      <span className="text-slate-500 dark:text-slate-400">
+                        {incident.creator?.email ?? t.dashboard.unknown}
+                      </span>
+                    </span>
+                    {incident.assignee && (
+                      <>
+                        <span className="w-0.5 h-0.5 rounded-full bg-slate-300 shrink-0" />
+                        <span className="truncate">
+                          {t.dashboard.assignedTo}{" "}
+                          <span className="text-slate-500 dark:text-slate-400">
+                            {incident.assignee.name ?? incident.assignee.email}
+                          </span>
+                        </span>
+                      </>
+                    )}
+                    {!incident.assignee && (
+                      <>
+                        <span className="w-0.5 h-0.5 rounded-full bg-slate-300 shrink-0" />
+                        <span className="italic">{t.dashboard.unassigned}</span>
+                      </>
+                    )}
                   </div>
-                  <div className="mt-2 sm:flex sm:justify-between">
-                    <div className="sm:flex">
-                      <p className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                        {t.dashboard.statusLabel}{" "}
-                        {t.dashboard.status[
-                          incident.status as keyof typeof t.dashboard.status
-                        ] || incident.status}
-                      </p>
-                      <p className="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400 sm:mt-0 sm:ml-6">
-                        {t.dashboard.createdBy}{" "}
-                        {incident.creator?.email || t.dashboard.unknown}
-                      </p>
-                      <p className="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400 sm:mt-0 sm:ml-6">
-                        {t.dashboard.assignedTo}{" "}
-                        {incident.assignee
-                          ? incident.assignee.name || incident.assignee.email
-                          : t.dashboard.unassigned}
-                      </p>
-                    </div>
-                  </div>
+                </div>
+
+                {/* Status */}
+                <div className="flex items-center gap-1.5 w-28 justify-center shrink-0">
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                      STATUS_DOT[incident.status] ?? "bg-slate-400"
+                    }`}
+                  />
+                  <span className="text-xs font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                    {t.dashboard.status[
+                      incident.status as keyof typeof t.dashboard.status
+                    ] ?? incident.status}
+                  </span>
+                </div>
+
+                {/* Severity pill */}
+                <div className="w-20 flex justify-center shrink-0">
+                  <span
+                    className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${
+                      SEVERITY_PILL[incident.severity] ??
+                      "bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    {t.dashboard.severity[
+                      incident.severity as keyof typeof t.dashboard.severity
+                    ] ?? incident.severity}
+                  </span>
                 </div>
               </Link>
             </li>
@@ -252,24 +304,27 @@ export default function IncidentList({
         )}
       </ul>
 
+      {/* Pagination */}
       {pageData.pageCount > 1 && (
-        <div className="px-4 py-3 sm:px-6 border-t border-gray-100 dark:border-gray-700 flex items-center justify-center gap-4 text-sm">
+        <div className="px-4 py-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center gap-3">
           <button
             type="button"
             disabled={page <= 1}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="px-3 py-1 rounded-md border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-700"
+            className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-slate-800 transition text-sm font-medium"
           >
             ‹
           </button>
-          <span className="text-gray-600 dark:text-gray-300">
+          <span className="text-xs text-slate-500 dark:text-slate-400 tabular-nums">
             {pageData.page} / {pageData.pageCount}
           </span>
           <button
             type="button"
             disabled={page >= pageData.pageCount}
-            onClick={() => setPage((p) => Math.min(pageData.pageCount, p + 1))}
-            className="px-3 py-1 rounded-md border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-700"
+            onClick={() =>
+              setPage((p) => Math.min(pageData.pageCount, p + 1))
+            }
+            className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-slate-800 transition text-sm font-medium"
           >
             ›
           </button>

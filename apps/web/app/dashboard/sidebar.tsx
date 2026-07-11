@@ -1,8 +1,16 @@
 "use client";
 
+import {
+  Activity,
+  AlertTriangle,
+  BarChart3,
+  Clock,
+  Settings,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { LanguageSelector } from "../../components/language-selector";
-import { Logo } from "../../components/logo";
 import { LogoutButton } from "../../components/logout-button";
 import { ThemeToggle } from "../../components/theme-toggle";
 import { useLanguage } from "../../contexts/language-context";
@@ -14,6 +22,14 @@ interface SidebarProps {
   userEmail?: string | null;
 }
 
+const ROLE_BADGE: Record<string, string> = {
+  OWNER: "bg-violet-500/20 text-violet-300",
+  ADMIN: "bg-blue-500/20 text-blue-300",
+  RESPONDER: "bg-emerald-500/20 text-emerald-300",
+  OBSERVER: "bg-slate-500/20 text-slate-400",
+  VIEWER: "bg-slate-500/20 text-slate-400",
+};
+
 export function DashboardSidebar({
   userRole,
   tenantId,
@@ -21,66 +37,86 @@ export function DashboardSidebar({
   userEmail,
 }: SidebarProps) {
   const { t } = useLanguage();
+  const pathname = usePathname();
+
+  const navItems = [
+    { href: "/dashboard", label: t.dashboard.incidents, icon: AlertTriangle, exact: true },
+    { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3, exact: false },
+    { href: "/dashboard/oncall", label: "On-Call", icon: Clock, exact: false },
+    { href: "/dashboard/team", label: t.team.title, icon: Users, exact: false },
+    { href: "/dashboard/settings", label: t.dashboard.settings, icon: Settings, exact: false },
+  ];
+
+  const isActive = (href: string, exact: boolean) =>
+    exact ? pathname === href : pathname.startsWith(href);
+
+  const initials = (userEmail?.charAt(0) ?? "?").toUpperCase();
 
   return (
-    <aside className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
-      <div className="p-6">
-        <Link href="/" className="block">
-          <div className="flex items-center gap-2 mb-1">
-            <Logo className="w-8 h-8" />
-            <h1 className="text-2xl font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors">
-              {t.brandName}
-            </h1>
+    <aside className="w-60 bg-slate-900 flex flex-col shrink-0 h-screen">
+      {/* Brand */}
+      <div className="px-4 pt-5 pb-4 border-b border-slate-800">
+        <Link href="/" className="flex items-center gap-2.5 mb-4 group">
+          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shrink-0 group-hover:bg-indigo-500 transition-colors">
+            <Activity className="w-4 h-4 text-white" />
           </div>
+          <span className="text-base font-bold text-white tracking-tight leading-none">
+            {t.brandName}
+          </span>
         </Link>
-        <p className="text-sm text-gray-500 mt-1 truncate">
-          {t.dashboard.tenant}: {tenantName ?? tenantId}
-        </p>
-        <div className="mt-2 text-xs font-mono bg-gray-100 dark:bg-gray-700 p-1 rounded px-2 inline-block">
-          {userRole}
+
+        <div className="flex items-center gap-2 mb-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+          <span className="text-xs text-slate-400 truncate font-medium">
+            {tenantName ?? tenantId}
+          </span>
         </div>
-        <div className="mt-4 flex gap-2">
+
+        <span
+          className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${
+            ROLE_BADGE[userRole ?? ""] ?? "bg-slate-700 text-slate-400"
+          }`}
+        >
+          {userRole}
+        </span>
+
+        <div className="mt-3 flex items-center gap-2">
           <LanguageSelector />
           <ThemeToggle />
         </div>
       </div>
-      <nav className="mt-6 flex-1">
-        <Link
-          href="/dashboard"
-          className="block px-6 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
-        >
-          {t.dashboard.incidents}
-        </Link>
-        <Link
-          href="/dashboard/analytics"
-          className="block px-6 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
-        >
-          Analytics
-        </Link>
-        <Link
-          href="/dashboard/oncall"
-          className="block px-6 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
-        >
-          On-Call
-        </Link>
-        <Link
-          href="/dashboard/team"
-          className="block px-6 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
-        >
-          {t.team.title}
-        </Link>
-        <Link
-          href="/dashboard/settings"
-          className="block px-6 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
-        >
-          {t.dashboard.settings}
-        </Link>
+
+      {/* Navigation */}
+      <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
+        {navItems.map(({ href, label, icon: Icon, exact }) => {
+          const active = isActive(href, exact);
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all duration-100 ${
+                active
+                  ? "bg-indigo-600 text-white"
+                  : "text-slate-400 hover:text-slate-100 hover:bg-slate-800"
+              }`}
+            >
+              <Icon className={`w-4 h-4 shrink-0 ${active ? "text-white" : "text-slate-500"}`} />
+              <span className="truncate">{label}</span>
+              {active && (
+                <span className="ml-auto w-1 h-1 rounded-full bg-indigo-300 shrink-0" />
+              )}
+            </Link>
+          );
+        })}
       </nav>
-      <div className="border-t border-gray-200 dark:border-gray-700 p-4">
-        <div className="px-2 mb-2">
-          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-            {userEmail}
-          </p>
+
+      {/* User footer */}
+      <div className="border-t border-slate-800 px-3 py-3">
+        <div className="flex items-center gap-2.5 mb-3 px-1">
+          <div className="w-7 h-7 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center shrink-0">
+            <span className="text-xs font-bold text-slate-200">{initials}</span>
+          </div>
+          <p className="text-xs text-slate-400 truncate flex-1 leading-tight">{userEmail}</p>
         </div>
         <LogoutButton />
       </div>

@@ -9,7 +9,7 @@ export function LogoutButton() {
     <button
       type="button"
       onClick={() => signOut({ callbackUrl: "/" })}
-      className="w-full text-left px-6 py-3 text-red-600 hover:bg-gray-50 dark:text-red-400 dark:hover:bg-gray-700 transition"
+      className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium text-slate-400 hover:text-red-400 hover:bg-slate-800 transition-colors"
     >
       {t.nav.signOut}
     </button>

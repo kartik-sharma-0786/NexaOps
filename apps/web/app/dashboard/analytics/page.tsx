@@ -73,7 +73,7 @@ export default function AnalyticsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-500">
+      <div className="flex items-center justify-center h-64 text-slate-400">
         Loading analytics…
       </div>
     );
@@ -81,7 +81,7 @@ export default function AnalyticsPage() {
 
   if (!data) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-500">
+      <div className="flex items-center justify-center h-64 text-slate-400">
         No analytics data yet.
       </div>
     );
@@ -127,12 +127,13 @@ export default function AnalyticsPage() {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-0.5">Reports</p>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
           Analytics
         </h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        <p className="text-sm text-slate-400 mt-0.5">
           Last {data.days} days
         </p>
       </div>
@@ -142,9 +143,9 @@ export default function AnalyticsPage() {
         {statCards.map((c) => (
           <div
             key={c.label}
-            className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-5 shadow-sm"
+            className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm hover:shadow-md transition-shadow"
           >
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
               {c.label}
             </p>
             <p className={`text-3xl font-bold ${c.tone}`}>{c.value}</p>
@@ -153,8 +154,8 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Daily incidents bar chart */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm">
-        <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">
           Incidents per Day
         </h2>
         {data.dailyCounts.length === 0 ? (
@@ -195,8 +196,8 @@ export default function AnalyticsPage() {
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* MTTR by severity */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">
             Avg Time to Resolve (MTTR)
           </h2>
           {data.mttr.length === 0 ? (
@@ -235,8 +236,8 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Severity distribution pie */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">
             Severity Distribution
           </h2>
           {data.severityDistribution.length === 0 ? (

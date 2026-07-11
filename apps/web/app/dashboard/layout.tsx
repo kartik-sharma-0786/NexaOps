@@ -15,7 +15,7 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-950">
       <DashboardSidebar
         userRole={session.user.role}
         tenantId={session.user.tenantId}
@@ -23,8 +23,11 @@ export default async function DashboardLayout({
         userEmail={session.user.email}
       />
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto p-8">{children}</main>
+      <main className="flex-1 overflow-y-auto">
+        <div className="px-6 py-6 lg:px-8 lg:py-7 max-w-[1400px]">
+          {children}
+        </div>
+      </main>
     </div>
   );
 }

@@ -73,7 +73,10 @@ export default function OnCallPage() {
     setLoading(false);
   };
 
-  useEffect(() => { if (user?.jwt) load(); }, [user?.jwt]);
+  useEffect(() => {
+    if (user?.jwt) load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load is stable per jwt
+  }, [user?.jwt]);
 
   const saveSchedule = async () => {
     if (!user?.jwt) return;
@@ -135,72 +138,76 @@ export default function OnCallPage() {
   const memberById = (id: string) => members.find((m) => m.userId === id);
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64 text-gray-500">Loading…</div>;
+    return <div className="flex items-center justify-center h-64 text-slate-400">Loading…</div>;
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 max-w-4xl">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">On-Call Schedule</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-0.5">Operations</p>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">On-Call Schedule</h1>
+        <p className="text-sm text-slate-400 mt-0.5">
           Manage rotation and temporary overrides for your on-call team.
         </p>
       </div>
 
       {/* Current on-call hero card */}
-      <div className={`rounded-xl p-6 border-2 ${
+      <div className={`rounded-xl p-5 border ${
         current
-          ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
-          : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+          ? "bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800"
+          : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800"
       }`}>
-        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">
+        <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">
           Currently On-Call
         </p>
         {current?.user ? (
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-green-200 dark:bg-green-700 flex items-center justify-center text-2xl font-bold text-green-800 dark:text-green-100">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-emerald-200 dark:bg-emerald-800 flex items-center justify-center text-lg font-bold text-emerald-800 dark:text-emerald-100 shrink-0">
               {(current.user.name || current.user.email)[0].toUpperCase()}
             </div>
             <div>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">
+              <p className="text-base font-bold text-slate-900 dark:text-white">
                 {current.user.name || current.user.email}
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {current.user.email} &middot; via {current.via}
+              <p className="text-xs text-slate-400">
+                {current.user.email} · via {current.via}
               </p>
             </div>
+            <span className="ml-auto text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 rounded-full">
+              ACTIVE
+            </span>
           </div>
         ) : (
-          <p className="text-lg text-gray-400 italic">No one assigned — set up your rotation below.</p>
+          <p className="text-sm text-slate-400 italic">No one assigned — set up your rotation below.</p>
         )}
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-2 gap-5">
         {/* Rotation builder */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">
             Rotation Order
           </h2>
-          <div className="space-y-2 mb-4">
+          <div className="space-y-1.5 mb-4">
             {memberOrder.length === 0 ? (
-              <p className="text-sm text-gray-400 italic">No members in rotation. Add members below.</p>
+              <p className="text-sm text-slate-400 italic">No members in rotation. Add members below.</p>
             ) : (
               memberOrder.map((uid, idx) => {
                 const m = memberById(uid);
                 return (
                   <div
                     key={uid}
-                    className="flex items-center gap-2 p-2.5 rounded-lg bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700"
                   >
-                    <span className="text-xs font-bold text-gray-400 w-5 text-center">{idx + 1}</span>
-                    <span className="flex-1 text-sm text-gray-800 dark:text-gray-200">
+                    <span className="text-xs font-bold text-slate-300 w-4 text-center tabular-nums">{idx + 1}</span>
+                    <span className="flex-1 text-sm text-slate-700 dark:text-slate-200">
                       {m?.name || m?.email || uid}
                     </span>
                     {canEdit && (
-                      <div className="flex gap-1">
-                        <button onClick={() => moveUp(idx)} disabled={idx === 0} className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-30 text-xs px-1">▲</button>
-                        <button onClick={() => moveDown(idx)} disabled={idx === memberOrder.length - 1} className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-30 text-xs px-1">▼</button>
-                        <button onClick={() => toggleMember(uid)} className="text-red-400 hover:text-red-600 text-xs px-1">✕</button>
+                      <div className="flex gap-0.5">
+                        <button onClick={() => moveUp(idx)} disabled={idx === 0} className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-20 text-xs w-6 h-6 flex items-center justify-center rounded hover:bg-slate-200 dark:hover:bg-slate-700 transition">▲</button>
+                        <button onClick={() => moveDown(idx)} disabled={idx === memberOrder.length - 1} className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-20 text-xs w-6 h-6 flex items-center justify-center rounded hover:bg-slate-200 dark:hover:bg-slate-700 transition">▼</button>
+                        <button onClick={() => toggleMember(uid)} className="text-red-400 hover:text-red-600 text-xs w-6 h-6 flex items-center justify-center rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">✕</button>
                       </div>
                     )}
                   </div>
@@ -210,7 +217,7 @@ export default function OnCallPage() {
           </div>
           {canEdit && members.filter((m) => !memberOrder.includes(m.userId)).length > 0 && (
             <div className="mb-4">
-              <p className="text-xs text-gray-500 mb-1">Add to rotation:</p>
+              <p className="text-xs text-slate-500 mb-1.5">Add to rotation:</p>
               <div className="flex flex-wrap gap-1">
                 {members
                   .filter((m) => !memberOrder.includes(m.userId))
@@ -218,7 +225,7 @@ export default function OnCallPage() {
                     <button
                       key={m.userId}
                       onClick={() => toggleMember(m.userId)}
-                      className="text-xs px-2 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-200 dark:border-indigo-700"
+                      className="text-xs px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-200 dark:border-indigo-800 transition"
                     >
                       + {m.name || m.email}
                     </button>
@@ -229,23 +236,23 @@ export default function OnCallPage() {
           {canEdit && (
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Shift Duration (days)</label>
+                <label className="block text-xs text-slate-500 mb-1">Shift Duration (days)</label>
                 <input
                   type="number"
                   min={1}
                   max={90}
                   value={shiftDays}
                   onChange={(e) => setShiftDays(Number(e.target.value))}
-                  className="w-full text-sm rounded-md border border-gray-300 dark:border-gray-600 p-1.5 bg-white dark:bg-gray-700 dark:text-white"
+                  className="w-full text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dark:text-white px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition"
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Rotation Start</label>
+                <label className="block text-xs text-slate-500 mb-1">Rotation Start</label>
                 <input
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full text-sm rounded-md border border-gray-300 dark:border-gray-600 p-1.5 bg-white dark:bg-gray-700 dark:text-white"
+                  className="w-full text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dark:text-white px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition"
                 />
               </div>
             </div>
@@ -254,7 +261,7 @@ export default function OnCallPage() {
             <button
               onClick={saveSchedule}
               disabled={saving}
-              className="w-full text-sm py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-medium disabled:opacity-50 transition-colors"
+              className="w-full text-sm py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium disabled:opacity-50 transition-colors shadow-sm"
             >
               {saving ? "Saving…" : "Save Schedule"}
             </button>
@@ -262,61 +269,59 @@ export default function OnCallPage() {
         </div>
 
         {/* Overrides */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">
             Temporary Overrides
           </h2>
 
           {canEdit && (
             <form onSubmit={addOverride} className="mb-4 space-y-2">
-              <div className="grid grid-cols-1 gap-2">
-                <select
-                  value={overrideUserId}
-                  onChange={(e) => setOverrideUserId(e.target.value)}
-                  className="text-sm rounded-md border border-gray-300 dark:border-gray-600 p-1.5 bg-white dark:bg-gray-700 dark:text-white"
-                  required
-                >
-                  <option value="">Select member…</option>
-                  {members.map((m) => (
-                    <option key={m.userId} value={m.userId}>{m.name || m.email}</option>
-                  ))}
-                </select>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">From</label>
-                    <input
-                      type="datetime-local"
-                      value={overrideStart}
-                      onChange={(e) => setOverrideStart(e.target.value)}
-                      className="w-full text-sm rounded-md border border-gray-300 dark:border-gray-600 p-1.5 bg-white dark:bg-gray-700 dark:text-white"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">To</label>
-                    <input
-                      type="datetime-local"
-                      value={overrideEnd}
-                      onChange={(e) => setOverrideEnd(e.target.value)}
-                      className="w-full text-sm rounded-md border border-gray-300 dark:border-gray-600 p-1.5 bg-white dark:bg-gray-700 dark:text-white"
-                      required
-                    />
-                  </div>
+              <select
+                value={overrideUserId}
+                onChange={(e) => setOverrideUserId(e.target.value)}
+                className="w-full text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dark:text-white px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition"
+                required
+              >
+                <option value="">Select member…</option>
+                {members.map((m) => (
+                  <option key={m.userId} value={m.userId}>{m.name || m.email}</option>
+                ))}
+              </select>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs text-slate-500 mb-1">From</label>
+                  <input
+                    type="datetime-local"
+                    value={overrideStart}
+                    onChange={(e) => setOverrideStart(e.target.value)}
+                    className="w-full text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dark:text-white px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-500 mb-1">To</label>
+                  <input
+                    type="datetime-local"
+                    value={overrideEnd}
+                    onChange={(e) => setOverrideEnd(e.target.value)}
+                    className="w-full text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dark:text-white px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition"
+                    required
+                  />
                 </div>
               </div>
               <button
                 type="submit"
                 disabled={savingOverride}
-                className="w-full text-sm py-1.5 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-medium disabled:opacity-50"
+                className="w-full text-sm py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium disabled:opacity-50 transition-colors shadow-sm"
               >
                 {savingOverride ? "Adding…" : "Add Override"}
               </button>
             </form>
           )}
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {!schedule?.overrides?.length ? (
-              <p className="text-sm text-gray-400 italic text-center py-4">No overrides scheduled.</p>
+              <p className="text-sm text-slate-400 italic text-center py-4">No overrides scheduled.</p>
             ) : (
               schedule.overrides.map((o) => {
                 const now = new Date();
@@ -324,25 +329,25 @@ export default function OnCallPage() {
                 return (
                   <div
                     key={o.id}
-                    className={`flex items-start gap-2 p-2.5 rounded-lg border ${
+                    className={`flex items-start gap-2 px-3 py-2.5 rounded-lg border ${
                       active
-                        ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
-                        : "bg-gray-50 dark:bg-gray-700/30 border-gray-200 dark:border-gray-600"
+                        ? "bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800"
+                        : "bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700"
                     }`}
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">
+                      <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">
                         {o.user?.name || o.user?.email || o.userId}
-                        {active && <span className="ml-2 text-xs text-green-600 dark:text-green-400 font-semibold">● ACTIVE</span>}
+                        {active && <span className="ml-2 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">ACTIVE</span>}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-slate-400 mt-0.5">
                         {fmtDate(o.startsAt)} → {fmtDate(o.endsAt)}
                       </p>
                     </div>
                     {canEdit && (
                       <button
                         onClick={() => removeOverride(o.id)}
-                        className="text-xs text-red-400 hover:text-red-600 flex-shrink-0"
+                        className="text-xs font-medium text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors shrink-0"
                       >
                         Remove
                       </button>
