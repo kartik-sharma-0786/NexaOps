@@ -253,8 +253,8 @@ export default function AnalyticsPage() {
                   cx="50%"
                   cy="50%"
                   outerRadius={75}
-                  label={(props: Record<string, unknown>) =>
-                    `${props.severity} ${(((props.percent as number) ?? 0) * 100).toFixed(0)}%`
+                  label={(props) =>
+                    `${props.name ?? ""} ${((props.percent ?? 0) * 100).toFixed(0)}%`
                   }
                   labelLine={false}
                 >
