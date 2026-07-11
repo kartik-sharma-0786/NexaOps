@@ -1,18 +1,25 @@
 import { Injectable, Logger } from '@nestjs/common';
-import Anthropic from '@anthropic-ai/sdk';
+
+const GEMINI_MODEL = 'gemini-flash-latest';
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+
+type GeminiResponse = {
+  candidates?: Array<{
+    content?: { parts?: Array<{ text?: string }> };
+  }>;
+  error?: { message?: string };
+};
 
 @Injectable()
 export class AiSummaryService {
   private readonly logger = new Logger(AiSummaryService.name);
-  private readonly client?: Anthropic;
+  private readonly apiKey?: string;
 
   constructor() {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (apiKey) {
-      this.client = new Anthropic({ apiKey });
-    } else {
+    this.apiKey = process.env.GEMINI_API_KEY;
+    if (!this.apiKey) {
       this.logger.warn(
-        'ANTHROPIC_API_KEY not set — AI summaries will use a stub response',
+        'GEMINI_API_KEY not set — AI summaries will use a stub response',
       );
     }
   }
@@ -45,17 +52,35 @@ ${timeline || '(no timeline events yet)'}
 
 Summary:`;
 
-    if (!this.client) {
+    if (!this.apiKey) {
       return `[AI not configured] Incident "${incident.title}" (${incident.severity}) was created and is currently ${incident.status}. ${incident.events.length} timeline event(s) recorded.`;
     }
 
-    const message = await this.client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 256,
-      messages: [{ role: 'user', content: prompt }],
+    const res = await fetch(GEMINI_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': this.apiKey,
+      },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          maxOutputTokens: 256,
+          // Thinking models spend the token budget on reasoning; disable it
+          // so short summaries don't come back empty.
+          thinkingConfig: { thinkingBudget: 0 },
+        },
+      }),
     });
 
-    const block = message.content[0];
-    return block.type === 'text' ? block.text.trim() : '';
+    const data = (await res.json()) as GeminiResponse;
+    if (!res.ok) {
+      throw new Error(
+        `Gemini API error (${res.status}): ${data.error?.message ?? 'unknown'}`,
+      );
+    }
+
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    return text?.trim() ?? '';
   }
 }
