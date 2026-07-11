@@ -5,8 +5,9 @@ import { Queue } from 'bullmq';
 import { and, eq } from 'drizzle-orm';
 import { UpsertEscalationPolicyDto } from './dto/upsert-escalation-policy.dto';
 
-@Injectable()
+const queueEnabled = process.env.NOTIFICATIONS_QUEUE_ENABLED !== 'false';
 
+@Injectable()
 export class EscalationService {
   constructor(
     @Optional() @InjectQueue('escalation') private readonly escalationQueue?: Queue,

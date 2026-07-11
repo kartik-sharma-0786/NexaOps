@@ -49,7 +49,10 @@ export class EscalationProcessor extends WorkerHost {
       .where(
         and(
           eq(tenantMembers.tenantId, tenantId),
-          inArray(tenantMembers.role, rolesToNotify),
+          inArray(
+            tenantMembers.role,
+            rolesToNotify as Array<'OWNER' | 'ADMIN' | 'RESPONDER' | 'OBSERVER' | 'VIEWER'>,
+          ),
         ),
       );
 
