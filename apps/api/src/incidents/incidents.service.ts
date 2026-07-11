@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import {
@@ -25,6 +26,8 @@ import { UpdateIncidentStatusDto } from './dto/update-incident-status.dto';
 
 @Injectable()
 export class IncidentsService {
+  private readonly logger = new Logger(IncidentsService.name);
+
   constructor(
     private readonly eventsGateway: EventsGateway,
     private readonly notificationsService: NotificationsService,
@@ -83,13 +86,13 @@ export class IncidentsService {
       void this.escalationService.enqueueCheck(incident.id, tenantId, dto.severity);
     }
 
-    // Add Email Job
+    // Fire-and-forget — email failures must never fail the HTTP response
     if (incidentWithCreator?.creator?.email) {
-      await this.notificationsService.enqueueEmail({
+      void this.notificationsService.enqueueEmail({
         to: incidentWithCreator.creator.email,
         subject: `[${incident.severity}] New Incident: ${incident.title}`,
         text: `A new incident has been reported.\n\nTitle: ${incident.title}\nDescription: ${incident.description}\nSeverity: ${incident.severity}`,
-      });
+      }).catch((err) => this.logger.error(`Failed to send creation email: ${String(err)}`));
     }
 
     return incident;
@@ -197,33 +200,38 @@ export class IncidentsService {
       .orderBy(sql`date_trunc('day', ${incidents.createdAt})`);
 
     // MTTR: avg minutes between createdAt and the STATUS_CHANGE→RESOLVED event
-    const mttrRows = await db
-      .select({
-        severity: incidents.severity,
-        avgMinutes: sql<number>`
-          cast(avg(
-            extract(epoch from (
-              (select ie.created_at
-               from incident_events ie
-               where ie.incident_id = ${incidents.id}
-                 and ie.action_type = 'STATUS_CHANGE'
-                 and ie.message like '%RESOLVED%'
-               order by ie.created_at asc
-               limit 1)
-              - ${incidents.createdAt}
-            )) / 60 as int)
-        `,
-        resolved: sql<number>`cast(count(*) as int)`,
-      })
-      .from(incidents)
-      .where(
-        and(
-          eq(incidents.tenantId, tenantId),
-          eq(incidents.status, 'RESOLVED'),
-          gte(incidents.createdAt, since),
-        ),
-      )
-      .groupBy(incidents.severity);
+    let mttrRows: { severity: string; avgMinutes: number; resolved: number }[] = [];
+    try {
+      mttrRows = await db
+        .select({
+          severity: incidents.severity,
+          avgMinutes: sql<number>`
+            cast(coalesce(avg(
+              extract(epoch from (
+                (select ie.created_at
+                 from incident_events ie
+                 where ie.incident_id = ${incidents.id}
+                   and ie.action_type = 'STATUS_CHANGE'
+                   and ie.message like '%RESOLVED%'
+                 order by ie.created_at asc
+                 limit 1)
+                - ${incidents.createdAt}
+              )) / 60, 0) as int)
+          `,
+          resolved: sql<number>`cast(count(*) as int)`,
+        })
+        .from(incidents)
+        .where(
+          and(
+            eq(incidents.tenantId, tenantId),
+            eq(incidents.status, 'RESOLVED'),
+            gte(incidents.createdAt, since),
+          ),
+        )
+        .groupBy(incidents.severity);
+    } catch (err) {
+      this.logger.error(`MTTR query failed: ${String(err)}`);
+    }
 
     // Severity distribution (all time for this tenant)
     const severityDist = await db
@@ -315,17 +323,18 @@ export class IncidentsService {
       `${dto.status === 'RESOLVED' ? '✅' : '🔁'} Incident "${incident.title}": ${incident.status} → ${dto.status}`,
     );
 
-    // Notify the tenant's responders rather than a hardcoded address.
-    const recipients = await this.getNotifiableMemberEmails(tenantId);
-    await Promise.all(
-      recipients.map((to) =>
-        this.notificationsService.enqueueEmail({
-          to,
-          subject: `Incident Updated: ${incident.title}`,
-          text: `Status changed from ${incident.status} to ${dto.status}`,
-        }),
+    // Fire-and-forget — email failures must never fail the HTTP response
+    void this.getNotifiableMemberEmails(tenantId).then((recipients) =>
+      Promise.all(
+        recipients.map((to) =>
+          this.notificationsService.enqueueEmail({
+            to,
+            subject: `Incident Updated: ${incident.title}`,
+            text: `Status changed from ${incident.status} to ${dto.status}`,
+          }),
+        ),
       ),
-    );
+    ).catch((err) => this.logger.error(`Failed to send status-change emails: ${String(err)}`));
 
     return updated;
   }
@@ -374,11 +383,11 @@ export class IncidentsService {
         tenantId,
         `👤 Incident "${incident.title}" assigned to ${assigneeName ?? assigneeEmail}`,
       );
-      await this.notificationsService.enqueueEmail({
+      void this.notificationsService.enqueueEmail({
         to: assigneeEmail,
         subject: `[${incident.severity}] Incident assigned to you: ${incident.title}`,
         text: `You have been assigned to the incident "${incident.title}".\n\nStatus: ${incident.status}\nSeverity: ${incident.severity}`,
-      });
+      }).catch((err) => this.logger.error(`Failed to send assignment email: ${String(err)}`));
     }
 
     return updated;
