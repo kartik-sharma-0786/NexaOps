@@ -31,7 +31,7 @@ export default function OnCallPage() {
   const user = session?.user as { jwt?: string; role?: string } | undefined;
 
   const [schedule, setSchedule] = useState<Schedule | null>(null);
-  const [current, setCurrent] = useState<CurrentOnCall>(undefined as any);
+  const [current, setCurrent] = useState<CurrentOnCall>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

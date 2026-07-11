@@ -178,7 +178,7 @@ export default function AnalyticsPage() {
                 tickLine={false}
               />
               <Tooltip
-                formatter={(v: number) => [v, "Incidents"]}
+                formatter={(v) => [v, "Incidents"]}
                 labelFormatter={fmtDay}
                 contentStyle={{
                   background: "var(--tw-bg-opacity, #fff)",
@@ -253,8 +253,8 @@ export default function AnalyticsPage() {
                   cx="50%"
                   cy="50%"
                   outerRadius={75}
-                  label={({ severity, percent }) =>
-                    `${severity} ${(percent * 100).toFixed(0)}%`
+                  label={(props: Record<string, unknown>) =>
+                    `${props.severity} ${(((props.percent as number) ?? 0) * 100).toFixed(0)}%`
                   }
                   labelLine={false}
                 >
@@ -266,7 +266,7 @@ export default function AnalyticsPage() {
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(v: number, name: string) => [v, name]}
+                  formatter={(v, name) => [v, name]}
                   contentStyle={{
                     borderRadius: 8,
                     fontSize: 12,

@@ -80,8 +80,9 @@ export function EscalationSettings() {
         setForm({ name: "Default", severity: "CRITICAL", delayMinutes: 15, notifyRole: "OWNER" });
         load();
       }
-    } catch {}
-    finally { setSaving(false); }
+    } catch (_err) {
+      // network/server error — setSaving resets in finally
+    } finally { setSaving(false); }
   };
 
   const toggleEnabled = async (policy: Policy) => {
