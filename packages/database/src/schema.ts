@@ -1,5 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
+    boolean,
+    integer,
     jsonb,
     pgEnum,
     pgTable,
@@ -213,3 +215,77 @@ export const incidentEventsRelations = relations(incidentEvents, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+// Escalation policies — notify higher-priority roles when an incident is not
+// acknowledged within delayMinutes of being created.
+export const escalationPolicies = pgTable("escalation_policies", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id)
+    .notNull(),
+  name: text("name").default("Default").notNull(),
+  // Minimum severity that triggers this policy (CRITICAL / HIGH / MEDIUM / LOW)
+  severity: text("severity").default("CRITICAL").notNull(),
+  delayMinutes: integer("delay_minutes").default(15).notNull(),
+  // Role to notify (OWNER / ADMIN / RESPONDER …)
+  notifyRole: text("notify_role").default("OWNER").notNull(),
+  enabled: boolean("enabled").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// On-call schedules — one active schedule per tenant (simple rotation MVP).
+export const onCallSchedules = pgTable("on_call_schedules", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id)
+    .notNull()
+    .unique(), // one schedule per tenant for now
+  name: text("name").default("Primary").notNull(),
+  // Ordered list of userIds in rotation (JSONB array of UUID strings)
+  memberOrder: jsonb("member_order").$type<string[]>().default([]).notNull(),
+  // How many days each person is on-call before rotating
+  shiftDays: integer("shift_days").default(7).notNull(),
+  // Anchor date for computing whose turn it is
+  startDate: timestamp("start_date").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Manual overrides — "I'm out Wed–Thu, swap me with Alice"
+export const onCallOverrides = pgTable("on_call_overrides", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  scheduleId: uuid("schedule_id")
+    .references(() => onCallSchedules.id)
+    .notNull(),
+  userId: uuid("user_id")
+    .references(() => users.id)
+    .notNull(),
+  startsAt: timestamp("starts_at").notNull(),
+  endsAt: timestamp("ends_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const onCallSchedulesRelations = relations(
+  onCallSchedules,
+  ({ one, many }) => ({
+    tenant: one(tenants, {
+      fields: [onCallSchedules.tenantId],
+      references: [tenants.id],
+    }),
+    overrides: many(onCallOverrides),
+  }),
+);
+
+export const onCallOverridesRelations = relations(
+  onCallOverrides,
+  ({ one }) => ({
+    schedule: one(onCallSchedules, {
+      fields: [onCallOverrides.scheduleId],
+      references: [onCallSchedules.id],
+    }),
+    user: one(users, {
+      fields: [onCallOverrides.userId],
+      references: [users.id],
+    }),
+  }),
+);

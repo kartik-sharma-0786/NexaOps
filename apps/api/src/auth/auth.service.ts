@@ -96,6 +96,8 @@ export class AuthService {
       result.newUser.email,
       'OWNER',
       result.newTenant.id,
+      result.newUser.name,
+      result.newTenant.name,
     );
   }
 
@@ -131,11 +133,18 @@ export class AuthService {
       throw new UnauthorizedException('No tenant found for this user');
     }
 
+    const [tenant] = await db
+      .select({ name: tenants.name })
+      .from(tenants)
+      .where(eq(tenants.id, membership.tenantId));
+
     return this.generateToken(
       user.id,
       user.email,
       membership.role,
       membership.tenantId,
+      user.name,
+      tenant?.name,
     );
   }
 
@@ -228,7 +237,20 @@ export class AuthService {
       throw new ForbiddenException('You are not a member of this tenant');
     }
 
-    return this.generateToken(userId, email, membership.role, tenantId);
+    const [row] = await db
+      .select({ userName: users.name, tenantName: tenants.name })
+      .from(users)
+      .innerJoin(tenants, eq(tenants.id, tenantId))
+      .where(eq(users.id, userId));
+
+    return this.generateToken(
+      userId,
+      email,
+      membership.role,
+      tenantId,
+      row?.userName,
+      row?.tenantName,
+    );
   }
 
   private async generateToken(
@@ -236,6 +258,8 @@ export class AuthService {
     email: string,
     role: string,
     tenantId: string,
+    name?: string,
+    tenantName?: string,
   ) {
     const payload = { sub: userId, email, role, tenantId };
     return {
@@ -245,6 +269,8 @@ export class AuthService {
         email,
         role,
         tenantId,
+        name: name ?? null,
+        tenantName: tenantName ?? null,
       },
     };
   }

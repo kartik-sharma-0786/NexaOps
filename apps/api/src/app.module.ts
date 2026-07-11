@@ -8,11 +8,14 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { BillingModule } from './billing/billing.module';
+import { EscalationModule } from './escalation/escalation.module';
+import { OnCallModule } from './oncall/oncall.module';
 import { EventsModule } from './events/events.module';
 import { HealthModule } from './health/health.module';
 import { IncidentsModule } from './incidents/incidents.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { StatusModule } from './status/status.module';
 import { TeamModule } from './team/team.module';
 
 const queueEnabled = process.env.NOTIFICATIONS_QUEUE_ENABLED !== 'false';
@@ -47,11 +50,14 @@ const isProduction = process.env.NODE_ENV === 'production';
       : []),
     AuthModule,
     IncidentsModule,
+    EscalationModule,
+    OnCallModule,
     EventsModule,
     NotificationsModule,
     TeamModule,
     IntegrationsModule,
     BillingModule,
+    StatusModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

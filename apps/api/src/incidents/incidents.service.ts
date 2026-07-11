@@ -10,12 +10,14 @@ import {
   tenantMembers,
   users,
 } from '@nexaops/database';
-import { and, desc, eq, ilike, inArray, sql, SQL } from 'drizzle-orm';
+import { and, desc, eq, gte, ilike, inArray, sql, SQL } from 'drizzle-orm';
 import {
   publicUserColumns,
   stripPasswordHashFromIncident,
 } from '../common/public-user';
+import { EscalationService } from '../escalation/escalation.service';
 import { EventsGateway } from '../events/events.gateway';
+import { AiSummaryService } from './ai-summary.service';
 import { ChatopsService } from '../notifications/chatops.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CreateIncidentDto } from './dto/create-incident.dto';
@@ -27,6 +29,8 @@ export class IncidentsService {
     private readonly eventsGateway: EventsGateway,
     private readonly notificationsService: NotificationsService,
     private readonly chatopsService: ChatopsService,
+    private readonly aiSummaryService: AiSummaryService,
+    private readonly escalationService: EscalationService,
   ) {}
 
   // userId is null when the incident comes from the alert-ingestion API.
@@ -73,6 +77,11 @@ export class IncidentsService {
       tenantId,
       `🚨 [${incident.severity}] New incident: ${incident.title}`,
     );
+
+    // Enqueue escalation check for high-priority incidents
+    if (dto.severity === 'CRITICAL' || dto.severity === 'HIGH') {
+      void this.escalationService.enqueueCheck(incident.id, tenantId, dto.severity);
+    }
 
     // Add Email Job
     if (incidentWithCreator?.creator?.email) {
@@ -171,6 +180,78 @@ export class IncidentsService {
       out[row.severity] += count;
     }
     return out;
+  }
+
+  async analytics(tenantId: string, days = 30) {
+    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+    // Daily incident counts
+    const dailyCounts = await db
+      .select({
+        day: sql<string>`to_char(date_trunc('day', ${incidents.createdAt}), 'YYYY-MM-DD')`,
+        count: sql<number>`cast(count(*) as int)`,
+      })
+      .from(incidents)
+      .where(and(eq(incidents.tenantId, tenantId), gte(incidents.createdAt, since)))
+      .groupBy(sql`date_trunc('day', ${incidents.createdAt})`)
+      .orderBy(sql`date_trunc('day', ${incidents.createdAt})`);
+
+    // MTTR: avg minutes between createdAt and the STATUS_CHANGE→RESOLVED event
+    const mttrRows = await db
+      .select({
+        severity: incidents.severity,
+        avgMinutes: sql<number>`
+          cast(avg(
+            extract(epoch from (
+              (select ie.created_at
+               from incident_events ie
+               where ie.incident_id = ${incidents.id}
+                 and ie.action_type = 'STATUS_CHANGE'
+                 and ie.message like '%RESOLVED%'
+               order by ie.created_at asc
+               limit 1)
+              - ${incidents.createdAt}
+            )) / 60 as int)
+        `,
+        resolved: sql<number>`cast(count(*) as int)`,
+      })
+      .from(incidents)
+      .where(
+        and(
+          eq(incidents.tenantId, tenantId),
+          eq(incidents.status, 'RESOLVED'),
+          gte(incidents.createdAt, since),
+        ),
+      )
+      .groupBy(incidents.severity);
+
+    // Severity distribution (all time for this tenant)
+    const severityDist = await db
+      .select({
+        severity: incidents.severity,
+        count: sql<number>`cast(count(*) as int)`,
+      })
+      .from(incidents)
+      .where(eq(incidents.tenantId, tenantId))
+      .groupBy(incidents.severity);
+
+    // Status distribution
+    const statusDist = await db
+      .select({
+        status: incidents.status,
+        count: sql<number>`cast(count(*) as int)`,
+      })
+      .from(incidents)
+      .where(eq(incidents.tenantId, tenantId))
+      .groupBy(incidents.status);
+
+    return {
+      days,
+      dailyCounts,
+      mttr: mttrRows,
+      severityDistribution: severityDist,
+      statusDistribution: statusDist,
+    };
   }
 
   async findOne(id: string, tenantId: string) {
@@ -332,6 +413,22 @@ export class IncidentsService {
         ),
       );
     return rows.map((row) => row.email);
+  }
+
+  async summarize(id: string, tenantId: string) {
+    const incident = await this.findOne(id, tenantId);
+    const summary = await this.aiSummaryService.summarize({
+      title: incident.title,
+      severity: incident.severity,
+      status: incident.status,
+      createdAt: new Date(incident.createdAt),
+      events: (incident.events ?? []).map((e: any) => ({
+        actionType: e.actionType,
+        message: e.message,
+        createdAt: new Date(e.createdAt),
+      })),
+    });
+    return { summary };
   }
 
   async addComment(

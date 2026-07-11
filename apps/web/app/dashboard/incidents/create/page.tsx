@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLanguage } from "../../../../contexts/language-context";
 import { canManageIncidents } from "../../../../lib/roles";
@@ -11,7 +11,16 @@ type IncidentFormData = {
   title: string;
   description?: string;
   severity: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
+  assigneeId?: string;
 };
+
+type Member = {
+  userId: string;
+  name: string;
+  email: string;
+};
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 export default function CreateIncidentPage() {
   const {
@@ -24,7 +33,19 @@ export default function CreateIncidentPage() {
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [members, setMembers] = useState<Member[]>([]);
   const user = session?.user as { role?: string; jwt?: string } | undefined;
+
+  useEffect(() => {
+    if (!user?.jwt) return;
+    fetch(`${API_URL}/members`, {
+      headers: { Authorization: `Bearer ${user.jwt}` },
+    })
+      .then(async (res) => {
+        if (res.ok) setMembers(await res.json());
+      })
+      .catch(() => {});
+  }, [user?.jwt]);
 
   if (status === "loading") {
     return <p className="text-center p-8">{t.incidentForm.loading}</p>;
@@ -49,14 +70,20 @@ export default function CreateIncidentPage() {
     setError("");
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-      const res = await fetch(`${apiUrl}/incidents`, {
+      const body = {
+        title: data.title,
+        description: data.description,
+        severity: data.severity,
+        ...(data.assigneeId ? { assigneeId: data.assigneeId } : {}),
+      };
+
+      const res = await fetch(`${API_URL}/incidents`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${user.jwt}`,
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(body),
       });
 
       if (!res.ok) {
@@ -122,6 +149,25 @@ export default function CreateIncidentPage() {
             <option value="CRITICAL">{t.dashboard.severity.CRITICAL}</option>
           </select>
         </div>
+
+        {members.length > 0 && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t.dashboard.assignedTo}
+            </label>
+            <select
+              {...register("assigneeId")}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            >
+              <option value="">{t.dashboard.unassigned}</option>
+              {members.map((m) => (
+                <option key={m.userId} value={m.userId}>
+                  {m.name || m.email}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div className="flex justify-end">
           <button

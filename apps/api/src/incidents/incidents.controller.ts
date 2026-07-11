@@ -56,6 +56,11 @@ export class IncidentsController {
     return this.incidentsService.stats(req.user.tenantId);
   }
 
+  @Get('analytics')
+  analytics(@Request() req: any) {
+    return this.incidentsService.analytics(req.user.tenantId);
+  }
+
   @Patch(':id/assign')
   @Roles(...INCIDENT_WRITE_ROLES)
   assign(
@@ -92,6 +97,11 @@ export class IncidentsController {
       user.userId,
       user.tenantId,
     );
+  }
+
+  @Post(':id/summarize')
+  summarize(@Request() req: any, @Param('id') id: string) {
+    return this.incidentsService.summarize(id, req.user.tenantId);
   }
 
   @Post(':id/comments')

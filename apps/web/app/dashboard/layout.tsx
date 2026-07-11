@@ -19,6 +19,7 @@ export default async function DashboardLayout({
       <DashboardSidebar
         userRole={session.user.role}
         tenantId={session.user.tenantId}
+        tenantName={session.user.tenantName ?? undefined}
         userEmail={session.user.email}
       />
 

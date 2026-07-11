@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@nexaops/ui";
-import { useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -52,8 +52,13 @@ export default function RegisterPage() {
         throw new Error(json.message || t.auth.errorGeneric);
       }
 
-      // On success, redirect to login
-      router.push("/auth/login");
+      // Account created — sign straight into the dashboard.
+      const signin = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      });
+      router.push(signin?.error ? "/auth/login" : "/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : t.auth.errorGeneric);
     } finally {

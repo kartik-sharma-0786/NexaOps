@@ -125,6 +125,8 @@ describe('AuthService', () => {
         email: 'new@example.com',
         role: 'OWNER',
         tenantId: 'tenant-1',
+        name: 'New User',
+        tenantName: 'Acme',
       });
       expect(argon2.hash).toHaveBeenCalledWith('password123');
     });
@@ -160,8 +162,15 @@ describe('AuthService', () => {
       mockedDb.query.users.findFirst.mockResolvedValue({
         id: 'user-1',
         email: 'user@example.com',
+        name: 'Test User',
         passwordHash: 'hash',
         memberships: [{ role: 'ADMIN', tenantId: 'tenant-1' }],
+      });
+      // tenant-name lookup for the session payload
+      mockedDb.select.mockReturnValue({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockResolvedValue([{ name: 'Acme Corp' }]),
+        }),
       });
       (argon2.verify as jest.Mock).mockResolvedValue(true);
 
@@ -172,6 +181,8 @@ describe('AuthService', () => {
 
       expect(result.access_token).toBe('jwt-token');
       expect(result.user.role).toBe('ADMIN');
+      expect(result.user.name).toBe('Test User');
+      expect(result.user.tenantName).toBe('Acme Corp');
     });
   });
 

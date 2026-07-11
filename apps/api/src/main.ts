@@ -3,6 +3,7 @@ dotenv.config();
 
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as Sentry from '@sentry/node';
 import helmet from 'helmet';
@@ -29,12 +30,16 @@ function getCorsOrigins(): string[] {
 }
 
 async function bootstrap() {
-  // rawBody is required to verify Stripe webhook signatures.
-  const app = await NestFactory.create(AppModule, {
+  // rawBody is required to verify payment webhook signatures.
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
     rawBody: true,
   });
   app.useLogger(app.get(Logger));
+
+  // Render/most PaaS terminate TLS at a proxy; without this every client
+  // shares the proxy's IP and the rate limiter throttles all users as one.
+  app.set('trust proxy', 1);
 
   // CSP disabled: this service serves JSON plus Swagger UI (which relies on
   // inline scripts); the frontend carries its own CSP.

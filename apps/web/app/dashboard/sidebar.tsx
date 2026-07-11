@@ -10,12 +10,14 @@ import { useLanguage } from "../../contexts/language-context";
 interface SidebarProps {
   userRole?: string;
   tenantId?: string;
+  tenantName?: string;
   userEmail?: string | null;
 }
 
 export function DashboardSidebar({
   userRole,
   tenantId,
+  tenantName,
   userEmail,
 }: SidebarProps) {
   const { t } = useLanguage();
@@ -31,8 +33,8 @@ export function DashboardSidebar({
             </h1>
           </div>
         </Link>
-        <p className="text-sm text-gray-500 mt-1">
-          {t.dashboard.tenant}: {tenantId}
+        <p className="text-sm text-gray-500 mt-1 truncate">
+          {t.dashboard.tenant}: {tenantName ?? tenantId}
         </p>
         <div className="mt-2 text-xs font-mono bg-gray-100 dark:bg-gray-700 p-1 rounded px-2 inline-block">
           {userRole}
@@ -48,6 +50,18 @@ export function DashboardSidebar({
           className="block px-6 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
         >
           {t.dashboard.incidents}
+        </Link>
+        <Link
+          href="/dashboard/analytics"
+          className="block px-6 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+        >
+          Analytics
+        </Link>
+        <Link
+          href="/dashboard/oncall"
+          className="block px-6 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+        >
+          On-Call
         </Link>
         <Link
           href="/dashboard/team"

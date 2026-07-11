@@ -7,6 +7,7 @@ type AuthUser = {
   email?: string | null;
   role: string;
   tenantId: string;
+  tenantName?: string | null;
   jwt: string;
 };
 
@@ -40,10 +41,11 @@ export const authOptions: NextAuthOptions = {
             // Return user object including the token to be saved in session
             return {
               id: String(user.user.id),
-              name: user.user.email ?? null,
+              name: user.user.name ?? user.user.email ?? null,
               email: user.user.email ?? null,
               role: String(user.user.role),
               tenantId: String(user.user.tenantId),
+              tenantName: user.user.tenantName ?? null,
               jwt: String(user.access_token),
             };
           }
@@ -62,6 +64,7 @@ export const authOptions: NextAuthOptions = {
         token.jwt = u.jwt;
         token.role = u.role;
         token.tenantId = u.tenantId;
+        token.tenantName = u.tenantName ?? null;
         token.id = u.id;
       }
       return token;
@@ -72,11 +75,13 @@ export const authOptions: NextAuthOptions = {
           id?: string;
           role?: string;
           tenantId?: string;
+          tenantName?: string | null;
           jwt?: string;
         };
         session.user.id = t.id ?? "";
         session.user.role = t.role ?? "";
         session.user.tenantId = t.tenantId ?? "";
+        session.user.tenantName = t.tenantName ?? null;
         session.user.jwt = t.jwt ?? "";
       }
       return session;

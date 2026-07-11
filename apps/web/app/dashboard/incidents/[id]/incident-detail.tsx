@@ -59,6 +59,8 @@ export default function IncidentDetail({
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
   const [members, setMembers] = useState<Member[]>([]);
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [summarizing, setSummarizing] = useState(false);
 
   // Helper to safely access extended session properties
   const user = session?.user as ExtendedUser;
@@ -126,6 +128,26 @@ export default function IncidentDetail({
       // State updates via socket
     } catch (error) {
       console.error("Failed to update status", error);
+    }
+  };
+
+  const handleSummarize = async () => {
+    if (!user?.jwt) return;
+    setSummarizing(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const res = await fetch(`${apiUrl}/incidents/${incident.id}/summarize`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${user.jwt}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAiSummary(data.summary);
+      }
+    } catch (error) {
+      console.error("Failed to summarize", error);
+    } finally {
+      setSummarizing(false);
     }
   };
 
@@ -235,6 +257,38 @@ export default function IncidentDetail({
             )}
           </div>
         </div>
+      </div>
+
+      {/* AI Summary */}
+      <div className="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+            AI Summary
+          </h3>
+          <button
+            onClick={handleSummarize}
+            disabled={summarizing}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50 transition-colors"
+          >
+            {summarizing ? (
+              <>
+                <span className="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full" />
+                Summarizing…
+              </>
+            ) : (
+              "✦ Summarize with AI"
+            )}
+          </button>
+        </div>
+        {aiSummary ? (
+          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-4 border border-indigo-100 dark:border-indigo-800">
+            {aiSummary}
+          </p>
+        ) : (
+          <p className="text-sm text-gray-400 italic">
+            Click "Summarize with AI" to generate an incident summary using Claude.
+          </p>
+        )}
       </div>
 
       <div className="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">

@@ -308,6 +308,11 @@ export class TeamService {
       .set({ acceptedAt: new Date() })
       .where(eq(invitations.id, invite.id));
 
+    const [tenant] = await db
+      .select({ name: tenants.name })
+      .from(tenants)
+      .where(eq(tenants.id, invite.tenantId));
+
     const payload = {
       sub: user.id,
       email: user.email,
@@ -321,6 +326,8 @@ export class TeamService {
         email: user.email,
         role: invite.role,
         tenantId: invite.tenantId,
+        name: user.name ?? null,
+        tenantName: tenant?.name ?? null,
       },
     };
   }
