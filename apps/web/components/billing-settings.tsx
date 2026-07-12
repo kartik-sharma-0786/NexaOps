@@ -45,6 +45,7 @@ export function BillingSettings() {
   const jwt = user?.jwt;
 
   const [status, setStatus] = useState<BillingStatus | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<{
     kind: "ok" | "error";
@@ -53,14 +54,44 @@ export function BillingSettings() {
 
   const refreshStatus = async () => {
     if (!jwt) return;
-    const res = await fetch(`${API_URL}/billing`, {
-      headers: { Authorization: `Bearer ${jwt}` },
-    });
-    if (res.ok) setStatus(await res.json());
+    try {
+      const res = await fetch(`${API_URL}/billing`, {
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
+      if (res.ok) {
+        setStatus(await res.json());
+        setLoadFailed(false);
+      }
+    } catch {
+      // handled by the retry loop / retry button
+    }
   };
 
   useEffect(() => {
-    void refreshStatus();
+    if (!jwt) return;
+    let cancelled = false;
+    // Retry through API cold starts (Render free tier can take ~60s to wake):
+    // 6 attempts, 8s apart, then surface a visible error instead of vanishing.
+    void (async () => {
+      for (let attempt = 0; attempt < 6 && !cancelled; attempt++) {
+        try {
+          const res = await fetch(`${API_URL}/billing`, {
+            headers: { Authorization: `Bearer ${jwt}` },
+          });
+          if (res.ok) {
+            if (!cancelled) setStatus(await res.json());
+            return;
+          }
+        } catch {
+          // transient failure — keep retrying
+        }
+        await new Promise((r) => setTimeout(r, 8000));
+      }
+      if (!cancelled) setLoadFailed(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jwt]);
 
@@ -162,7 +193,37 @@ export function BillingSettings() {
     }
   };
 
-  if (!status) return null;
+  if (!status) {
+    return (
+      <div className="bg-white dark:bg-slate-800 shadow rounded-lg p-6 border border-slate-100 dark:border-slate-700 md:col-span-2">
+        <h2 className="text-lg font-medium text-slate-900 dark:text-white mb-4 border-b border-slate-100 dark:border-slate-700 pb-2">
+          {t.billing.title}
+        </h2>
+        {loadFailed ? (
+          <div className="flex items-center justify-between gap-4">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Couldn&apos;t load billing — the server may be waking up.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setLoadFailed(false);
+                void refreshStatus();
+              }}
+              className="px-4 py-2 rounded-md border border-slate-300 dark:border-slate-600 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+            >
+              Retry
+            </button>
+          </div>
+        ) : (
+          <div className="animate-pulse space-y-3">
+            <div className="h-4 w-24 rounded bg-slate-200 dark:bg-slate-700" />
+            <div className="h-8 w-40 rounded bg-slate-200 dark:bg-slate-700" />
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white dark:bg-slate-800 shadow rounded-lg p-6 border border-slate-100 dark:border-slate-700 md:col-span-2">
