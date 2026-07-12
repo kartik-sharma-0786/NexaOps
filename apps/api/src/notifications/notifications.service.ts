@@ -40,14 +40,18 @@ export class NotificationsService {
         text: data.text,
       });
       if (error) {
-        this.logger.error(`Failed to send email to ${data.to}: ${JSON.stringify(error)}`);
+        this.logger.error(
+          `Failed to send email to ${data.to}: ${JSON.stringify(error)}`,
+        );
         throw new Error(error.message);
       }
       this.logger.log(`Email sent to ${data.to}: ${data.subject}`);
       return;
     }
 
-    this.logger.log(`📧 [Mock Email] To: ${data.to} | Subject: ${data.subject}`);
+    this.logger.log(
+      `📧 [Mock Email] To: ${data.to} | Subject: ${data.subject}`,
+    );
     this.logger.log(`📝 Body: ${data.text}`);
   }
 
