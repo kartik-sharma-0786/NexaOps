@@ -51,27 +51,33 @@ export default function OnCallPage() {
   const load = async () => {
     if (!user?.jwt) return;
     const headers = { Authorization: `Bearer ${user.jwt}` };
-    const [schedRes, curRes, memRes] = await Promise.all([
-      fetch(`${API_URL}/oncall/schedule`, { headers }),
-      fetch(`${API_URL}/oncall/current`, { headers }),
-      fetch(`${API_URL}/oncall/members`, { headers }),
-    ]);
+    try {
+      const [schedRes, curRes, memRes] = await Promise.all([
+        fetch(`${API_URL}/oncall/schedule`, { headers }),
+        fetch(`${API_URL}/oncall/current`, { headers }),
+        fetch(`${API_URL}/oncall/members`, { headers }),
+      ]);
 
-    const sched: Schedule | null = schedRes.ok ? await schedRes.json() : null;
-    const cur: CurrentOnCall = curRes.ok ? await curRes.json() : null;
-    const mems: Member[] = memRes.ok ? await memRes.json() : [];
+      const sched: Schedule | null = schedRes.ok ? await schedRes.json() : null;
+      const cur: CurrentOnCall = curRes.ok ? await curRes.json() : null;
+      const mems: Member[] = memRes.ok ? await memRes.json() : [];
 
-    setSchedule(sched);
-    setCurrent(cur);
-    setMembers(mems);
-    if (sched) {
-      setShiftDays(sched.shiftDays);
-      setStartDate(new Date(sched.startDate).toISOString().split("T")[0]);
-      setMemberOrder(sched.memberOrder);
-    } else {
-      setMemberOrder(mems.map((m) => m.userId));
+      setSchedule(sched);
+      setCurrent(cur);
+      setMembers(mems);
+      if (sched) {
+        setShiftDays(sched.shiftDays);
+        setStartDate(new Date(sched.startDate).toISOString().split("T")[0]);
+        setMemberOrder(sched.memberOrder);
+      } else {
+        setMemberOrder(mems.map((m) => m.userId));
+      }
+    } catch {
+      // Transient failure (aborted navigation, network blip) — keep whatever
+      // data we already have rather than crashing into an infinite skeleton.
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
