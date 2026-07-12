@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { PageSkeleton } from "../../../components/skeleton";
 import {
   Bar,
   BarChart,
@@ -72,11 +73,7 @@ export default function AnalyticsPage() {
   }, [user?.jwt]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64 text-slate-400">
-        Loading analytics…
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   if (!data) {

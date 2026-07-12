@@ -108,13 +108,13 @@ export function EscalationSettings() {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-100 dark:border-gray-700 md:col-span-2">
-      <div className="flex items-center justify-between mb-4 border-b border-gray-100 dark:border-gray-700 pb-2">
+    <div className="bg-white dark:bg-slate-800 shadow rounded-lg p-6 border border-slate-100 dark:border-slate-700 md:col-span-2">
+      <div className="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-700 pb-2">
         <div>
-          <h2 className="text-lg font-medium text-gray-900 dark:text-white">
+          <h2 className="text-lg font-medium text-slate-900 dark:text-white">
             Escalation Policies
           </h2>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Auto-notify team members when a critical incident remains unresolved.
           </p>
         </div>
@@ -132,28 +132,28 @@ export function EscalationSettings() {
       {adding && (
         <form
           onSubmit={handleCreate}
-          className="mb-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 space-y-3"
+          className="mb-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 space-y-3"
         >
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
                 Name
               </label>
               <input
                 value={form.name}
                 onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                className="w-full text-sm rounded-md border border-gray-300 dark:border-gray-600 p-1.5 bg-white dark:bg-gray-700 dark:text-white"
+                className="w-full text-sm rounded-md border border-slate-300 dark:border-slate-600 p-1.5 bg-white dark:bg-slate-700 dark:text-white"
                 required
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
                 Severity
               </label>
               <select
                 value={form.severity}
                 onChange={(e) => setForm((f) => ({ ...f, severity: e.target.value }))}
-                className="w-full text-sm rounded-md border border-gray-300 dark:border-gray-600 p-1.5 bg-white dark:bg-gray-700 dark:text-white"
+                className="w-full text-sm rounded-md border border-slate-300 dark:border-slate-600 p-1.5 bg-white dark:bg-slate-700 dark:text-white"
               >
                 {SEVERITIES.map((s) => (
                   <option key={s} value={s}>{s}</option>
@@ -161,7 +161,7 @@ export function EscalationSettings() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
                 Delay (min)
               </label>
               <input
@@ -170,18 +170,18 @@ export function EscalationSettings() {
                 max={1440}
                 value={form.delayMinutes}
                 onChange={(e) => setForm((f) => ({ ...f, delayMinutes: Number(e.target.value) }))}
-                className="w-full text-sm rounded-md border border-gray-300 dark:border-gray-600 p-1.5 bg-white dark:bg-gray-700 dark:text-white"
+                className="w-full text-sm rounded-md border border-slate-300 dark:border-slate-600 p-1.5 bg-white dark:bg-slate-700 dark:text-white"
                 required
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
                 Notify Role
               </label>
               <select
                 value={form.notifyRole}
                 onChange={(e) => setForm((f) => ({ ...f, notifyRole: e.target.value }))}
-                className="w-full text-sm rounded-md border border-gray-300 dark:border-gray-600 p-1.5 bg-white dark:bg-gray-700 dark:text-white"
+                className="w-full text-sm rounded-md border border-slate-300 dark:border-slate-600 p-1.5 bg-white dark:bg-slate-700 dark:text-white"
               >
                 {ROLES.map((r) => (
                   <option key={r} value={r}>{r}</option>
@@ -202,9 +202,9 @@ export function EscalationSettings() {
       )}
 
       {loading ? (
-        <p className="text-sm text-gray-400 py-4 text-center">Loading…</p>
+        <p className="text-sm text-slate-400 py-4 text-center">Loading…</p>
       ) : policies.length === 0 ? (
-        <p className="text-sm text-gray-400 py-4 text-center italic">
+        <p className="text-sm text-slate-400 py-4 text-center italic">
           No escalation policies yet. Add one to auto-escalate unresolved incidents.
         </p>
       ) : (
@@ -214,8 +214,8 @@ export function EscalationSettings() {
               key={p.id}
               className={`flex items-center gap-3 p-3 rounded-lg border ${
                 p.enabled
-                  ? "border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700/30"
-                  : "border-dashed border-gray-200 dark:border-gray-700 opacity-60"
+                  ? "border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700/30"
+                  : "border-dashed border-slate-200 dark:border-slate-700 opacity-60"
               }`}
             >
               <span
@@ -223,10 +223,10 @@ export function EscalationSettings() {
               >
                 {p.severity}
               </span>
-              <span className="text-sm font-medium text-gray-800 dark:text-gray-200 flex-1">
+              <span className="text-sm font-medium text-slate-800 dark:text-slate-200 flex-1">
                 {p.name}
               </span>
-              <span className="text-xs text-gray-500 dark:text-gray-400">
+              <span className="text-xs text-slate-500 dark:text-slate-400">
                 after <strong>{p.delayMinutes}m</strong> → notify <strong>{p.notifyRole}</strong>
               </span>
               {canEdit && (
@@ -235,7 +235,7 @@ export function EscalationSettings() {
                     onClick={() => toggleEnabled(p)}
                     title={p.enabled ? "Disable" : "Enable"}
                     className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                      p.enabled ? "bg-indigo-600" : "bg-gray-300 dark:bg-gray-600"
+                      p.enabled ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-600"
                     }`}
                   >
                     <span

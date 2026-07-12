@@ -165,8 +165,8 @@ export function BillingSettings() {
   if (!status) return null;
 
   return (
-    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-100 dark:border-gray-700 md:col-span-2">
-      <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4 border-b border-gray-100 dark:border-gray-700 pb-2">
+    <div className="bg-white dark:bg-slate-800 shadow rounded-lg p-6 border border-slate-100 dark:border-slate-700 md:col-span-2">
+      <h2 className="text-lg font-medium text-slate-900 dark:text-white mb-4 border-b border-slate-100 dark:border-slate-700 pb-2">
         {t.billing.title}
       </h2>
 
@@ -184,7 +184,7 @@ export function BillingSettings() {
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             {t.billing.currentPlan}
           </p>
           <p className="mt-1 flex items-center gap-2">
@@ -192,13 +192,13 @@ export function BillingSettings() {
               className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
                 status.plan === "PRO"
                   ? "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200"
-                  : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                  : "bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300"
               }`}
             >
               {status.plan === "PRO" ? t.billing.pro : t.billing.free}
             </span>
             {status.plan === "PRO" && status.currentPeriodEnd && (
-              <span className="text-sm text-gray-500 dark:text-gray-400">
+              <span className="text-sm text-slate-500 dark:text-slate-400">
                 {t.billing.renews}{" "}
                 {new Date(status.currentPeriodEnd).toLocaleDateString(locale)}
               </span>
@@ -208,7 +208,7 @@ export function BillingSettings() {
 
         <div>
           {!status.configured ? (
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               {t.billing.notConfigured}
             </p>
           ) : status.plan === "FREE" ? (
@@ -225,7 +225,7 @@ export function BillingSettings() {
               type="button"
               onClick={cancel}
               disabled={busy}
-              className="px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition disabled:opacity-50"
+              className="px-4 py-2 rounded-md border border-slate-300 dark:border-slate-600 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition disabled:opacity-50"
             >
               {busy ? t.billing.redirecting : t.billing.cancelSubscription}
             </button>

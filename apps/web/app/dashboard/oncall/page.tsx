@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { PageSkeleton } from "../../../components/skeleton";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -138,7 +139,7 @@ export default function OnCallPage() {
   const memberById = (id: string) => members.find((m) => m.userId === id);
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64 text-slate-400">Loading…</div>;
+    return <PageSkeleton />;
   }
 
   return (

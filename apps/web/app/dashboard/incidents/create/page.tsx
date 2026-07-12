@@ -53,11 +53,11 @@ export default function CreateIncidentPage() {
 
   if (!canManageIncidents(user?.role)) {
     return (
-      <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-lg shadow text-center">
+      <div className="max-w-2xl mx-auto bg-white dark:bg-slate-800 p-8 rounded-lg shadow text-center">
         <h1 className="text-xl font-bold text-red-600 mb-4">
           {t.incidentForm.accessDenied}
         </h1>
-        <p className="text-gray-600 dark:text-gray-300">
+        <p className="text-slate-600 dark:text-slate-300">
           {t.incidentForm.permissionDenied}
         </p>
       </div>
@@ -101,8 +101,8 @@ export default function CreateIncidentPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-5 sm:p-8 rounded-lg shadow">
-      <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
+    <div className="max-w-2xl mx-auto bg-white dark:bg-slate-800 p-5 sm:p-8 rounded-lg shadow">
+      <h1 className="text-2xl font-bold mb-6 text-slate-900 dark:text-white">
         {t.incidentForm.createTitle}
       </h1>
 
@@ -112,12 +112,12 @@ export default function CreateIncidentPage() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
             {t.incidentForm.title}
           </label>
           <input
             {...register("title", { required: t.incidentForm.titleRequired })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-slate-700 dark:border-slate-600 dark:text-white"
           />
           {errors.title && (
             <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>
@@ -125,23 +125,23 @@ export default function CreateIncidentPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
             {t.incidentForm.description}
           </label>
           <textarea
             {...register("description")}
             rows={4}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-slate-700 dark:border-slate-600 dark:text-white"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
             {t.incidentForm.severity}
           </label>
           <select
             {...register("severity")}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-slate-700 dark:border-slate-600 dark:text-white"
           >
             <option value="LOW">{t.dashboard.severity.LOW}</option>
             <option value="MEDIUM">{t.dashboard.severity.MEDIUM}</option>
@@ -152,12 +152,12 @@ export default function CreateIncidentPage() {
 
         {members.length > 0 && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
               {t.dashboard.assignedTo}
             </label>
             <select
               {...register("assigneeId")}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-slate-700 dark:border-slate-600 dark:text-white"
             >
               <option value="">{t.dashboard.unassigned}</option>
               {members.map((m) => (
@@ -173,7 +173,7 @@ export default function CreateIncidentPage() {
           <button
             type="button"
             onClick={() => router.back()}
-            className="mr-3 px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600"
+            className="mr-3 px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-slate-700 dark:text-white dark:border-slate-600 dark:hover:bg-slate-600"
           >
             {t.incidentForm.cancel}
           </button>
