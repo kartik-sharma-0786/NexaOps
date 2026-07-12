@@ -12,11 +12,20 @@ type Incident = {
   latestUpdate: string | null;
 };
 
+type PublicMonitor = {
+  id: string;
+  name: string;
+  status: "UP" | "DOWN" | "PENDING";
+  lastCheckedAt: string | null;
+  lastResponseMs: number | null;
+};
+
 type StatusData = {
   tenant: { name: string; slug: string };
   status: StatusLevel;
   activeCount: number;
   incidents: Incident[];
+  monitors?: PublicMonitor[];
   updatedAt: string;
 };
 
@@ -164,6 +173,60 @@ export default async function StatusPage({
             Updated {fmt(data.updatedAt)}
           </span>
         </div>
+
+        {/* Service monitors */}
+        {(data.monitors?.length ?? 0) > 0 && (
+          <section>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-3">
+              Services
+            </h2>
+            <ul className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700">
+              {data.monitors!.map((m) => (
+                <li
+                  key={m.id}
+                  className="px-4 py-3 flex items-center justify-between gap-3"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span
+                      className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
+                        m.status === "UP"
+                          ? "bg-green-500"
+                          : m.status === "DOWN"
+                            ? "bg-red-500 animate-pulse"
+                            : "bg-gray-300 dark:bg-gray-600"
+                      }`}
+                    />
+                    <span className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">
+                      {m.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 flex-shrink-0 text-xs">
+                    {m.lastResponseMs != null && m.status === "UP" && (
+                      <span className="text-gray-400 tabular-nums">
+                        {m.lastResponseMs}ms
+                      </span>
+                    )}
+                    <span
+                      className={`font-semibold ${
+                        m.status === "UP"
+                          ? "text-green-600 dark:text-green-400"
+                          : m.status === "DOWN"
+                            ? "text-red-600 dark:text-red-400"
+                            : "text-gray-400"
+                      }`}
+                    >
+                      {m.status === "UP"
+                        ? "Operational"
+                        : m.status === "DOWN"
+                          ? "Down"
+                          : "Pending"}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {/* Active incidents */}
         {active.length > 0 && (

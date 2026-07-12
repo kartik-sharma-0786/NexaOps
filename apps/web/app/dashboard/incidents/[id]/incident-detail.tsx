@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   Circle,
   Clock,
+  Download,
   Sparkles,
   User,
 } from "lucide-react";
@@ -155,6 +156,75 @@ export default function IncidentDetail({
     }
   };
 
+  const exportPostMortem = () => {
+    const events = (incident.events ?? [])
+      .slice()
+      .sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      );
+    const resolvedEvent = events.find(
+      (e) => e.message.includes("RESOLVED"),
+    );
+    const durationMins = resolvedEvent
+      ? Math.round(
+          (new Date(resolvedEvent.createdAt).getTime() -
+            new Date(incident.createdAt).getTime()) /
+            60_000,
+        )
+      : null;
+
+    const lines = [
+      `# Post-Mortem: ${incident.title}`,
+      ``,
+      `| | |`,
+      `|---|---|`,
+      `| **Severity** | ${incident.severity} |`,
+      `| **Status** | ${incident.status} |`,
+      `| **Reported by** | ${incident.creator?.email ?? "unknown"} |`,
+      `| **Started** | ${new Date(incident.createdAt).toISOString()} |`,
+      ...(durationMins != null
+        ? [`| **Time to resolve** | ${durationMins} minute(s) |`]
+        : []),
+      ``,
+      `## Description`,
+      ``,
+      incident.description || "_No description provided._",
+      ``,
+      ...(aiSummary
+        ? [`## AI Summary`, ``, aiSummary, ``]
+        : []),
+      `## Timeline`,
+      ``,
+      ...(events.length === 0
+        ? ["_No timeline events recorded._"]
+        : events.map(
+            (e) =>
+              `- **${new Date(e.createdAt).toISOString()}** — ${e.actor?.email ?? "System"}: ${e.message}`,
+          )),
+      ``,
+      `## Action Items`,
+      ``,
+      `- [ ] _Add follow-up actions here_`,
+      ``,
+      `---`,
+      `_Exported from NexaOps on ${new Date().toISOString()}_`,
+      ``,
+    ];
+
+    const blob = new Blob([lines.join("\n")], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `post-mortem-${incident.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 60)}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user?.jwt || !comment.trim()) return;
@@ -219,6 +289,16 @@ export default function IncidentDetail({
 
             {/* Actions */}
             <div className="flex flex-col gap-2 shrink-0">
+              {incident.status === "RESOLVED" && (
+                <button
+                  type="button"
+                  onClick={exportPostMortem}
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Post-mortem
+                </button>
+              )}
               {canManageIncidents(user?.role) ? (
                 <select
                   aria-label={t.dashboard.statusLabel}

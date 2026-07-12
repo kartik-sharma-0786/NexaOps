@@ -83,16 +83,24 @@ export class IncidentsService {
 
     // Enqueue escalation check for high-priority incidents
     if (dto.severity === 'CRITICAL' || dto.severity === 'HIGH') {
-      void this.escalationService.enqueueCheck(incident.id, tenantId, dto.severity);
+      void this.escalationService.enqueueCheck(
+        incident.id,
+        tenantId,
+        dto.severity,
+      );
     }
 
     // Fire-and-forget — email failures must never fail the HTTP response
     if (incidentWithCreator?.creator?.email) {
-      void this.notificationsService.enqueueEmail({
-        to: incidentWithCreator.creator.email,
-        subject: `[${incident.severity}] New Incident: ${incident.title}`,
-        text: `A new incident has been reported.\n\nTitle: ${incident.title}\nDescription: ${incident.description}\nSeverity: ${incident.severity}`,
-      }).catch((err) => this.logger.error(`Failed to send creation email: ${String(err)}`));
+      void this.notificationsService
+        .enqueueEmail({
+          to: incidentWithCreator.creator.email,
+          subject: `[${incident.severity}] New Incident: ${incident.title}`,
+          text: `A new incident has been reported.\n\nTitle: ${incident.title}\nDescription: ${incident.description}\nSeverity: ${incident.severity}`,
+        })
+        .catch((err) =>
+          this.logger.error(`Failed to send creation email: ${String(err)}`),
+        );
     }
 
     return incident;
@@ -195,12 +203,15 @@ export class IncidentsService {
         count: sql<number>`cast(count(*) as int)`,
       })
       .from(incidents)
-      .where(and(eq(incidents.tenantId, tenantId), gte(incidents.createdAt, since)))
+      .where(
+        and(eq(incidents.tenantId, tenantId), gte(incidents.createdAt, since)),
+      )
       .groupBy(sql`date_trunc('day', ${incidents.createdAt})`)
       .orderBy(sql`date_trunc('day', ${incidents.createdAt})`);
 
     // MTTR: avg minutes between createdAt and the STATUS_CHANGE→RESOLVED event
-    let mttrRows: { severity: string; avgMinutes: number; resolved: number }[] = [];
+    let mttrRows: { severity: string; avgMinutes: number; resolved: number }[] =
+      [];
     try {
       mttrRows = await db
         .select({
@@ -288,7 +299,7 @@ export class IncidentsService {
   async updateStatus(
     id: string,
     dto: UpdateIncidentStatusDto,
-    userId: string,
+    userId: string | null, // null = system actor (e.g. monitor auto-resolve)
     tenantId: string,
   ) {
     // Verify existence and ownership
@@ -325,17 +336,23 @@ export class IncidentsService {
     );
 
     // Fire-and-forget — email failures must never fail the HTTP response
-    void this.getNotifiableMemberEmails(tenantId).then((recipients) =>
-      Promise.all(
-        recipients.map((to) =>
-          this.notificationsService.enqueueEmail({
-            to,
-            subject: `Incident Updated: ${incident.title}`,
-            text: `Status changed from ${incident.status} to ${dto.status}`,
-          }),
+    void this.getNotifiableMemberEmails(tenantId)
+      .then((recipients) =>
+        Promise.all(
+          recipients.map((to) =>
+            this.notificationsService.enqueueEmail({
+              to,
+              subject: `Incident Updated: ${incident.title}`,
+              text: `Status changed from ${incident.status} to ${dto.status}`,
+            }),
+          ),
         ),
-      ),
-    ).catch((err) => this.logger.error(`Failed to send status-change emails: ${String(err)}`));
+      )
+      .catch((err) =>
+        this.logger.error(
+          `Failed to send status-change emails: ${String(err)}`,
+        ),
+      );
 
     return updated;
   }
@@ -384,11 +401,15 @@ export class IncidentsService {
         tenantId,
         `👤 Incident "${incident.title}" assigned to ${assigneeName ?? assigneeEmail}`,
       );
-      void this.notificationsService.enqueueEmail({
-        to: assigneeEmail,
-        subject: `[${incident.severity}] Incident assigned to you: ${incident.title}`,
-        text: `You have been assigned to the incident "${incident.title}".\n\nStatus: ${incident.status}\nSeverity: ${incident.severity}`,
-      }).catch((err) => this.logger.error(`Failed to send assignment email: ${String(err)}`));
+      void this.notificationsService
+        .enqueueEmail({
+          to: assigneeEmail,
+          subject: `[${incident.severity}] Incident assigned to you: ${incident.title}`,
+          text: `You have been assigned to the incident "${incident.title}".\n\nStatus: ${incident.status}\nSeverity: ${incident.severity}`,
+        })
+        .catch((err) =>
+          this.logger.error(`Failed to send assignment email: ${String(err)}`),
+        );
     }
 
     return updated;

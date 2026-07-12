@@ -22,6 +22,8 @@ export function IntegrationsSettings() {
   const [slackUrl, setSlackUrl] = useState("");
   const [discordUrl, setDiscordUrl] = useState("");
   const [configured, setConfigured] = useState({ slack: false, discord: false });
+  const [statusSlug, setStatusSlug] = useState<string | null>(null);
+  const [slugCopied, setSlugCopied] = useState(false);
   const [keys, setKeys] = useState<ApiKey[]>([]);
   const [keyName, setKeyName] = useState("");
   const [freshKey, setFreshKey] = useState<string | null>(null);
@@ -54,6 +56,7 @@ export function IntegrationsSettings() {
             slack: s.slackConfigured,
             discord: s.discordConfigured,
           });
+          setStatusSlug(s.statusSlug ?? null);
         }
         if (keysRes.ok) setKeys(await keysRes.json());
       } catch {
@@ -175,6 +178,53 @@ export function IntegrationsSettings() {
           }`}
         >
           {notice.text}
+        </div>
+      )}
+
+      {/* Public status page link */}
+      {statusSlug && (
+        <div className="rounded-lg border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/20 p-4">
+          <p className="text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">
+            Public status page
+          </p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
+            Share this page with your users — it shows your public monitors and
+            recent incidents, no login required.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              type="text"
+              readOnly
+              value={`${typeof window !== "undefined" ? window.location.origin : ""}/status/${statusSlug}`}
+              onFocus={(e) => e.target.select()}
+              className="flex-1 rounded-lg border border-indigo-200 dark:border-indigo-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-xs font-mono px-3 py-2 focus:outline-none"
+            />
+            <a
+              href={`/status/${statusSlug}`}
+              target="_blank"
+              rel="noreferrer"
+              className="px-4 py-2 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap text-center"
+            >
+              Open
+            </a>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(
+                    `${window.location.origin}/status/${statusSlug}`,
+                  );
+                  setSlugCopied(true);
+                  setTimeout(() => setSlugCopied(false), 2000);
+                } catch {
+                  // clipboard unavailable — the input is selectable
+                }
+              }}
+              className="px-4 py-2 rounded-lg border border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 text-xs font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors whitespace-nowrap"
+            >
+              {slugCopied ? "Copied!" : "Copy"}
+            </button>
+          </div>
         </div>
       )}
 

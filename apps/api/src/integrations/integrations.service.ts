@@ -4,7 +4,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { apiKeys, db, tenantIntegrations } from '@nexaops/database';
+import { apiKeys, db, tenantIntegrations, tenants } from '@nexaops/database';
 import { createHash, randomBytes } from 'crypto';
 import { and, eq } from 'drizzle-orm';
 
@@ -35,9 +35,14 @@ export class IntegrationsService {
       .select()
       .from(tenantIntegrations)
       .where(eq(tenantIntegrations.tenantId, tenantId));
+    const [tenant] = await db
+      .select({ slug: tenants.slug })
+      .from(tenants)
+      .where(eq(tenants.id, tenantId));
     return {
       slackConfigured: !!row?.slackWebhookUrl,
       discordConfigured: !!row?.discordWebhookUrl,
+      statusSlug: tenant?.slug ?? null,
     };
   }
 

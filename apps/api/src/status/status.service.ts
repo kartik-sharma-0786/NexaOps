@@ -1,5 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { db, incidentEvents, incidents, tenants } from '@nexaops/database';
+import {
+  db,
+  incidentEvents,
+  incidents,
+  monitors,
+  tenants,
+} from '@nexaops/database';
 import { and, desc, eq, gte, inArray } from 'drizzle-orm';
 
 const RECENT_DAYS = 7;
@@ -46,8 +52,7 @@ export class StatusService {
     const enriched = recentIncidents.map((inc) => {
       const resolvedEvent = inc.events.find(
         (e) =>
-          e.actionType === 'STATUS_CHANGE' &&
-          e.message.includes('RESOLVED'),
+          e.actionType === 'STATUS_CHANGE' && e.message.includes('RESOLVED'),
       );
       return {
         id: inc.id,
@@ -62,8 +67,30 @@ export class StatusService {
       };
     });
 
+    // Public uptime monitors for this tenant.
+    const publicMonitors = await db
+      .select({
+        id: monitors.id,
+        name: monitors.name,
+        status: monitors.status,
+        lastCheckedAt: monitors.lastCheckedAt,
+        lastResponseMs: monitors.lastResponseMs,
+      })
+      .from(monitors)
+      .where(
+        and(
+          eq(monitors.tenantId, tenant.id),
+          eq(monitors.isPublic, true),
+          eq(monitors.enabled, true),
+        ),
+      )
+      .orderBy(monitors.createdAt);
+
     let overallStatus: 'operational' | 'degraded' | 'outage' = 'operational';
-    if (active.some((i) => i.severity === 'CRITICAL')) {
+    if (
+      active.some((i) => i.severity === 'CRITICAL') ||
+      publicMonitors.some((m) => m.status === 'DOWN')
+    ) {
       overallStatus = 'outage';
     } else if (active.length > 0) {
       overallStatus = 'degraded';
@@ -74,6 +101,7 @@ export class StatusService {
       status: overallStatus,
       activeCount: active.length,
       incidents: enriched,
+      monitors: publicMonitors,
       updatedAt: new Date(),
     };
   }

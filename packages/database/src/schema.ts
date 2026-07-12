@@ -289,3 +289,25 @@ export const onCallOverridesRelations = relations(
     }),
   }),
 );
+
+// Uptime monitors — cron-checked URLs that auto-create/resolve incidents.
+export const monitors = pgTable("monitors", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  tenantId: uuid("tenant_id")
+    .references(() => tenants.id)
+    .notNull(),
+  name: text("name").notNull(),
+  url: text("url").notNull(),
+  intervalMinutes: integer("interval_minutes").default(5).notNull(),
+  enabled: boolean("enabled").default(true).notNull(),
+  // Shown on the tenant's public status page when true.
+  isPublic: boolean("is_public").default(true).notNull(),
+  // Runtime state maintained by the checker.
+  status: text("status").default("PENDING").notNull(), // UP | DOWN | PENDING
+  lastCheckedAt: timestamp("last_checked_at"),
+  lastResponseMs: integer("last_response_ms"),
+  lastError: text("last_error"),
+  // Open auto-created incident, cleared when the monitor recovers.
+  incidentId: uuid("incident_id").references(() => incidents.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});

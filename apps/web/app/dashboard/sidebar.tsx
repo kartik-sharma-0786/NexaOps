@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   BarChart3,
   Clock,
+  MonitorCheck,
   Settings,
   Users,
   X,
@@ -46,6 +47,7 @@ export function DashboardSidebar({
   const navItems = [
     { href: "/dashboard", label: t.dashboard.incidents, icon: AlertTriangle, exact: true },
     { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3, exact: false },
+    { href: "/dashboard/monitors", label: "Monitors", icon: MonitorCheck, exact: false },
     { href: "/dashboard/oncall", label: "On-Call", icon: Clock, exact: false },
     { href: "/dashboard/team", label: t.team.title, icon: Users, exact: false },
     { href: "/dashboard/settings", label: t.dashboard.settings, icon: Settings, exact: false },

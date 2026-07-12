@@ -15,6 +15,7 @@ import { EventsModule } from './events/events.module';
 import { HealthModule } from './health/health.module';
 import { IncidentsModule } from './incidents/incidents.module';
 import { IntegrationsModule } from './integrations/integrations.module';
+import { MonitorsModule } from './monitors/monitors.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { StatusModule } from './status/status.module';
 import { TeamModule } from './team/team.module';
@@ -58,6 +59,7 @@ const isProduction = process.env.NODE_ENV === 'production';
     NotificationsModule,
     TeamModule,
     IntegrationsModule,
+    MonitorsModule,
     BillingModule,
     StatusModule,
   ],
