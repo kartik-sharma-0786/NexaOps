@@ -185,14 +185,23 @@ export default function Home() {
 
             <div className="grid md:grid-cols-3 gap-8">
               {[
-                { ...t.landing.resourceCards.guide, color: "bg-blue-600" },
-                { ...t.landing.resourceCards.webinar, color: "bg-purple-600" },
+                {
+                  ...t.landing.resourceCards.guide,
+                  color: "bg-blue-600",
+                  href: "/resources/incident-management-guide",
+                },
+                {
+                  ...t.landing.resourceCards.webinar,
+                  color: "bg-purple-600",
+                  href: "/resources/resilient-systems-at-scale",
+                },
                 {
                   ...t.landing.resourceCards.caseStudy,
                   color: "bg-green-600",
+                  href: "/resources/post-mortem-best-practices",
                 },
               ].map((resource, idx) => (
-                <div key={idx} className="group cursor-pointer">
+                <Link key={idx} href={resource.href} className="group block">
                   <div
                     className={`h-48 ${resource.color} rounded-t-2xl relative overflow-hidden`}
                   >
@@ -212,7 +221,7 @@ export default function Home() {
                       {t.landing.readMore} <ArrowRight className="ml-2 w-4 h-4" />
                     </span>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>

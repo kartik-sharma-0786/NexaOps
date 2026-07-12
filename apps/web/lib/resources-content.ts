@@ -261,6 +261,61 @@ export const RESOURCE_ARTICLES: ResourceArticle[] = [
     ],
   },
   {
+    slug: "uptime-monitoring-101",
+    key: "guideUptimeMonitoring",
+    type: "Guide",
+    title: "Uptime Monitoring 101",
+    description:
+      "How to monitor your services so outages open incidents before customers notice.",
+    readTime: "9 min read",
+    gradient: "from-cyan-600 to-sky-600",
+    sections: [
+      {
+        kind: "p",
+        text: "Every incident process has a first domino: knowing something is down. If that knowledge comes from a customer email, you've already lost twenty minutes and some trust. Uptime monitoring makes the first domino automatic — a machine notices the failure and starts your response process within a minute.",
+      },
+      { kind: "h2", text: "What to monitor" },
+      {
+        kind: "list",
+        items: [
+          "Your health endpoint — a route like /health that checks the app can serve traffic. This is your canary; every service should have one.",
+          "The user-facing front door — your homepage or app login. Infrastructure can be green while the thing users actually touch is broken.",
+          "Critical API routes — the endpoint your mobile app or biggest customer calls. Monitor what would page you anyway.",
+          "Third-party dependencies you can't live without — payment providers, auth services. You can't fix them, but you want to know it's them, not you.",
+        ],
+      },
+      { kind: "h2", text: "Choosing check intervals" },
+      {
+        kind: "p",
+        text: "Shorter intervals mean faster detection but noisier data and more load. A sensible default: 1–5 minutes for anything user-facing or revenue-critical, 10–15 minutes for internal tools and staging. Remember your detection time adds to every outage's duration — a 15-minute interval means up to 15 minutes of downtime before anyone even knows.",
+      },
+      { kind: "h2", text: "What counts as down?" },
+      {
+        kind: "p",
+        text: "A good checker treats 5xx responses, timeouts, and network failures as down — and everything else as up. Resist the urge to alert on 4xx: a 404 usually means the check is misconfigured, not that the service failed. Timeouts matter more than people expect: a service that answers in 30 seconds is down for any practical purpose, so cap checks around 10 seconds.",
+      },
+      { kind: "h2", text: "Close the loop with incidents" },
+      {
+        kind: "p",
+        text: "Monitoring that only sends an email is half a system. The failure should open an incident automatically — with severity, ownership, escalation timers, and a timeline — and resolve itself when the check recovers, recording exactly how long you were down. That downtime record is what makes your post-mortems and SLO math honest. In NexaOps, monitors do exactly this out of the box.",
+      },
+      {
+        kind: "quote",
+        text: "The goal isn't a wall of green dashboards — it's that nobody ever has to say 'since when has this been broken?'",
+      },
+      { kind: "h2", text: "Show your users, too" },
+      {
+        kind: "p",
+        text: "A public status page with live service states and 30-day uptime history turns outages from a support-ticket storm into a single link. Publishing your uptime is also a commitment device: teams that show their numbers publicly tend to defend them.",
+      },
+      { kind: "h2", text: "Start with one monitor today" },
+      {
+        kind: "p",
+        text: "Add a monitor on your health endpoint with a 5-minute interval and let it run for a week. You'll get a baseline response-time curve, a real uptime number instead of a guess, and — the first time something breaks at 2 a.m. — an incident that was already open before anyone woke up.",
+      },
+    ],
+  },
+  {
     slug: "automating-incident-response",
     key: "webinarAutomation",
     type: "Webinar",

@@ -4,6 +4,7 @@ import {
   BookOpen,
   Clock,
   KeyRound,
+  MonitorCheck,
   Rocket,
   ShieldCheck,
   Siren,
@@ -24,8 +25,9 @@ const API_URL =
 const SECTIONS = [
   { id: "getting-started", label: "Getting Started", icon: Rocket },
   { id: "incidents", label: "Incidents", icon: Siren },
+  { id: "monitors", label: "Uptime Monitors", icon: MonitorCheck },
   { id: "alert-api", label: "Alert Ingestion API", icon: Webhook },
-  { id: "notifications", label: "Chat & Email Notifications", icon: Bell },
+  { id: "notifications", label: "Notifications", icon: Bell },
   { id: "escalation", label: "Escalation Policies", icon: ArrowUpRight },
   { id: "oncall", label: "On-Call Schedules", icon: Clock },
   { id: "roles", label: "Roles & Permissions", icon: ShieldCheck },
@@ -153,6 +155,37 @@ export default function DocsPage() {
             generates a 2–3 sentence recap of the timeline, useful for handoffs
             and stakeholder updates.
           </P>
+          <P>
+            Once an incident is RESOLVED, a <strong>Post-mortem</strong> button
+            appears on its page. It downloads a ready-to-edit Markdown file with
+            the severity, time-to-resolve, description, AI summary, the full
+            timeline, and an action-items checklist — a head start on your
+            review instead of a blank page.
+          </P>
+
+          <H2 id="monitors">Uptime Monitors</H2>
+          <P>
+            <InlineCode>Dashboard → Monitors</InlineCode> watches any HTTP
+            endpoint for you. Add a name, a URL, and a check interval (1–60
+            minutes). When a check fails (5xx, timeout after 10s, or network
+            error), NexaOps <strong>automatically opens a HIGH incident</strong>{" "}
+            — which flows through the normal pipeline: chat notifications fire
+            and escalation policies apply. When the endpoint recovers, the
+            incident <strong>auto-resolves</strong> with the recovery recorded
+            on its timeline.
+          </P>
+          <P>
+            Every check is recorded, powering the{" "}
+            <strong>response-time sparklines</strong> and 24h/7d uptime
+            percentages on the Monitors page, and the{" "}
+            <strong>30-day uptime strips</strong> on your public status page.
+            History is kept for 30 days. Monitors marked{" "}
+            <InlineCode>public</InlineCode> appear on your status page at{" "}
+            <InlineCode>/status/&lt;your-slug&gt;</InlineCode> (the exact link
+            is shown in Settings → Integrations); the rest stay internal. You
+            can pause a monitor any time with its toggle — paused monitors are
+            skipped and never open incidents.
+          </P>
 
           <H2 id="alert-api">Alert Ingestion API</H2>
           <P>
@@ -180,7 +213,14 @@ export default function DocsPage() {
             apply.
           </P>
 
-          <H2 id="notifications">Chat &amp; Email Notifications</H2>
+          <H2 id="notifications">Notifications</H2>
+          <P>
+            The <strong>bell icon</strong> (sidebar on desktop, top bar on
+            mobile) shows incident activity live — created, updated, escalated —
+            with an unread badge. Clicking a notification jumps straight to the
+            incident. No configuration needed; it works over the same realtime
+            connection that keeps the incident list fresh.
+          </P>
           <P>
             Connect Slack and/or Discord in{" "}
             <InlineCode>Dashboard → Settings → Integrations</InlineCode> by pasting

@@ -23,11 +23,18 @@ type PublicMonitor = {
 };
 
 /** 30-cell uptime strip: one cell per day, gray when no data. */
-function UptimeStrip({ days }: { days: { day: string; pct: number }[] }) {
+function UptimeStrip({
+  days,
+  until,
+}: {
+  days: { day: string; pct: number }[];
+  until: string;
+}) {
   const byDay = new Map(days.map((d) => [d.day, d.pct]));
+  const end = new Date(until).getTime();
   const cells: { key: string; pct: number | null }[] = [];
   for (let i = 29; i >= 0; i--) {
-    const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+    const d = new Date(end - i * 24 * 60 * 60 * 1000);
     const key = d.toISOString().slice(0, 10);
     cells.push({ key, pct: byDay.get(key) ?? null });
   }
@@ -258,7 +265,9 @@ export default async function StatusPage({
                       </span>
                     </div>
                   </div>
-                  {(m.days?.length ?? 0) > 0 && <UptimeStrip days={m.days!} />}
+                  {(m.days?.length ?? 0) > 0 && (
+                    <UptimeStrip days={m.days!} until={data.updatedAt} />
+                  )}
                 </li>
               ))}
             </ul>

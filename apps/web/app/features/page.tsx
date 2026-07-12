@@ -24,7 +24,7 @@ const highlights: Array<{
   {
     key: "alerting",
     icon: <BellRing className="w-6 h-6 text-amber-500" />,
-    status: "coming_soon",
+    status: "live",
   },
   {
     key: "runbooks",
@@ -48,7 +48,7 @@ const deepDiveKeys: Array<{
   status: FeatureStatus;
 }> = [
   { key: "incidentTimeline", status: "live" },
-  { key: "onCall", status: "coming_soon" },
+  { key: "onCall", status: "live" },
   { key: "collaboration", status: "coming_soon" },
   { key: "guardrails", status: "coming_soon" },
 ];
