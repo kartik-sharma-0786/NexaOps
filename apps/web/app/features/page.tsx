@@ -131,8 +131,8 @@ export default function FeaturesPage() {
                   className="p-6 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gradient-to-br from-slate-50 to-white dark:from-gray-800 dark:to-gray-900 shadow-sm hover:shadow-md transition-all"
                 >
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-semibold transition-colors">
-                      {t.features.deepDives[key].title.split(" ")[0]}
+                    <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-base shrink-0 transition-colors">
+                      {t.features.deepDives[key].title.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 flex items-center justify-between gap-2">
                       <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
