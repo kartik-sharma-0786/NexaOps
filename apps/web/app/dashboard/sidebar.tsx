@@ -14,6 +14,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LanguageSelector } from "../../components/language-selector";
 import { LogoutButton } from "../../components/logout-button";
+import { NotificationsBell } from "../../components/notifications-bell";
 import { ThemeToggle } from "../../components/theme-toggle";
 import { useLanguage } from "../../contexts/language-context";
 
@@ -101,6 +102,7 @@ export function DashboardSidebar({
         <div className="mt-3 flex items-center gap-2">
           <LanguageSelector />
           <ThemeToggle />
+          <NotificationsBell align="left" />
         </div>
       </div>
 

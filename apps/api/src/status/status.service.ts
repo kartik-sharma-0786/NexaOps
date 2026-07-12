@@ -7,11 +7,14 @@ import {
   tenants,
 } from '@nexaops/database';
 import { and, desc, eq, gte, inArray } from 'drizzle-orm';
+import { MonitorsService } from '../monitors/monitors.service';
 
 const RECENT_DAYS = 7;
 
 @Injectable()
 export class StatusService {
+  constructor(private readonly monitorsService: MonitorsService) {}
+
   async getStatus(slug: string) {
     const [tenant] = await db
       .select({ id: tenants.id, name: tenants.name, slug: tenants.slug })
@@ -86,6 +89,21 @@ export class StatusService {
       )
       .orderBy(monitors.createdAt);
 
+    const dailyUptime =
+      publicMonitors.length > 0
+        ? await this.monitorsService.publicDailyUptime(tenant.id)
+        : {};
+    const monitorsWithHistory = publicMonitors.map((m) => {
+      const days = dailyUptime[m.id] ?? [];
+      const uptime30d =
+        days.length > 0
+          ? Math.round(
+              (days.reduce((s, d) => s + d.pct, 0) / days.length) * 10,
+            ) / 10
+          : null;
+      return { ...m, days, uptime30d };
+    });
+
     let overallStatus: 'operational' | 'degraded' | 'outage' = 'operational';
     if (
       active.some((i) => i.severity === 'CRITICAL') ||
@@ -101,7 +119,7 @@ export class StatusService {
       status: overallStatus,
       activeCount: active.length,
       incidents: enriched,
-      monitors: publicMonitors,
+      monitors: monitorsWithHistory,
       updatedAt: new Date(),
     };
   }

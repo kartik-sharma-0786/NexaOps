@@ -6,6 +6,7 @@ import { MonitorsService } from './monitors.service';
 export class MonitorsScheduler {
   private readonly logger = new Logger(MonitorsScheduler.name);
   private running = false;
+  private lastPrune = 0;
 
   constructor(private readonly monitorsService: MonitorsService) {}
 
@@ -17,6 +18,11 @@ export class MonitorsScheduler {
       const checked = await this.monitorsService.checkDueMonitors();
       if (checked > 0) {
         this.logger.debug(`Monitor sweep: ${checked} check(s) run`);
+      }
+      // Hourly retention pass for check history.
+      if (Date.now() - this.lastPrune > 60 * 60 * 1000) {
+        this.lastPrune = Date.now();
+        await this.monitorsService.pruneOldChecks();
       }
     } catch (err) {
       this.logger.error(`Monitor sweep failed: ${String(err)}`);

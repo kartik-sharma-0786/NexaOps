@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
     boolean,
+    index,
     integer,
     jsonb,
     pgEnum,
@@ -311,3 +312,26 @@ export const monitors = pgTable("monitors", {
   incidentId: uuid("incident_id").references(() => incidents.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+// Individual check results for uptime history (pruned after 30 days).
+export const monitorChecks = pgTable(
+  "monitor_checks",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    monitorId: uuid("monitor_id")
+      .references(() => monitors.id, { onDelete: "cascade" })
+      .notNull(),
+    tenantId: uuid("tenant_id")
+      .references(() => tenants.id)
+      .notNull(),
+    up: boolean("up").notNull(),
+    responseMs: integer("response_ms"),
+    checkedAt: timestamp("checked_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    monitorTimeIdx: index("monitor_checks_monitor_time_idx").on(
+      t.monitorId,
+      t.checkedAt,
+    ),
+  }),
+);

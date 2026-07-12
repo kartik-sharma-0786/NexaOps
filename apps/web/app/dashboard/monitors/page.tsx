@@ -21,6 +21,60 @@ type Monitor = {
   lastError: string | null;
 };
 
+type CheckPoint = { t: string; up: boolean; ms: number | null };
+type MonitorHistory = Record<
+  string,
+  { checks: CheckPoint[]; uptime24h: number | null; uptime7d: number | null }
+>;
+
+function Sparkline({ checks }: { checks: CheckPoint[] }) {
+  if (checks.length < 2) return null;
+  const w = 110;
+  const h = 26;
+  const pad = 3;
+  const maxMs = Math.max(...checks.map((c) => c.ms ?? 0), 1);
+  const pts = checks.map((c, i) => ({
+    x: pad + (i * (w - pad * 2)) / (checks.length - 1),
+    y: h - pad - ((c.ms ?? 0) / maxMs) * (h - pad * 2),
+    up: c.up,
+  }));
+  const path = pts
+    .map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`)
+    .join(" ");
+  return (
+    <svg width={w} height={h} className="shrink-0" aria-hidden="true">
+      <path
+        d={path}
+        fill="none"
+        stroke="#6366f1"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+        opacity="0.85"
+      />
+      {pts
+        .filter((p) => !p.up)
+        .map((p, i) => (
+          <circle key={i} cx={p.x} cy={p.y} r="2.5" fill="#ef4444" />
+        ))}
+    </svg>
+  );
+}
+
+function UptimeBadge({ label, pct }: { label: string; pct: number | null }) {
+  if (pct == null) return null;
+  const tone =
+    pct >= 99
+      ? "text-emerald-600 dark:text-emerald-400"
+      : pct >= 95
+        ? "text-amber-600 dark:text-amber-400"
+        : "text-red-600 dark:text-red-400";
+  return (
+    <span className="text-[11px] text-slate-400 tabular-nums">
+      {label} <span className={`font-semibold ${tone}`}>{pct}%</span>
+    </span>
+  );
+}
+
 const STATUS_STYLE: Record<
   Monitor["status"],
   { dot: string; label: string; text: string }
@@ -45,6 +99,7 @@ export default function MonitorsPage() {
   const canEdit = canManageTeam(user?.role);
 
   const [items, setItems] = useState<Monitor[]>([]);
+  const [history, setHistory] = useState<MonitorHistory>({});
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
   const [url, setUrl] = useState("");
@@ -56,10 +111,16 @@ export default function MonitorsPage() {
   const load = useCallback(async () => {
     if (!user?.jwt) return;
     try {
-      const res = await fetch(`${API_URL}/monitors`, {
-        headers: { Authorization: `Bearer ${user.jwt}` },
-      });
-      if (res.ok) setItems(await res.json());
+      const [listRes, histRes] = await Promise.all([
+        fetch(`${API_URL}/monitors`, {
+          headers: { Authorization: `Bearer ${user.jwt}` },
+        }),
+        fetch(`${API_URL}/monitors/history`, {
+          headers: { Authorization: `Bearer ${user.jwt}` },
+        }),
+      ]);
+      if (listRes.ok) setItems(await listRes.json());
+      if (histRes.ok) setHistory(await histRes.json());
     } catch {
       // keep current data on transient errors
     } finally {
@@ -264,7 +325,14 @@ export default function MonitorsPage() {
                         <p className="text-xs text-red-500 mt-0.5 truncate">{m.lastError}</p>
                       )}
                     </div>
-                    <div className="hidden sm:block text-right shrink-0">
+                    <div className="hidden md:flex flex-col items-end gap-0.5 shrink-0">
+                      <Sparkline checks={history[m.id]?.checks ?? []} />
+                      <div className="flex items-center gap-2">
+                        <UptimeBadge label="24h" pct={history[m.id]?.uptime24h ?? null} />
+                        <UptimeBadge label="7d" pct={history[m.id]?.uptime7d ?? null} />
+                      </div>
+                    </div>
+                    <div className="hidden sm:block text-right shrink-0 w-24">
                       <p className="text-xs text-slate-500 dark:text-slate-400 tabular-nums">
                         {m.lastResponseMs != null ? `${m.lastResponseMs}ms` : "—"}
                       </p>

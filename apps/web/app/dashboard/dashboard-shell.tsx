@@ -3,6 +3,7 @@
 import { Activity, Menu } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { NotificationsBell } from "../../components/notifications-bell";
 import { useLanguage } from "../../contexts/language-context";
 import { DashboardSidebar } from "./sidebar";
 
@@ -95,6 +96,9 @@ export function DashboardShell({
               {t.brandName}
             </span>
           </Link>
+          <div className="ml-auto">
+            <NotificationsBell align="right" />
+          </div>
         </header>
 
         <main className="flex-1 overflow-y-auto">

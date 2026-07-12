@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { db, incidentEvents, monitors } from '@nexaops/database';
-import { and, eq, isNull, lte, or, sql } from 'drizzle-orm';
+import { db, incidentEvents, monitorChecks, monitors } from '@nexaops/database';
+import { and, desc, eq, gte, isNull, lt, lte, or, sql } from 'drizzle-orm';
 import { IncidentsService } from '../incidents/incidents.service';
 import { CreateMonitorDto, UpdateMonitorDto } from './dto/monitor.dto';
 
@@ -121,6 +121,18 @@ export class MonitorsService {
     }
     const responseMs = Date.now() - started;
 
+    // Record history (best-effort — a failed insert must not break the check)
+    try {
+      await db.insert(monitorChecks).values({
+        monitorId: monitor.id,
+        tenantId: monitor.tenantId,
+        up,
+        responseMs,
+      });
+    } catch (err) {
+      this.logger.warn(`Failed to record check history: ${String(err)}`);
+    }
+
     if (up) {
       await db
         .update(monitors)
@@ -156,6 +168,106 @@ export class MonitorsService {
         incidentId,
       })
       .where(eq(monitors.id, monitor.id));
+  }
+
+  // ---- History & uptime ----
+
+  /**
+   * Per-monitor recent checks (for sparklines) plus 24h/7d uptime percentages.
+   * Shaped as a map keyed by monitor id so the dashboard can join client-side.
+   */
+  async history(tenantId: string) {
+    const uptimeRows = await db
+      .select({
+        monitorId: monitorChecks.monitorId,
+        up24: sql<number | null>`
+          avg(case when "monitor_checks"."up" then 1.0 else 0.0 end)
+            filter (where "monitor_checks"."checked_at" >= now() - interval '24 hours')
+        `,
+        up7d: sql<number | null>`
+          avg(case when "monitor_checks"."up" then 1.0 else 0.0 end)
+        `,
+      })
+      .from(monitorChecks)
+      .where(
+        and(
+          eq(monitorChecks.tenantId, tenantId),
+          gte(monitorChecks.checkedAt, sql`now() - interval '7 days'`),
+        ),
+      )
+      .groupBy(monitorChecks.monitorId);
+
+    const tenantMonitors = await db
+      .select({ id: monitors.id })
+      .from(monitors)
+      .where(eq(monitors.tenantId, tenantId));
+
+    const out: Record<
+      string,
+      {
+        checks: { t: Date; up: boolean; ms: number | null }[];
+        uptime24h: number | null;
+        uptime7d: number | null;
+      }
+    > = {};
+
+    for (const { id } of tenantMonitors) {
+      const recent = await db
+        .select({
+          t: monitorChecks.checkedAt,
+          up: monitorChecks.up,
+          ms: monitorChecks.responseMs,
+        })
+        .from(monitorChecks)
+        .where(eq(monitorChecks.monitorId, id))
+        .orderBy(desc(monitorChecks.checkedAt))
+        .limit(30);
+
+      const agg = uptimeRows.find((r) => r.monitorId === id);
+      out[id] = {
+        checks: recent.reverse(),
+        uptime24h: agg?.up24 != null ? Math.round(Number(agg.up24) * 1000) / 10 : null,
+        uptime7d: agg?.up7d != null ? Math.round(Number(agg.up7d) * 1000) / 10 : null,
+      };
+    }
+    return out;
+  }
+
+  /** Daily uptime buckets for the public status page (last 30 days). */
+  async publicDailyUptime(tenantId: string) {
+    const rows = await db
+      .select({
+        monitorId: monitorChecks.monitorId,
+        day: sql<string>`to_char(date_trunc('day', "monitor_checks"."checked_at"), 'YYYY-MM-DD')`,
+        pct: sql<number>`avg(case when "monitor_checks"."up" then 1.0 else 0.0 end)`,
+      })
+      .from(monitorChecks)
+      .where(
+        and(
+          eq(monitorChecks.tenantId, tenantId),
+          gte(monitorChecks.checkedAt, sql`now() - interval '30 days'`),
+        ),
+      )
+      .groupBy(monitorChecks.monitorId, sql`date_trunc('day', "monitor_checks"."checked_at")`);
+
+    const byMonitor: Record<string, { day: string; pct: number }[]> = {};
+    for (const r of rows) {
+      (byMonitor[r.monitorId] ??= []).push({
+        day: r.day,
+        pct: Math.round(Number(r.pct) * 1000) / 10,
+      });
+    }
+    for (const list of Object.values(byMonitor)) {
+      list.sort((a, b) => a.day.localeCompare(b.day));
+    }
+    return byMonitor;
+  }
+
+  /** Drop check rows older than 30 days. Called hourly by the scheduler. */
+  async pruneOldChecks(): Promise<void> {
+    await db
+      .delete(monitorChecks)
+      .where(lt(monitorChecks.checkedAt, sql`now() - interval '30 days'`));
   }
 
   private async openIncident(

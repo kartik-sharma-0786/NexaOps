@@ -27,6 +27,11 @@ export class MonitorsController {
     return this.monitorsService.findAll(req.user.tenantId);
   }
 
+  @Get('history')
+  history(@Request() req: any) {
+    return this.monitorsService.history(req.user.tenantId);
+  }
+
   @Post()
   @Roles(...TEAM_MANAGE_ROLES)
   create(@Request() req: any, @Body() dto: CreateMonitorDto) {
