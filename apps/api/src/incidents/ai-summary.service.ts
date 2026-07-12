@@ -35,8 +35,7 @@ export class AiSummaryService {
       .slice()
       .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
       .map(
-        (e) =>
-          `[${e.createdAt.toISOString()}] ${e.actionType}: ${e.message}`,
+        (e) => `[${e.createdAt.toISOString()}] ${e.actionType}: ${e.message}`,
       )
       .join('\n');
 

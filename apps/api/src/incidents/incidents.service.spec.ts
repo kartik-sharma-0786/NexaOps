@@ -1,8 +1,10 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { EscalationService } from '../escalation/escalation.service';
 import { EventsGateway } from '../events/events.gateway';
 import { ChatopsService } from '../notifications/chatops.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { AiSummaryService } from './ai-summary.service';
 import { IncidentsService } from './incidents.service';
 
 jest.mock('@nexaops/database', () => ({
@@ -49,6 +51,12 @@ describe('IncidentsService', () => {
   const chatopsService = {
     notify: jest.fn().mockResolvedValue(undefined),
   };
+  const aiSummaryService = {
+    summarize: jest.fn().mockResolvedValue('summary'),
+  };
+  const escalationService = {
+    enqueueCheck: jest.fn().mockResolvedValue(undefined),
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -59,6 +67,8 @@ describe('IncidentsService', () => {
         { provide: EventsGateway, useValue: eventsGateway },
         { provide: NotificationsService, useValue: notificationsService },
         { provide: ChatopsService, useValue: chatopsService },
+        { provide: AiSummaryService, useValue: aiSummaryService },
+        { provide: EscalationService, useValue: escalationService },
       ],
     }).compile();
 

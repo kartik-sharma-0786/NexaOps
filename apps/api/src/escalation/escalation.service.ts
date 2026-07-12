@@ -1,5 +1,10 @@
 import { InjectQueue } from '@nestjs/bullmq';
-import { Injectable, Logger, NotFoundException, Optional } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  Optional,
+} from '@nestjs/common';
 import {
   db,
   escalationPolicies,
@@ -30,7 +35,9 @@ export class EscalationService {
   constructor(
     private readonly notificationsService: NotificationsService,
     private readonly chatopsService: ChatopsService,
-    @Optional() @InjectQueue('escalation') private readonly escalationQueue?: Queue,
+    @Optional()
+    @InjectQueue('escalation')
+    private readonly escalationQueue?: Queue,
   ) {}
 
   async findAll(tenantId: string) {
@@ -61,11 +68,18 @@ export class EscalationService {
       .set({
         ...(dto.name !== undefined && { name: dto.name }),
         ...(dto.severity !== undefined && { severity: dto.severity }),
-        ...(dto.delayMinutes !== undefined && { delayMinutes: dto.delayMinutes }),
+        ...(dto.delayMinutes !== undefined && {
+          delayMinutes: dto.delayMinutes,
+        }),
         ...(dto.notifyRole !== undefined && { notifyRole: dto.notifyRole }),
         ...(dto.enabled !== undefined && { enabled: dto.enabled }),
       })
-      .where(and(eq(escalationPolicies.id, id), eq(escalationPolicies.tenantId, tenantId)))
+      .where(
+        and(
+          eq(escalationPolicies.id, id),
+          eq(escalationPolicies.tenantId, tenantId),
+        ),
+      )
       .returning();
 
     if (!policy) throw new NotFoundException('Policy not found');
@@ -75,18 +89,19 @@ export class EscalationService {
   async remove(id: string, tenantId: string) {
     const [policy] = await db
       .delete(escalationPolicies)
-      .where(and(eq(escalationPolicies.id, id), eq(escalationPolicies.tenantId, tenantId)))
+      .where(
+        and(
+          eq(escalationPolicies.id, id),
+          eq(escalationPolicies.tenantId, tenantId),
+        ),
+      )
       .returning();
 
     if (!policy) throw new NotFoundException('Policy not found');
     return { deleted: true };
   }
 
-  async enqueueCheck(
-    incidentId: string,
-    tenantId: string,
-    severity: string,
-  ) {
+  async enqueueCheck(incidentId: string, tenantId: string, severity: string) {
     if (!queueEnabled) return;
 
     // Find the matching active policy
@@ -106,7 +121,12 @@ export class EscalationService {
 
     await this.escalationQueue.add(
       'check',
-      { incidentId, tenantId, policyId: policy.id, notifyRole: policy.notifyRole },
+      {
+        incidentId,
+        tenantId,
+        policyId: policy.id,
+        notifyRole: policy.notifyRole,
+      },
       { delay: policy.delayMinutes * 60 * 1000 },
     );
   }

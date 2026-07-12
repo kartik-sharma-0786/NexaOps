@@ -6,7 +6,7 @@ import {
   tenantMembers,
   users,
 } from '@nexaops/database';
-import { and, eq, gte, lte } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { CreateOverrideDto } from './dto/create-override.dto';
 import { UpsertScheduleDto } from './dto/upsert-schedule.dto';
 
@@ -32,7 +32,9 @@ export class OnCallService {
       ...(dto.name !== undefined && { name: dto.name }),
       ...(dto.memberOrder !== undefined && { memberOrder: dto.memberOrder }),
       ...(dto.shiftDays !== undefined && { shiftDays: dto.shiftDays }),
-      ...(dto.startDate !== undefined && { startDate: new Date(dto.startDate) }),
+      ...(dto.startDate !== undefined && {
+        startDate: new Date(dto.startDate),
+      }),
       updatedAt: new Date(),
     };
 
@@ -73,7 +75,11 @@ export class OnCallService {
       (o) => new Date(o.startsAt) <= now && new Date(o.endsAt) >= now,
     );
     if (activeOverride) {
-      return { userId: activeOverride.userId, user: activeOverride.user, via: 'override' };
+      return {
+        userId: activeOverride.userId,
+        user: activeOverride.user,
+        via: 'override',
+      };
     }
 
     const userId = this.computeRotationUserId(schedule);
@@ -90,7 +96,11 @@ export class OnCallService {
 
   async getMembers(tenantId: string) {
     return db
-      .select({ userId: tenantMembers.userId, name: users.name, email: users.email })
+      .select({
+        userId: tenantMembers.userId,
+        name: users.name,
+        email: users.email,
+      })
       .from(tenantMembers)
       .innerJoin(users, eq(tenantMembers.userId, users.id))
       .where(eq(tenantMembers.tenantId, tenantId));
@@ -100,7 +110,8 @@ export class OnCallService {
     const schedule = await db.query.onCallSchedules.findFirst({
       where: eq(onCallSchedules.tenantId, tenantId),
     });
-    if (!schedule) throw new NotFoundException('No schedule found for this tenant');
+    if (!schedule)
+      throw new NotFoundException('No schedule found for this tenant');
 
     const [override] = await db
       .insert(onCallOverrides)
@@ -122,7 +133,12 @@ export class OnCallService {
 
     const [deleted] = await db
       .delete(onCallOverrides)
-      .where(and(eq(onCallOverrides.id, id), eq(onCallOverrides.scheduleId, schedule.id)))
+      .where(
+        and(
+          eq(onCallOverrides.id, id),
+          eq(onCallOverrides.scheduleId, schedule.id),
+        ),
+      )
       .returning();
 
     if (!deleted) throw new NotFoundException('Override not found');
@@ -147,7 +163,12 @@ export class OnCallService {
     memberOrder: string[];
     shiftDays: number;
     startDate: Date | string;
-    overrides: Array<{ userId: string; user: any; startsAt: Date | string; endsAt: Date | string }>;
+    overrides: Array<{
+      userId: string;
+      user: any;
+      startsAt: Date | string;
+      endsAt: Date | string;
+    }>;
   }): Promise<string | null> {
     const now = new Date();
     const active = schedule.overrides.find(

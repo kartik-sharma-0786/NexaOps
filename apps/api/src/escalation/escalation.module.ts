@@ -11,9 +11,7 @@ const queueEnabled = process.env.NOTIFICATIONS_QUEUE_ENABLED !== 'false';
 @Module({
   imports: [
     NotificationsModule,
-    ...(queueEnabled
-      ? [BullModule.registerQueue({ name: 'escalation' })]
-      : []),
+    ...(queueEnabled ? [BullModule.registerQueue({ name: 'escalation' })] : []),
   ],
   controllers: [EscalationController],
   providers: [

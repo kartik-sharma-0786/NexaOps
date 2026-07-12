@@ -24,9 +24,16 @@ export class EscalationProcessor extends WorkerHost {
     const { incidentId, tenantId, notifyRole } = job.data;
 
     const [incident] = await db
-      .select({ id: incidents.id, title: incidents.title, status: incidents.status, severity: incidents.severity })
+      .select({
+        id: incidents.id,
+        title: incidents.title,
+        status: incidents.status,
+        severity: incidents.severity,
+      })
       .from(incidents)
-      .where(and(eq(incidents.id, incidentId), eq(incidents.tenantId, tenantId)))
+      .where(
+        and(eq(incidents.id, incidentId), eq(incidents.tenantId, tenantId)),
+      )
       .limit(1);
 
     if (!incident) {
@@ -36,7 +43,9 @@ export class EscalationProcessor extends WorkerHost {
 
     // Only escalate if still unresolved
     if (incident.status === 'RESOLVED') {
-      this.logger.log(`Escalation skipped — incident ${incidentId} already resolved`);
+      this.logger.log(
+        `Escalation skipped — incident ${incidentId} already resolved`,
+      );
       return;
     }
 
@@ -51,13 +60,17 @@ export class EscalationProcessor extends WorkerHost {
           eq(tenantMembers.tenantId, tenantId),
           inArray(
             tenantMembers.role,
-            rolesToNotify as Array<'OWNER' | 'ADMIN' | 'RESPONDER' | 'OBSERVER' | 'VIEWER'>,
+            rolesToNotify as Array<
+              'OWNER' | 'ADMIN' | 'RESPONDER' | 'OBSERVER' | 'VIEWER'
+            >,
           ),
         ),
       );
 
     if (recipients.length === 0) {
-      this.logger.log(`Escalation: no recipients found for role ${notifyRole} in tenant ${tenantId}`);
+      this.logger.log(
+        `Escalation: no recipients found for role ${notifyRole} in tenant ${tenantId}`,
+      );
       return;
     }
 
