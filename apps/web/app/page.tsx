@@ -340,7 +340,7 @@ export default function Home() {
                 </li>
                 <li>
                   <Link
-                    href="/resources"
+                    href="/docs"
                     className="hover:text-indigo-600 dark:hover:text-indigo-400"
                   >
                     {t.footer.documentation}
