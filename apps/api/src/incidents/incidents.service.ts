@@ -210,13 +210,14 @@ export class IncidentsService {
               extract(epoch from (
                 (select ie.created_at
                  from incident_events ie
-                 where ie.incident_id = ${incidents.id}
+                 where ie.incident_id = "incidents"."id"
                    and ie.action_type = 'STATUS_CHANGE'
                    and ie.message like '%RESOLVED%'
                  order by ie.created_at asc
                  limit 1)
-                - ${incidents.createdAt}
-              )) / 60, 0) as int)
+                - "incidents"."created_at"
+              ))
+            ) / 60, 0) as int)
           `,
           resolved: sql<number>`cast(count(*) as int)`,
         })
